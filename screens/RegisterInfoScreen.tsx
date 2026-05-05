@@ -287,10 +287,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: s(66),
     width: s(311),
-    height: s(36),
+    height: s(44),
     fontFamily: FONTS.title,
     fontSize: s(14),
     color: COLORS.bodyText,
+    textAlignVertical: 'center',
   },
   registerButton: {
     position: 'absolute',
