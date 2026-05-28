@@ -7,32 +7,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS, COLORS } from '../utils/theme';
+import { FONTS } from '../utils/theme';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
 
-const { width: SCREEN_W } = Dimensions.get('window');
-const SCALE = SCREEN_W / 440;
-const s = (v: number) => v * SCALE;
-
-// Crater images for the planet decoration
-const craterImages = [
-  { src: require('../assets/vector-15.png'), style: { top: s(40), left: s(147), width: s(109), height: s(111) } },
-  { src: require('../assets/vector-16.png'), style: { top: s(116), left: s(45), width: s(55), height: s(92) } },
-  { src: require('../assets/vector-17.png'), style: { top: s(143), left: s(289), width: s(83), height: s(56) } },
-  { src: require('../assets/vector-18.png'), style: { top: s(196), left: s(229), width: s(42), height: s(41) } },
-  { src: require('../assets/vector-19.png'), style: { top: s(229), left: s(128), width: s(102), height: s(107) } },
-  { src: require('../assets/vector-20.png'), style: { top: s(260), left: s(317), width: s(47), height: s(59) } },
-  { src: require('../assets/vector-21.png'), style: { top: s(34), left: s(260), width: s(50), height: s(57) } },
-];
-
-
-
-
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const wp = (percent: number) => (SCREEN_W * percent) / 100;
+const hp = (percent: number) => (SCREEN_H * percent) / 100;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
@@ -44,323 +33,323 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Background */}
-      <Image
-        source={require('../assets/download-1-1.png')}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ImageBackground
+        source={require('../assets/OnBoardingAssets/bgImg.png')}
         style={styles.background}
         resizeMode="cover"
-      />
-
-
-
-      {/* Planet decoration */}
-      <View style={styles.planetWrapper}>
-        <Image
-          source={require('../assets/vector-14.png')}
-          style={{ position: 'absolute', top: s(10), left: s(1), width: s(410), height: s(380) }}
-          resizeMode="contain"
-        />
-        <Image
-          source={require('../assets/image.png')}
-          style={{ position: 'absolute', top: s(11), left: s(1), width: s(408), height: s(378) }}
-          resizeMode="contain"
-        />
-        {craterImages.map((item, index) => (
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* STEMM LAB title logo */}
           <Image
-            key={`crater-${index}`}
-            source={item.src}
-            style={[styles.absImage, item.style, { tintColor: '#6b6b6b' }]}
+            source={require('../assets/OnBoardingAssets/STEMMLAB.png')}
+            style={styles.titleLogo}
             resizeMode="contain"
           />
-        ))}
-      </View>
 
+          {/* ── METEOR 1 ── Login form */}
+          <View style={styles.meteor1Container}>
+            <Image
+              source={require('../assets/LoginAssets/meteor1.png')}
+              style={styles.meteorBg}
+              resizeMode="contain"
+            />
 
+            {/* Content sits inside the meteor with padding so nothing bleeds out */}
+            <View style={styles.meteor1Inner}>
 
-      {/* STEMM LAB title */}
-      <Text style={styles.title}>{'STEMM\nLAB'}</Text>
+              {/* Login title image */}
+              <Image
+                source={require('../assets/LoginAssets/login.png')}
+                style={styles.loginTitleImage}
+                resizeMode="contain"
+              />
 
-      {/* LOGIN subtitle */}
-      <Image
-        source={require('../assets/vector-18.png')}
-        style={styles.loginBg}
-        resizeMode="contain"
-      />
-      <Text style={styles.loginTitle}>LOGIN</Text>
+              {/* Username label */}
+              <Text style={styles.labelText}>Username/Email</Text>
 
-      {/* Username field */}
-      <Text style={styles.usernameLabel}>Username/Email</Text>
-      <Image
-        source={require('../assets/vector-22.png')}
-        style={styles.usernameFieldBg}
-        resizeMode="contain"
-      />
-      <TextInput
-        style={styles.usernameInput}
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Enter your username/email here"
-        placeholderTextColor={COLORS.placeholderText}
-        autoCapitalize="none"
-        autoComplete="username"
-        textAlign="center"
-      />
+              {/* Username input */}
+              <View style={styles.inputBox}>
+                <Image
+                  source={require('../assets/LoginAssets/usernameBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="Enter your username here"
+                  placeholderTextColor="#7F8C8D"
+                  autoCapitalize="none"
+                  autoComplete="username"
+                  textAlign="left"
+                />
+              </View>
 
-      {/* Password field */}
-      <Text style={styles.passwordLabel}>Password</Text>
-      <Image
-        source={require('../assets/vector-23.png')}
-        style={styles.passwordFieldBg}
-        resizeMode="contain"
-      />
-      <TextInput
-        style={styles.passwordInput}
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Enter your password here"
-        placeholderTextColor={COLORS.placeholderText}
-        secureTextEntry
-        autoComplete="password"
-        textAlign="center"
-      />
+              {/* Password label */}
+              <Text style={styles.labelText}>Password</Text>
 
-      {/* Login button */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
-        <Image
-          source={require('../assets/vector-24.png')}
-          style={styles.loginButtonBg}
-          resizeMode="contain"
-        />
-        <Text style={styles.loginButtonText}>LOGIN</Text>
-      </TouchableOpacity>
+              {/* Password input */}
+              <View style={styles.inputBox}>
+                <Image
+                  source={require('../assets/LoginAssets/passwordBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Enter your password here"
+                  placeholderTextColor="#7F8C8D"
+                  secureTextEntry
+                  autoComplete="password"
+                  textAlign="left"
+                />
+              </View>
 
-      {/* Lower crater decoration */}
-      <Image
-        source={require('../assets/vector-21.png')}
-        style={styles.lowerCrater}
-        resizeMode="contain"
-      />
+              {/* Login button */}
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={handleLogin}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={require('../assets/LoginAssets/loginBtn.png')}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
 
-      {/* Google sign-in rectangle background */}
-      <Image
-        source={require('../assets/vector-26.png')}
-        style={styles.googleRectBg}
-        resizeMode="contain"
-      />
+            </View>
+          </View>
 
-      {/* Google logo */}
-      <Image
-        source={require('../assets/google.png')}
-        style={styles.googleLogo}
-        resizeMode="contain"
-      />
+          {/* Divider */}
+          <Image
+            source={require('../assets/LoginAssets/line.png')}
+            style={styles.dividerLine}
+            resizeMode="contain"
+          />
 
-      {/* Continue with Google text */}
-      <Image
-        source={require('../assets/continue-with-google.png')}
-        style={styles.continueWithGoogle}
-        resizeMode="contain"
-      />
+          {/* ── METEOR 2 ── Google + Sign up */}
+          <View style={styles.meteor2Container}>
+            <Image
+              source={require('../assets/LoginAssets/meteor2.png')}
+              style={styles.meteorBg}
+              resizeMode="contain"
+            />
 
-      {/* Divider line */}
-      <Image
-        source={require('../assets/vector-2.png')}
-        style={styles.dividerLine}
-        resizeMode="contain"
-      />
+            <View style={styles.meteor2Inner}>
 
-      {/* Sign up link */}
-      <View style={styles.signUpRow}>
-        <Text style={styles.signUpText}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('RegisterRole')}>
-          <Text style={styles.signUpLink}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
+              {/* Google button */}
+              <TouchableOpacity
+                style={styles.googleButton}
+                onPress={handleLogin}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={require('../assets/LoginAssets/google.png')}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
 
+              {/* Thin divider */}
+              <Image
+                source={require('../assets/LoginAssets/line2.png')}
+                style={styles.googleDivider}
+                resizeMode="contain"
+              />
 
-    </View>
+              {/* Sign up row */}
+              <View style={styles.signUpRow}>
+                <Text style={styles.signUpText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('RegisterRole')}>
+                  <Text style={styles.signUpLink}>Sign up</Text>
+                </TouchableOpacity>
+              </View>
+
+            </View>
+          </View>
+
+        </ScrollView>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgGray,
+    backgroundColor: '#08121E',
   },
   background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingBottom: hp(3),
+  },
+
+  /* ── Title logo ── */
+  titleLogo: {
+    width: wp(55),
+    height: hp(15),
+    marginTop: hp(9),
+  },
+
+  /* ── Shared meteor background ── */
+  meteorBg: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: s(440),
-    height: s(956),
-  },
-  absImage: {
-    position: 'absolute',
-  },
-
-  planetWrapper: {
-    position: 'absolute',
-    top: s(258),
-    left: s(16),
-    width: s(420),
-    height: s(376),
+    width: '100%',
+    height: '100%',
   },
 
 
-  title: {
-    position: 'absolute',
-    top: s(77),
-    left: s(106),
+  meteor1Container: {
+    width: wp(104),
+    height: hp(60),
+    marginTop: hp(-5),
+    alignSelf: 'center',
+    left: 6
+  },
+
+  meteor1Inner: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(14),  // same as meteor2Inner
+    paddingTop: hp(3),
+    paddingBottom: hp(5),
+    gap: hp(0.5),
+  },
+
+  loginTitleImage: {
+    width: wp(60),
+    height: hp(5),
+    marginBottom: hp(0.8),
+    marginTop: hp(3)
+  },
+
+  labelText: {
     fontFamily: FONTS.title,
-    fontSize: s(64),
-    color: COLORS.darkText,
-    textAlign: 'center',
+    fontSize: 12,              // reduced further
+    color: '#08121E',
+    alignSelf: 'flex-start',
+    marginTop: hp(1.2),
+    left: 15
+
   },
-  loginBg: {
+
+  boxImageBackground: {
     position: 'absolute',
-    top: s(298),
-    left: s(150),
-    width: s(133),
-    height: s(48),
+    width: '120%',         // Adjust this percentage down (e.g. 75% or 80%) to make it shorter horizontally
+    height: '100%',        // Keeps the vertical height matching the text input container
   },
-  loginTitle: {
-    position: 'absolute',
-    top: s(302),
-    left: s(162),
-    fontFamily: FONTS.heading,
-    fontSize: s(32),
-    color: COLORS.darkText,
-    letterSpacing: s(5.12),
+
+
+  inputBox: {
+    width: wp(60),             // same as googleButton
+    height: hp(5.5),             // same as googleButton
+    justifyContent: 'center',
+    alignItems: 'center',
+    left: -wp(-1),
+    marginTop: hp(1)
   },
-  usernameLabel: {
-    position: 'absolute',
-    top: s(372),
-    left: s(60),
+
+  textInput: {
+    width: '100%',
+    height: '100%',
     fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
+    fontSize: 11,              // smaller placeholder text
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: -5,
+    paddingRight: 10,
+    paddingHorizontal: 20,
+    marginTop: 2
   },
-  usernameFieldBg: {
-    position: 'absolute',
-    top: s(397),
-    left: s(51),
-    width: s(339),
-    height: s(49),
-  },
-  usernameInput: {
-    position: 'absolute',
-    top: s(399),
-    left: s(55),
-    width: s(330),
-    height: s(44),
-    fontFamily: FONTS.title,
-    fontSize: s(14),
-    color: COLORS.bodyText,
-    textAlignVertical: 'center',
-  },
-  passwordLabel: {
-    position: 'absolute',
-    top: s(456),
-    left: s(60),
-    fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
-  },
-  passwordFieldBg: {
-    position: 'absolute',
-    top: s(480),
-    left: s(51),
-    width: s(339),
-    height: s(49),
-  },
-  passwordInput: {
-    position: 'absolute',
-    top: s(482),
-    left: s(55),
-    width: s(330),
-    height: s(44),
-    fontFamily: FONTS.title,
-    fontSize: s(14),
-    color: COLORS.bodyText,
-    textAlignVertical: 'center',
-  },
+
   loginButton: {
-    position: 'absolute',
-    top: s(547),
-    left: s(155),
-    width: s(130),
-    height: s(41),
-  },
-  loginButtonBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: s(130),
-    height: s(41),
-  },
-  loginButtonText: {
-    position: 'absolute',
-    top: s(11),
-    left: s(36),
-    fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
+    width: wp(35),
+    height: hp(4.5),
+    marginTop: hp(2),
+    marginBottom: hp(0.5),
   },
 
-  lowerCrater: {
-    position: 'absolute',
-    top: s(640),
-    left: s(30),
-    width: s(380),
-    height: s(300),
-    tintColor: '#6b6b6b',
+  fullImage: {
+    width: '100%',
+    height: '100%',
   },
-  googleRectBg: {
-    position: 'absolute',
-    top: s(700),
-    left: s(70),
-    width: s(300),
-    height: s(50),
-  },
-  googleLogo: {
-    position: 'absolute',
-    top: s(706),
-    left: s(90),
-    width: s(38),
-    height: s(38),
-  },
-  continueWithGoogle: {
-    position: 'absolute',
-    top: s(710),
-    left: s(140),
-    width: s(200),
-    height: s(30),
-  },
+
+  /* ── Divider ── */
   dividerLine: {
-    position: 'absolute',
-    top: s(770),
-    left: s(70),
-    width: s(300),
-    height: s(3),
+    width: wp(85),
+    height: 4,
+    marginTop: hp(-6),
   },
+
+  /* ── Meteor 2 — significantly taller ── */
+  meteor2Container: {
+    width: wp(140),
+    height: hp(44),             // was hp(32) — much taller to contain all content
+    marginTop: hp(-11),
+    alignSelf: 'center',
+  },
+
+  meteor2Inner: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(14),
+    paddingVertical: hp(5),     // more vertical breathing room
+    gap: hp(1.5),
+  },
+
+  googleButton: {
+    width: '100%',
+    height: hp(6.8),
+    marginTop: hp(5),
+  },
+
+  googleDivider: {
+    width: '63%',
+    height: 2,
+    marginTop: hp(0),
+  },
+
   signUpRow: {
-    position: 'absolute',
-    top: s(795),
-    left: s(57),
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
   signUpText: {
     fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
-  },
-  signUpLink: {
-    fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: '#fefeff',
+    fontSize: 11,               // reduced
+    color: '#08121E',
+    marginTop: hp(0.5),
   },
 
+  signUpLink: {
+    fontFamily: FONTS.title,
+    fontSize: 11,               // reduced
+    color: '#ffffff',
+    marginTop: hp(0.5),
+  },
 });
 
 export default LoginScreen;

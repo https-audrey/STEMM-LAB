@@ -7,18 +7,22 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS, COLORS } from '../utils/theme';
+import { FONTS } from '../utils/theme';
 import ProfanityFilter from '../utils/profanityFilter';
 
 type Nav = StackNavigationProp<RootStackParamList, 'RegisterInfo'>;
 
-const { width: SCREEN_W } = Dimensions.get('window');
-const SCALE = SCREEN_W / 440;
-const s = (v: number) => v * SCALE;
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const wp = (percent: number) => (SCREEN_W * percent) / 100;
+const hp = (percent: number) => (SCREEN_H * percent) / 100;
 
 type FormData = {
   fullName: string;
@@ -28,62 +32,10 @@ type FormData = {
   passwordConfirmation: string;
 };
 
-const fieldDefinitions = [
-  {
-    key: 'fullName' as keyof FormData,
-    label: 'Full Name',
-    placeholder: 'Enter your full name here',
-    labelTop: 372,
-    inputTop: 397,
-    type: 'text',
-    image: require('../assets/vector-22.png'),
-    keyboardType: 'default' as const,
-  },
-  {
-    key: 'dateOfBirth' as keyof FormData,
-    label: 'Date of Birth',
-    placeholder: 'DD/MM/YYYY',
-    labelTop: 456,
-    inputTop: 480,
-    type: 'text',
-    image: require('../assets/vector-23.png'),
-    keyboardType: 'numeric' as const,
-  },
-  {
-    key: 'usernameOrEmail' as keyof FormData,
-    label: 'Username/Email',
-    placeholder: 'Enter your username/email here',
-    labelTop: 539,
-    inputTop: 564,
-    type: 'text',
-    image: require('../assets/vector-32.png'),
-    keyboardType: 'email-address' as const,
-  },
-  {
-    key: 'password' as keyof FormData,
-    label: 'Password',
-    placeholder: 'Enter your password here',
-    labelTop: 623,
-    inputTop: 647,
-    type: 'password',
-    image: require('../assets/vector-33.png'),
-    keyboardType: 'default' as const,
-  },
-  {
-    key: 'passwordConfirmation' as keyof FormData,
-    label: 'Password Confirmation',
-    placeholder: 'Re-enter your password here',
-    labelTop: 706,
-    inputTop: 730,
-    type: 'password',
-    image: require('../assets/vector-34.png'),
-    keyboardType: 'default' as const,
-  },
-];
-
 const RegisterInfoScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
   const filter = useMemo(() => new ProfanityFilter(), []);
+
   const [profanityError, setProfanityError] = useState('');
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -92,6 +44,9 @@ const RegisterInfoScreen: React.FC = () => {
     password: '',
     passwordConfirmation: '',
   });
+
+  // Dynamic scrolling state
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const handleChange = (key: keyof FormData, value: string) => {
     if (key === 'dateOfBirth') {
@@ -108,7 +63,6 @@ const RegisterInfoScreen: React.FC = () => {
       return;
     }
 
-    // Check for profanity in the username/email field
     if (key === 'usernameOrEmail') {
       const hasProfanity = value.length > 0 && filter.isProfane(value);
       console.log('[ProfanityFilter] Checking:', value, '| isProfane:', hasProfanity);
@@ -126,7 +80,6 @@ const RegisterInfoScreen: React.FC = () => {
   };
 
   const handleRegister = () => {
-    // Block registration if username contains profanity
     const hasProfanity = filter.isProfane(formData.usernameOrEmail);
     console.log('[ProfanityFilter] Register check:', formData.usernameOrEmail, '| isProfane:', hasProfanity);
     if (hasProfanity) {
@@ -137,206 +90,422 @@ const RegisterInfoScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Background */}
-      <Image
-        source={require('../assets/download-1-1.png')}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ImageBackground
+        source={require('../assets/OnBoardingAssets/bgImg.png')}
         style={styles.background}
         resizeMode="cover"
-      />
-
-      {/* Form card background */}
-      <Image
-        source={require('../assets/vector-31.png')}
-        style={styles.formCardBg}
-        resizeMode="contain"
-      />
-      <Image
-        source={require('../assets/vector-36.png')}
-        style={styles.formCardOverlay}
-        resizeMode="contain"
-      />
-
-      {/* Logo shapes */}
-      <Image source={require('../assets/vector-15.png')} style={styles.logoVector1} resizeMode="contain" />
-      <Image source={require('../assets/vector-16.png')} style={styles.logoVector2} resizeMode="contain" />
-
-      {/* STEMM LAB title */}
-      <Text style={styles.title}>{'STEMM\nLAB'}</Text>
-
-      {/* Register subtitle */}
-      <Text style={styles.registerTitle}>Register</Text>
-
-      {/* Form fields */}
-      {fieldDefinitions.map((field) => (
-        <View key={field.key}>
-          <Text style={[styles.fieldLabel, { top: s(field.labelTop) }]}>
-            {field.label}
-          </Text>
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={isInputFocused} // Only scrollable when filling a text box
+        >
+          {/* STEMM LAB title logo */}
           <Image
-            source={field.image}
-            style={[styles.fieldBg, { top: s(field.inputTop) }]}
+            source={require('../assets/OnBoardingAssets/STEMMLAB.png')}
+            style={styles.titleLogo}
             resizeMode="contain"
           />
-          <TextInput
-            style={[styles.fieldInput, { top: s(field.inputTop + 4) }]}
-            value={formData[field.key]}
-            onChangeText={(text) => handleChange(field.key, text)}
-            placeholder={field.placeholder}
-            placeholderTextColor={COLORS.placeholderText}
-            secureTextEntry={field.type === 'password'}
-            keyboardType={field.keyboardType || 'default'}
-            autoCapitalize="none"
-          />
-          {/* Show profanity error below the username field */}
-          {field.key === 'usernameOrEmail' && profanityError !== '' && (
-            <Text style={[styles.errorText, { top: s(field.inputTop + 52) }]}>
-              {profanityError}
-            </Text>
-          )}
-        </View>
-      ))}
 
-      {/* Register button */}
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister} activeOpacity={0.8}>
-        <Image source={require('../assets/vector-24.png')} style={styles.registerButtonBg} resizeMode="contain" />
-        <Text style={styles.registerButtonText}>Register</Text>
-      </TouchableOpacity>
+          {/* ── PHONE CONTAINER ── Register form container */}
+          <View style={styles.phoneContainer}>
+            <Image
+              source={require('../assets/RegisterAssets/phone.png')}
+              style={styles.phoneBg}
+              resizeMode="stretch"
+            />
 
-      {/* Decorative star */}
-      <Image source={require('../assets/vector-35.png')} style={styles.decorStar} resizeMode="contain" />
+            <View style={styles.phoneInner}>
+              {/* Register Title */}
+              <Image
+                source={require('../assets/RegisterAssets/Register.png')}
+                style={styles.registerTitleImage}
+                resizeMode="contain"
+              />
 
-      {/* Bottom bar */}
-      <View style={styles.bottomBar} />
-    </View>
+              {/* 1. Full Name */}
+              <Image
+                source={require('../assets/RegisterAssets/Full Name.png')}
+                style={styles.fullNameLabel}
+                resizeMode="contain"
+              />
+              <View style={styles.fullNameBox}>
+                <Image
+                  source={require('../assets/RegisterAssets/nameBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.fullNameInput}
+                  value={formData.fullName}
+                  onChangeText={(text) => handleChange('fullName', text)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder="Enter your full name here"
+                  placeholderTextColor="#7F8C8D"
+                  autoCapitalize="words"
+                  textAlign="left"
+                />
+              </View>
+
+              {/* 2. Date of Birth */}
+              <Image
+                source={require('../assets/RegisterAssets/Date of Birth.png')}
+                style={styles.dobLabel}
+                resizeMode="contain"
+              />
+              <View style={styles.dobBox}>
+                <Image
+                  source={require('../assets/RegisterAssets/dobBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.dobInput}
+                  value={formData.dateOfBirth}
+                  onChangeText={(text) => handleChange('dateOfBirth', text)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder="DD/MM/YYYY"
+                  placeholderTextColor="#7F8C8D"
+                  keyboardType="numeric"
+                  textAlign="left"
+                />
+              </View>
+
+              {/* 3. Username/Email (Same as LoginScreen layout) */}
+              <Image
+                source={require('../assets/LoginAssets/username.png')}
+                style={styles.usernameLabel}
+                resizeMode="contain"
+              />
+              <View style={styles.usernameBox}>
+                <Image
+                  source={require('../assets/LoginAssets/usernameBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.usernameInput}
+                  value={formData.usernameOrEmail}
+                  onChangeText={(text) => handleChange('usernameOrEmail', text)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder="Enter your username here"
+                  placeholderTextColor="#7F8C8D"
+                  autoCapitalize="none"
+                  textAlign="left"
+                />
+              </View>
+              {profanityError !== '' && (
+                <Text style={styles.errorText}>{profanityError}</Text>
+              )}
+
+              {/* 4. Password (Same as LoginScreen layout) */}
+              <Image
+                source={require('../assets/LoginAssets/Password.png')}
+                style={styles.passwordLabel}
+                resizeMode="contain"
+              />
+              <View style={styles.passwordBox}>
+                <Image
+                  source={require('../assets/LoginAssets/passwordBox.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.passwordInput}
+                  value={formData.password}
+                  onChangeText={(text) => handleChange('password', text)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder="Enter your password here"
+                  placeholderTextColor="#7F8C8D"
+                  secureTextEntry
+                  textAlign="left"
+                />
+              </View>
+
+              {/* 5. Password Confirmation */}
+              <Image
+                source={require('../assets/RegisterAssets/Password Confirmation.png')}
+                style={styles.passwordConfirmLabel}
+                resizeMode="contain"
+              />
+              <View style={styles.passwordConfirmBox}>
+                <Image
+                  source={require('../assets/RegisterAssets/passwordBox2.png')}
+                  style={styles.boxImageBackground}
+                  resizeMode="stretch"
+                />
+                <TextInput
+                  style={styles.passwordConfirmInput}
+                  value={formData.passwordConfirmation}
+                  onChangeText={(text) => handleChange('passwordConfirmation', text)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder="Re-enter your password here"
+                  placeholderTextColor="#7F8C8D"
+                  secureTextEntry
+                  textAlign="left"
+                />
+              </View>
+
+              {/* Register Button */}
+              <TouchableOpacity
+                style={styles.registerButton}
+                onPress={handleRegister}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={require('../assets/RegisterAssets/registerBtn.png')}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgGray,
+    backgroundColor: '#08121E',
   },
   background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingBottom: hp(4),
+  },
+
+  /* ── Title logo (same as LoginScreen) ── */
+  titleLogo: {
+    width: wp(55),
+    height: hp(15),
+    marginTop: hp(8),
+  },
+
+  /* ── Phone Layout Container ── */
+  phoneContainer: {
+    width: wp(92),
+    height: hp(74),
+    marginTop: hp(3),
+    alignSelf: 'center',
+  },
+  phoneBg: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: s(440),
-    height: s(956),
+    width: '100%',
+    height: '100%',
   },
-  formCardBg: {
-    position: 'absolute',
-    top: s(267),
-    left: s(32),
-    width: s(376),
-    height: s(649),
+  phoneInner: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(14),
+    paddingTop: hp(4),
+    paddingBottom: hp(4),
+    gap: hp(0.2), // Tighter gap to keep everything inside the phone container
   },
-  formCardOverlay: {
-    position: 'absolute',
-    top: s(269),
-    left: s(34),
-    width: s(373),
-    height: s(646),
+
+  registerTitleImage: {
+    width: wp(35),
+    height: hp(5.5),
+    marginBottom: hp(2),
+    marginTop: -hp(5),
   },
-  logoVector1: {
-    position: 'absolute',
-    top: s(80),
-    left: s(100),
-    width: s(239),
-    height: s(71),
+
+  /* ── Individual Field Labels ── */
+  fullNameLabel: {
+    width: wp(20),
+    height: hp(1.5),
+    alignSelf: 'flex-start',
+    marginLeft: wp(-9),
+    marginTop: hp(0.6),
   },
-  logoVector2: {
-    position: 'absolute',
-    top: s(157),
-    left: s(148),
-    width: s(147),
-    height: s(75),
+  dobLabel: {
+    width: wp(28),
+    height: hp(3.6),
+    alignSelf: 'flex-start',
+    marginLeft: wp(-9),
+    marginTop: hp(0.6),
+    marginBottom: -9,
   },
-  title: {
+  usernameLabel: {
+    width: wp(33),
+    height: hp(3.6),
+    alignSelf: 'flex-start',
+    marginLeft: wp(-9),
+    marginTop: hp(0.6),
+    marginBottom: -9,
+  },
+  passwordLabel: {
+    width: wp(21),
+    height: hp(3.6),
+    alignSelf: 'flex-start',
+    marginLeft: wp(-9),
+    marginTop: hp(0.6),
+    marginBottom: -9,
+  },
+  passwordConfirmLabel: {
+    width: wp(51),
+    height: hp(3.6),
+    alignSelf: 'flex-start',
+    marginLeft: wp(-9),
+    marginTop: hp(0.6),
+    marginBottom: -9,
+  },
+
+  /* ── Individual Input Boxes ── */
+  fullNameBox: {
+    width: wp(70),
+    height: hp(5),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(0.4),
+  },
+  dobBox: {
+    width: wp(70),
+    height: hp(5),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(0.4),
+  },
+  usernameBox: {
+    width: wp(70),
+    height: hp(5.2),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(0.4),
+  },
+  passwordBox: {
+    width: wp(70),
+    height: hp(5.2),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(0.4),
+  },
+  passwordConfirmBox: {
+    width: wp(70),
+    height: hp(5.2),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(0.4),
+  },
+
+  boxImageBackground: {
     position: 'absolute',
-    top: s(77),
-    left: s(106),
+    width: '120%',
+    height: '100%',
+  },
+
+  /* ── Individual Text Inputs ── */
+  fullNameInput: {
+    width: '100%',
+    height: '100%',
     fontFamily: FONTS.title,
-    fontSize: s(64),
-    color: COLORS.darkText,
-    textAlign: 'center',
+    fontSize: 11,
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: wp(0),
+    paddingRight: wp(-13),
+    paddingHorizontal: 20,
+    marginTop: 2,
+    zIndex: 2,
+    left: -10
   },
-  registerTitle: {
-    position: 'absolute',
-    top: s(305),
-    left: s(148),
-    fontFamily: FONTS.heading,
-    fontSize: s(26),
-    color: COLORS.darkText,
-    letterSpacing: s(4.16),
-  },
-  fieldLabel: {
-    position: 'absolute',
-    left: s(60),
+  dobInput: {
+    width: '100%',
+    height: '100%',
     fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
+    fontSize: 11,
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: wp(0),
+    paddingRight: wp(-13),
+    paddingHorizontal: 20,
+    marginTop: 2,
+    zIndex: 2,
+    left: -10
   },
-  fieldBg: {
-    position: 'absolute',
-    left: s(51),
-    width: s(339),
-    height: s(49),
-  },
-  fieldInput: {
-    position: 'absolute',
-    left: s(66),
-    width: s(311),
-    height: s(44),
+  usernameInput: {
+    width: '100%',
+    height: '100%',
     fontFamily: FONTS.title,
-    fontSize: s(14),
-    color: COLORS.bodyText,
-    textAlignVertical: 'center',
+    fontSize: 11,
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: wp(0),
+    paddingRight: wp(-13),
+    paddingHorizontal: 20,
+    marginTop: 2,
+    zIndex: 2,
+    left: -10
   },
+  passwordInput: {
+    width: '100%',
+    height: '100%',
+    fontFamily: FONTS.title,
+    fontSize: 11,
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: wp(0),
+    paddingRight: wp(-13),
+    paddingHorizontal: 20,
+    marginTop: 2,
+    zIndex: 2,
+    left: -10
+  },
+  passwordConfirmInput: {
+    width: '100%',
+    height: '100%',
+    fontFamily: FONTS.title,
+    fontSize: 11,
+    color: '#08121E',
+    textAlign: 'left',
+    paddingLeft: wp(0),
+    paddingRight: wp(-13),
+    paddingHorizontal: 20,
+    marginTop: 2,
+    zIndex: 2,
+    left: -10
+  },
+
   registerButton: {
-    position: 'absolute',
-    top: s(803),
-    left: s(155),
-    width: s(130),
-    height: s(41),
+    width: wp(38),
+    height: hp(4.5),
+    marginTop: hp(3),
+    marginBottom: hp(0.5),
   },
-  registerButtonBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: s(130),
-    height: s(41),
+
+  fullImage: {
+    width: '100%',
+    height: '100%',
   },
-  registerButtonText: {
-    position: 'absolute',
-    top: s(11),
-    left: s(27),
-    fontFamily: FONTS.title,
-    fontSize: s(16),
-    color: COLORS.bodyText,
-  },
-  decorStar: {
-    position: 'absolute',
-    top: s(861),
-    left: s(198),
-    width: s(33),
-    height: s(34),
-  },
+
   errorText: {
-    position: 'absolute',
-    left: s(60),
     fontFamily: FONTS.title,
-    fontSize: s(12),
+    fontSize: 9,
     color: '#ff4d4d',
-  },
-  bottomBar: {
-    position: 'absolute',
-    top: s(939),
-    left: s(117),
-    width: s(206),
-    height: s(8),
-    backgroundColor: COLORS.white,
-    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginLeft: wp(-8),
+    marginTop: hp(0.2),
+    marginBottom: -6,
   },
 });
 
