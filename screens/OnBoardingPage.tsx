@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Image,
-  Text,
+  TouchableOpacity,
   StyleSheet,
   Dimensions,
   ImageBackground,
@@ -10,47 +10,20 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS } from '../utils/theme';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Loading'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
-const { width: SCREEN_W } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const LoadingScreen: React.FC = () => {
+const OnBoardingPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
-  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    let startTimestamp: number | null = null;
-    const duration = 2500; // 2.5 seconds loading progress
-    let animationFrameId: number;
-
-    const animate = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const elapsed = timestamp - startTimestamp;
-      const currentProgress = Math.min(Math.floor((elapsed / duration) * 100), 100);
-
-      setProgress(currentProgress);
-
-      if (currentProgress < 100) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        const timer = setTimeout(() => {
-          navigation.navigate('Home');
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [navigation]);
+  const handleStart = () => {
+    navigation.navigate('Login');
+  };
 
   return (
     <View style={styles.container}>
@@ -84,25 +57,23 @@ const LoadingScreen: React.FC = () => {
           resizeMode="contain"
         />
 
-        {/* Falling meteor container with dynamic percentage */}
-        <View style={styles.meteorContainer}>
+        {/* START button — meteor + START text overlaid, navigates to Login */}
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={handleStart}
+          activeOpacity={0.8}
+        >
           <Image
-            source={require('../assets/LoadingAssets/meteorFalling.png')}
+            source={require('../assets/OnBoardingAssets/meteor.png')}
             style={styles.meteorImage}
             resizeMode="contain"
           />
-          <View style={styles.percentContainer}>
-            {progress < 100 ? (
-              <Text style={styles.percentText}>{progress}%</Text>
-            ) : (
-              <Image
-                source={require('../assets/LoadingAssets/100%.png')}
-                style={styles.percentImage}
-                resizeMode="contain"
-              />
-            )}
-          </View>
-        </View>
+          <Image
+            source={require('../assets/OnBoardingAssets/START.png')}
+            style={styles.startText}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
         <Image
           source={require('../assets/OnBoardingAssets/star4.png')}
@@ -127,6 +98,8 @@ const LoadingScreen: React.FC = () => {
           style={styles.star6}
           resizeMode="contain"
         />
+
+
       </ImageBackground>
     </View>
   );
@@ -176,37 +149,25 @@ const styles = StyleSheet.create({
     height: s(50),
   },
 
-  /* Falling Meteor area — centered horizontally, middle of screen */
-  meteorContainer: {
+  /* START button area — centered horizontally, middle of screen */
+  startButton: {
     position: 'absolute',
-    top: s(390),
-    alignSelf: 'center',
-    width: s(360),
-    height: s(240),
-    left: s(10),
-  },
-  meteorImage: {
-    width: '118%',
-    height: '118%',
-  },
-  percentContainer: {
-    position: 'absolute',
-    left: '65%',
-    top: '60%',
-    width: s(100),
-    height: s(50),
+    top: s(420),
+    left: s(90),
+    width: s(260),
+    height: s(220),
     justifyContent: 'center',
     alignItems: 'center',
   },
-  percentText: {
-    fontFamily: FONTS.ui, // Oliver-Regular
-    fontSize: s(26),
-    color: '#08121e',
-    textAlign: 'center',
+  meteorImage: {
+    width: '100%',
+    height: '100%',
   },
-  percentImage: {
-    width: s(72),
-    height: s(32),
+  startText: {
+    position: 'absolute',
+    width: s(160),
+    height: s(55),
+    top: s(80),
   },
 
   star4: {
@@ -240,6 +201,8 @@ const styles = StyleSheet.create({
     width: s(50),
     height: s(48),
   },
+
+
 });
 
-export default LoadingScreen;
+export default OnBoardingPage;

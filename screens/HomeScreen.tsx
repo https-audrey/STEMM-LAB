@@ -1,164 +1,254 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Image,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ImageBackground,
 } from 'react-native';
-import { FONTS, COLORS } from '../utils/theme';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types/navigation';
+
+type Nav = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
-const SCALE = SCREEN_W / 440;
+const DESIGN_W = 440;
+const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-// Subject tabs config
-const subjectTabs = [
-  { id: 'physics', label: 'Physics', src: require('../assets/vector-82.png'), left: s(38), textLeft: s(43) },
-  { id: 'biology', label: 'Biology', src: require('../assets/vector-83.png'), left: s(132), textLeft: s(136), textWhite: true },
-  { id: 'chemistry', label: 'Chemistry', src: require('../assets/vector-84.png'), left: s(226), textLeft: s(235), textWhite: true },
-  { id: 'mathematics', label: 'Mathematics', src: require('../assets/vector-85.png'), left: s(320), textLeft: s(327), textWhite: true },
-];
+interface PlanetConfig {
+  id: number;
+  source: any;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
 
-// Level labels
-const levelLabels = [
-  { id: 'level-1', label: 'Level 1', top: s(779), left: s(93) },
-  { id: 'level-2', label: 'Level 2', top: s(744), left: s(265) },
-  { id: 'level-3', label: 'Level 3', top: s(650), left: s(154) },
-  { id: 'level-4', label: 'Level 4', top: s(531), left: s(58) },
-  { id: 'level-5', label: 'Level 5', top: s(628), left: s(302) },
-  { id: 'level-6', label: 'Level 6', top: s(454), left: s(245) },
+const PLANETS: PlanetConfig[] = [
+  { id: 1, source: require('../assets/HomescreenAssets/planet 1.png'), top: 703, left: 79, width: 80, height: 80 },
+  { id: 2, source: require('../assets/HomescreenAssets/planet 2.png'), top: 670, left: 249, width: 80, height: 80 },
+  { id: 3, source: require('../assets/HomescreenAssets/planet 3.png'), top: 573, left: 134, width: 80, height: 80 },
+  { id: 4, source: require('../assets/HomescreenAssets/planet 4.png'), top: 455, left: 69, width: 80, height: 80 },
+  { id: 5, source: require('../assets/HomescreenAssets/planet 5.png'), top: 553, left: 291, width: 80, height: 80 },
+  { id: 6, source: require('../assets/HomescreenAssets/planet 6.png'), top: 390, left: 290, width: 80, height: 80 },
 ];
 
 const HomePage: React.FC = () => {
+  const navigation = useNavigation<Nav>();
+  const [selectedSubject, setSelectedSubject] = useState<'physics' | 'biology' | 'chemistry' | 'mathematics' | null>(null);
+
+  const getPhysicsAsset = () => {
+    // When no subject is selected (default state), show the unpressed 'phy.png'.
+    // Once any category is selected, it changes to 'phy2.png'.
+    return selectedSubject === null
+      ? require('../assets/HomescreenAssets/phy.png')
+      : require('../assets/HomescreenAssets/phy2.png');
+  };
+
+  const getBiologyAsset = () => {
+    return selectedSubject === 'biology'
+      ? require('../assets/HomescreenAssets/bio2.png')
+      : require('../assets/HomescreenAssets/bio.png');
+  };
+
+  const getChemistryAsset = () => {
+    return selectedSubject === 'chemistry'
+      ? require('../assets/HomescreenAssets/chem2.png')
+      : require('../assets/HomescreenAssets/chem.png');
+  };
+
+  const getMathematicsAsset = () => {
+    return selectedSubject === 'mathematics'
+      ? require('../assets/HomescreenAssets/math2.png')
+      : require('../assets/HomescreenAssets/math.png');
+  };
+
   return (
     <View style={styles.container}>
-      {/* Background */}
-      <Image
-        source={require('../assets/download-1-1.png')}
+      {/* Full-screen space background */}
+      <ImageBackground
+        source={require('../assets/OnBoardingAssets/bgImg.png')}
         style={styles.background}
         resizeMode="cover"
-      />
+      >
+        {/* Header Section: "Hi! Alexander Isla" greeting & Astronaut */}
+        <Image
+          source={require('../assets/HomescreenAssets/hi.png')}
+          style={styles.hiGreeting}
+          resizeMode="contain"
+        />
+        <Image
+          source={require('../assets/HomescreenAssets/astronaut1.png')}
+          style={styles.astronaut}
+          resizeMode="contain"
+        />
 
+        {/* Info Box */}
+        <Image
+          source={require('../assets/HomescreenAssets/box.png')}
+          style={styles.infoBox}
+          resizeMode="contain"
+        />
 
-
-      {/* Level map background */}
-      <Image source={require('../assets/vector-31.png')} style={styles.levelMapBg} resizeMode="contain" />
-
-      {/* Bottom navigation */}
-      <View style={styles.bottomNav}>
-        <View style={styles.bottomNavBg} />
-
-        {/* Home */}
-        <TouchableOpacity style={styles.navHome} activeOpacity={0.7}>
-          <Image source={require('../assets/group-22.png')} style={{ width: s(91), height: s(76) }} resizeMode="contain" />
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-
-        {/* Team */}
-        <TouchableOpacity style={styles.navTeam} activeOpacity={0.7}>
-          <Image source={require('../assets/group-16.png')} style={{ width: s(82), height: s(70) }} resizeMode="contain" />
-          <Text style={[styles.navLabel, { marginTop: s(-14) }]}>Team</Text>
-        </TouchableOpacity>
-
-        {/* Levels */}
-        <TouchableOpacity style={styles.navLevels} activeOpacity={0.7}>
-          <Image source={require('../assets/planet-1.png')} style={{ width: s(63), height: s(57) }} resizeMode="contain" />
-          <Text style={styles.navLabel}>Levels</Text>
-        </TouchableOpacity>
-
-        {/* Leaderboard */}
-        <TouchableOpacity style={styles.navLeaderboard} activeOpacity={0.7}>
-          <Image source={require('../assets/group-11.png')} style={{ width: s(82), height: s(73) }} resizeMode="contain" />
-          <Text style={[styles.navLabelSmall, { marginTop: s(-16) }]}>Leaderboard</Text>
-        </TouchableOpacity>
-
-        {/* Profile */}
-        <TouchableOpacity style={styles.navProfile} activeOpacity={0.7}>
-          <Image source={require('../assets/group-21.png')} style={{ width: s(64), height: s(71) }} resizeMode="contain" />
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Level map path decorations */}
-      <Image source={require('../assets/vector-9.png')} style={{ position: 'absolute', top: s(480), left: s(156), width: s(141), height: s(68) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-6.png')} style={{ position: 'absolute', top: s(712), left: s(168), width: s(73), height: s(21) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-8.png')} style={{ position: 'absolute', top: s(533), left: s(124), width: s(18), height: s(33) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-7.png')} style={{ position: 'absolute', top: s(631), left: s(214), width: s(57), height: s(27) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-10.png')} style={{ position: 'absolute', top: s(469), left: s(318), width: s(24), height: s(68) }} resizeMode="contain" />
-
-      {/* Level node: Planet 2 */}
-      <Image source={require('../assets/planet-2.png')} style={{ position: 'absolute', top: s(656), left: s(249), width: s(88), height: s(85) }} resizeMode="contain" />
-
-      {/* Level node: Planet 1 */}
-      <Image source={require('../assets/planet-1.png')} style={{ position: 'absolute', top: s(688), left: s(77), width: s(87), height: s(85) }} resizeMode="contain" />
-
-      {/* Level node: Planet 3 */}
-      <Image source={require('../assets/planet-3.png')} style={{ position: 'absolute', top: s(560), left: s(133), width: s(89), height: s(84) }} resizeMode="contain" />
-
-      {/* Level node: Planet 5 */}
-      <Image source={require('../assets/planet-5.png')} style={{ position: 'absolute', top: s(547), left: s(291), width: s(77), height: s(74) }} resizeMode="contain" />
-
-      {/* Level node: Planet 4 */}
-      <Image source={require('../assets/planet-4.png')} style={{ position: 'absolute', top: s(445), left: s(67), width: s(80), height: s(80) }} resizeMode="contain" />
-
-      {/* Level node: Planet 6 */}
-      <Image source={require('../assets/planet-6.png')} style={{ position: 'absolute', top: s(375), left: s(283), width: s(89), height: s(84) }} resizeMode="contain" />
-
-      {/* Level labels */}
-      {levelLabels.map((item) => (
-        <Text key={item.id} style={[styles.levelLabel, { top: item.top, left: item.left }]}>
-          {item.label}
-        </Text>
-      ))}
-
-      {/* Subject tabs */}
-      {subjectTabs.map((tab) => (
-        <View key={tab.id}>
+        {/* Category Buttons Row */}
+        <View style={styles.categoriesRow}>
+          {/* Physics Tab */}
           <TouchableOpacity
-            style={[styles.subjectTab, { left: tab.left }]}
+            style={[styles.categoryTab, { left: s(38) }]}
+            onPress={() => setSelectedSubject(null)}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={getPhysicsAsset()}
+              style={styles.categoryImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+
+          {/* Biology Tab */}
+          <TouchableOpacity
+            style={[styles.categoryTab, { left: s(132) }]}
+            onPress={() => setSelectedSubject(prev => prev === 'biology' ? null : 'biology')}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={getBiologyAsset()}
+              style={styles.categoryImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+
+          {/* Chemistry Tab */}
+          <TouchableOpacity
+            style={[styles.categoryTab, { left: s(226) }]}
+            onPress={() => setSelectedSubject(prev => prev === 'chemistry' ? null : 'chemistry')}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={getChemistryAsset()}
+              style={styles.categoryImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+
+          {/* Mathematics Tab */}
+          <TouchableOpacity
+            style={[styles.categoryTab, { left: s(320) }]}
+            onPress={() => setSelectedSubject(prev => prev === 'mathematics' ? null : 'mathematics')}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={getMathematicsAsset()}
+              style={styles.categoryImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Big Earth Planet at the Base of the map (rendered behind the map container) */}
+        <Image
+          source={require('../assets/HomescreenAssets/bigEarth.png')}
+          style={styles.bigEarth}
+          resizeMode="contain"
+        />
+
+        {/* Levels Box Map Section */}
+        <Image
+          source={require('../assets/HomescreenAssets/levelsBox.png')}
+          style={styles.levelsBox}
+          resizeMode="contain"
+        />
+
+        {/* Planet nodes mapped dynamically from configuration array */}
+        {PLANETS.map((planet) => (
+          <TouchableOpacity
+            key={planet.id}
+            style={[
+              styles.planetNode,
+              {
+                top: s(planet.top),
+                left: s(planet.left),
+                width: s(planet.width),
+                height: s(planet.height),
+              },
+            ]}
             activeOpacity={0.7}
           >
-            <Image source={tab.src} style={styles.subjectTabImg} resizeMode="contain" />
+            <Image
+              source={planet.source}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
-          <Text style={[styles.subjectTabText, { left: tab.textLeft }, tab.textWhite && { color: COLORS.white }]}>
-            {tab.label}
-          </Text>
-        </View>
-      ))}
+        ))}
 
-      {/* Grade banner backgrounds */}
-      <Image source={require('../assets/vector-86.png')} style={{ position: 'absolute', top: s(369), left: s(33), width: s(371), height: s(52) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-92.png')} style={{ position: 'absolute', top: s(370), left: s(34), width: s(369), height: s(50) }} resizeMode="contain" />
+        {/* Level Title Header Banner (rendered on top of Planet 6 visually) */}
+        <Image
+          source={require('../assets/HomescreenAssets/levelTitle.png')}
+          style={styles.levelTitleBanner}
+          resizeMode="contain"
+        />
+        <Image
+          source={require('../assets/HomescreenAssets/Grade 8 - Physics.png')}
+          style={styles.gradeTitleText}
+          resizeMode="contain"
+        />
 
-      {/* Grade title */}
-      <Text style={styles.gradeTitle}>Grade 8 - Physics</Text>
+        {/* Bottom Navigation Bar */}
+        <Image
+          source={require('../assets/HomescreenAssets/navbarBox.png')}
+          style={styles.navbarBox}
+          resizeMode="contain"
+        />
 
-      {/* Level map outline */}
-      <Image source={require('../assets/vector-91.png')} style={{ position: 'absolute', top: s(370), left: s(34), width: s(372), height: s(436) }} resizeMode="contain" />
+        {/* Home Button */}
+        <TouchableOpacity style={styles.homeButton} activeOpacity={0.7}>
+          <Image
+            source={require('../assets/HomescreenAssets/home.png')}
+            style={styles.homeImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
-      {/* Header bar backgrounds */}
-      <Image source={require('../assets/vector-88.png')} style={{ position: 'absolute', top: s(64), left: s(28), width: s(309), height: s(49) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-89.png')} style={{ position: 'absolute', top: s(65), left: s(29), width: s(307), height: s(47) }} resizeMode="contain" />
+        {/* Team Button */}
+        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7}>
+          <Image
+            source={require('../assets/HomescreenAssets/team.png')}
+            style={styles.teamImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
-      {/* Greeting */}
-      <Text style={styles.hiText}>Hi!</Text>
-      <Text style={styles.nameText}>Alexander Isla</Text>
+        {/* Levels Button */}
+        <TouchableOpacity style={styles.levelsButton} activeOpacity={0.7}>
+          <Image
+            source={require('../assets/HomescreenAssets/levels.png')}
+            style={styles.levelsImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
-      {/* Profile card background */}
-      <Image source={require('../assets/vector-87.png')} style={{ position: 'absolute', top: s(119), left: s(34), width: s(372), height: s(171) }} resizeMode="contain" />
-      <Image source={require('../assets/vector-90.png')} style={{ position: 'absolute', top: s(120), left: s(35), width: s(370), height: s(169) }} resizeMode="contain" />
+        {/* Leaderboard Button */}
+        <TouchableOpacity style={styles.leaderboardButton} activeOpacity={0.7}>
+          <Image
+            source={require('../assets/HomescreenAssets/leaderboard.png')}
+            style={styles.leaderboardImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
-      {/* Astronaut */}
-      <Image
-        source={require('../assets/image-8.png')}
-        style={styles.astronaut}
-        resizeMode="cover"
-      />
-
-      {/* Bottom indicator bar */}
-      <View style={styles.bottomBar} />
+        {/* Profile Button */}
+        <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
+          <Image
+            source={require('../assets/HomescreenAssets/profile.png')}
+            style={styles.profileImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      </ImageBackground>
     </View>
   );
 };
@@ -166,154 +256,145 @@ const HomePage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgGray,
+    backgroundColor: '#08121E',
   },
   background: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: s(440),
-    height: s(956),
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
-
-  levelMapBg: {
-    position: 'absolute',
-    top: s(369),
-    left: s(33),
-    width: s(374),
-    height: s(438),
-  },
-  bottomNav: {
-    position: 'absolute',
-    top: s(831),
-    left: s(-4),
-    width: s(448),
-    height: s(126),
-  },
-  bottomNavBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: s(448),
-    height: s(126),
-    backgroundColor: COLORS.navBg,
-    borderTopLeftRadius: 21,
-    borderTopRightRadius: 21,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderLeftWidth: 3,
-    borderColor: COLORS.white,
-  },
-  navHome: {
-    position: 'absolute',
-    top: s(18),
-    left: s(15),
-    alignItems: 'center',
-  },
-  navTeam: {
-    position: 'absolute',
-    top: s(22),
-    left: s(109),
-    alignItems: 'center',
-  },
-  navLevels: {
-    position: 'absolute',
-    top: s(19),
-    left: s(203),
-    alignItems: 'center',
-  },
-  navLeaderboard: {
-    position: 'absolute',
-    top: s(21),
-    left: s(279),
-    alignItems: 'center',
-  },
-  navProfile: {
-    position: 'absolute',
-    top: s(13),
-    left: s(369),
-    alignItems: 'center',
-  },
-  navLabel: {
-    fontFamily: FONTS.ui,
-    fontSize: s(12),
-    color: COLORS.white,
-    letterSpacing: s(2.64),
-    marginTop: s(2),
-  },
-  navLabelSmall: {
-    fontFamily: FONTS.ui,
-    fontSize: s(7),
-    color: COLORS.white,
-    letterSpacing: s(1.54),
-  },
-  levelLabel: {
-    position: 'absolute',
-    fontFamily: FONTS.ui,
-    fontSize: s(12),
-    color: COLORS.white,
-    letterSpacing: s(2.64),
-  },
-  subjectTab: {
-    position: 'absolute',
-    top: s(306),
-    width: s(81),
-    height: s(46),
-  },
-  subjectTabImg: {
-    width: s(81),
-    height: s(46),
-  },
-  subjectTabText: {
-    position: 'absolute',
-    top: s(313),
-    fontFamily: FONTS.ui,
-    fontSize: s(15),
-    color: COLORS.darkText,
-    letterSpacing: s(3.3),
-  },
-  gradeTitle: {
-    position: 'absolute',
-    top: s(385),
-    left: s(97),
-    fontFamily: FONTS.ui,
-    fontSize: s(20),
-    color: COLORS.darkText,
-    letterSpacing: s(5.6),
-  },
-  hiText: {
+  hiGreeting: {
     position: 'absolute',
     top: s(70),
-    left: s(39),
-    fontFamily: FONTS.title,
-    fontSize: s(32),
-    color: COLORS.darkText,
-    letterSpacing: s(7.04),
-  },
-  nameText: {
-    position: 'absolute',
-    top: s(80),
-    left: s(106),
-    fontFamily: FONTS.title,
-    fontSize: s(20),
-    color: COLORS.darkText,
-    letterSpacing: s(4.4),
+    left: s(38),
+    width: s(300),
+    height: s(60),
   },
   astronaut: {
     position: 'absolute',
-    top: s(23),
-    left: s(318),
-    width: s(105),
-    height: s(105),
+    top: s(28),
+    left: s(320),
+    width: s(110),
+    height: s(120),
   },
-  bottomBar: {
+  infoBox: {
     position: 'absolute',
-    top: s(939),
-    left: s(117),
-    width: s(206),
-    height: s(8),
-    backgroundColor: COLORS.white,
-    borderRadius: 4,
+    top: s(135),
+    alignSelf: 'center',
+    width: s(370),
+    height: s(170),
+  },
+  categoriesRow: {
+    position: 'absolute',
+    top: s(318),
+    width: '100%',
+    height: s(50),
+  },
+  categoryTab: {
+    position: 'absolute',
+    width: s(85),
+    height: s(48),
+  },
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  levelsBox: {
+    position: 'absolute',
+    top: s(378),
+    left: s(32),
+    width: s(376),
+    height: s(440),
+  },
+  planetNode: {
+    position: 'absolute',
+  },
+  planetImage: {
+    width: '100%',
+    height: '100%',
+  },
+  levelTitleBanner: {
+    position: 'absolute',
+    top: s(377),
+    left: s(32),
+    width: s(374),
+    height: s(54),
+  },
+  gradeTitleText: {
+    position: 'absolute',
+    top: s(390),
+    left: s(95),
+    width: s(250),
+    height: s(28),
+  },
+  bigEarth: {
+    position: 'absolute',
+    top: s(730),
+    left: s(-60),
+    width: s(600),
+    height: s(250),
+  },
+  navbarBox: {
+    position: 'absolute',
+    top: s(790),
+    left: s(1),
+    width: s(440),
+    height: s(250),
+  },
+  homeButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: s(870),
+    left: s(12),
+  },
+  homeImage: {
+    width: s(90),
+    height: s(90),
+  },
+  teamButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: s(884),
+    left: s(95),
+  },
+  teamImage: {
+    width: s(90),
+    height: s(70),
+  },
+  levelsButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: s(880),
+    left: s(188),
+  },
+  levelsImage: {
+    width: s(80),
+    height: s(80),
+  },
+  leaderboardButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: s(880),
+    left: s(275),
+  },
+  leaderboardImage: {
+    width: s(82),
+    height: s(72),
+  },
+  profileButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: s(873),
+    left: s(353),
+  },
+  profileImage: {
+    width: s(83),
+    height: s(83),
   },
 });
 

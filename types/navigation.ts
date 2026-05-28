@@ -5,4 +5,5 @@ export type RootStackParamList = {
   RegisterInfo: { role: string };
   Loading: undefined;
   Home: undefined;
+  NoTeam: undefined;
 };

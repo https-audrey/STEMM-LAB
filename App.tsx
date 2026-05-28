@@ -9,12 +9,13 @@ import { ShortStack_400Regular } from '@expo-google-fonts/short-stack';
 import { DynaPuff_400Regular } from '@expo-google-fonts/dynapuff';
 
 import { RootStackParamList } from './types/navigation';
-import OnboardingScreen from './screens/OnboardingScreen';
+import OnBoardingPage from './screens/OnBoardingPage';
 import LoginScreen from './screens/LoginScreen';
 import RegisterRoleScreen from './screens/RegisterRoleScreen';
 import RegisterInfoScreen from './screens/RegisterInfoScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import HomeScreen from './screens/HomeScreen';
+import NoTeamFound from './screens/NoTeamFound';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -57,12 +58,13 @@ export default function App() {
           }),
         }}
       >
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Onboarding" component={OnBoardingPage} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="RegisterRole" component={RegisterRoleScreen} />
         <Stack.Screen name="RegisterInfo" component={RegisterInfoScreen} />
         <Stack.Screen name="Loading" component={LoadingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="NoTeam" component={NoTeamFound} />
       </Stack.Navigator>
     </NavigationContainer>
   );
