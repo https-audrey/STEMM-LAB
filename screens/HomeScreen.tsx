@@ -18,23 +18,7 @@ const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-interface PlanetConfig {
-  id: number;
-  source: any;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
 
-const PLANETS: PlanetConfig[] = [
-  { id: 1, source: require('../assets/HomescreenAssets/planet 1.png'), top: 703, left: 79, width: 80, height: 80 },
-  { id: 2, source: require('../assets/HomescreenAssets/planet 2.png'), top: 670, left: 249, width: 80, height: 80 },
-  { id: 3, source: require('../assets/HomescreenAssets/planet 3.png'), top: 573, left: 134, width: 80, height: 80 },
-  { id: 4, source: require('../assets/HomescreenAssets/planet 4.png'), top: 455, left: 69, width: 80, height: 80 },
-  { id: 5, source: require('../assets/HomescreenAssets/planet 5.png'), top: 553, left: 291, width: 80, height: 80 },
-  { id: 6, source: require('../assets/HomescreenAssets/planet 6.png'), top: 390, left: 290, width: 80, height: 80 },
-];
 
 const HomePage: React.FC = () => {
   const navigation = useNavigation<Nav>();
@@ -156,46 +140,102 @@ const HomePage: React.FC = () => {
         />
 
         {/* Levels Box Map Section */}
-        <Image
-          source={require('../assets/HomescreenAssets/levelsBox.png')}
-          style={styles.levelsBox}
-          resizeMode="contain"
-        />
+        <View pointerEvents="none" style={styles.levelsBox}>
+          <Image
+            source={require('../assets/HomescreenAssets/levelsBox.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+          />
+        </View>
 
-        {/* Planet nodes mapped dynamically from configuration array */}
-        {PLANETS.map((planet) => (
-          <TouchableOpacity
-            key={planet.id}
-            style={[
-              styles.planetNode,
-              {
-                top: s(planet.top),
-                left: s(planet.left),
-                width: s(planet.width),
-                height: s(planet.height),
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={planet.source}
-              style={styles.planetImage}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        ))}
+        {/* Planet 1 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(703), left: s(68), width: s(100), height: s(100), zIndex: 5 }]}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 1.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Planet 2 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(670), left: s(240), width: s(100), height: s(100), zIndex: 5 }]}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 2.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Planet 3 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(573), left: s(123), width: s(100), height: s(100), zIndex: 5 }]}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 3.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Planet 4 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(455), left: s(56), width: s(100), height: s(100), zIndex: 5 }]}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 4.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Planet 5 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(553), left: s(277), width: s(100), height: s(100), zIndex: 5 }]}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('Act5Start')}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 5.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Planet 6 */}
+        <TouchableOpacity
+          style={[styles.planetNode, { top: s(390), left: s(277), width: s(100), height: s(100), zIndex: 1 }]}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/planet 6.png')}
+            style={styles.planetImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
         {/* Level Title Header Banner (rendered on top of Planet 6 visually) */}
-        <Image
-          source={require('../assets/HomescreenAssets/levelTitle.png')}
-          style={styles.levelTitleBanner}
-          resizeMode="contain"
-        />
-        <Image
-          source={require('../assets/HomescreenAssets/Grade 8 - Physics.png')}
-          style={styles.gradeTitleText}
-          resizeMode="contain"
-        />
+        <View pointerEvents="none" style={[styles.levelTitleBanner, { zIndex: 3 }]}>
+          <Image
+            source={require('../assets/HomescreenAssets/levelTitle.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+          />
+        </View>
+        <View pointerEvents="none" style={[styles.gradeTitleText, { zIndex: 3 }]}>
+          <Image
+            source={require('../assets/HomescreenAssets/Grade 8 - Physics.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+          />
+        </View>
 
         {/* Bottom Navigation Bar */}
         <Image
@@ -205,7 +245,11 @@ const HomePage: React.FC = () => {
         />
 
         {/* Home Button */}
-        <TouchableOpacity style={styles.homeButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => navigation.navigate('Home')}
+          activeOpacity={0.7}
+        >
           <Image
             source={require('../assets/HomescreenAssets/home.png')}
             style={styles.homeImage}
@@ -214,7 +258,11 @@ const HomePage: React.FC = () => {
         </TouchableOpacity>
 
         {/* Team Button */}
-        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.teamButton}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('NoTeam')}
+        >
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}
@@ -223,16 +271,24 @@ const HomePage: React.FC = () => {
         </TouchableOpacity>
 
         {/* Levels Button */}
-        <TouchableOpacity style={styles.levelsButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.levelsButton}
+          onPress={() => navigation.navigate('Activity')}
+          activeOpacity={0.7}
+        >
           <Image
-            source={require('../assets/HomescreenAssets/levels.png')}
+            source={require('../assets/HomescreenAssets/activity.png')}
             style={styles.levelsImage}
             resizeMode="contain"
           />
         </TouchableOpacity>
 
         {/* Leaderboard Button */}
-        <TouchableOpacity style={styles.leaderboardButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.leaderboardButton}
+          onPress={() => navigation.navigate('Leaderboard')}
+          activeOpacity={0.7}
+        >
           <Image
             source={require('../assets/HomescreenAssets/leaderboard.png')}
             style={styles.leaderboardImage}
@@ -241,7 +297,11 @@ const HomePage: React.FC = () => {
         </TouchableOpacity>
 
         {/* Profile Button */}
-        <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.7}
+        >
           <Image
             source={require('../assets/HomescreenAssets/profile.png')}
             style={styles.profileImage}

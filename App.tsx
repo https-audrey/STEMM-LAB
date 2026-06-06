@@ -16,6 +16,15 @@ import RegisterInfoScreen from './screens/RegisterInfoScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import HomeScreen from './screens/HomeScreen';
 import NoTeamFound from './screens/NoTeamFound';
+import CreateTeamPage from './screens/CreateTeamPage';
+import Act5StartPage from './screens/act5/StartPage';
+import AuthenticationPage from './screens/act5/AuthenticationPage';
+import EquipmentPage from './screens/act5/EquipmentPage';
+import InstructionPage from './screens/act5/InstructionPage';
+import TeamPageChem from './screens/TeamPageChem';
+import LeaderboardPage from './screens/LeaderboardPage';
+import ProfilePage from './screens/ProfilePage';
+import ActivityPage from './screens/ActivityPage';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -49,8 +58,8 @@ export default function App() {
               transform: [
                 {
                   translateX: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [layouts.screen.width * 0.3, 0],
+                     inputRange: [0, 1],
+                     outputRange: [layouts.screen.width * 0.3, 0],
                   }),
                 },
               ],
@@ -65,6 +74,15 @@ export default function App() {
         <Stack.Screen name="Loading" component={LoadingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NoTeam" component={NoTeamFound} />
+        <Stack.Screen name="CreateTeam" component={CreateTeamPage} />
+        <Stack.Screen name="Act5Start" component={Act5StartPage} />
+        <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
+        <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
+        <Stack.Screen name="Act5Instruction" component={InstructionPage} />
+        <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
+        <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
+        <Stack.Screen name="Profile" component={ProfilePage} />
+        <Stack.Screen name="Activity" component={ActivityPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
