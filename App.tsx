@@ -1,8 +1,8 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { ShortStack_400Regular } from '@expo-google-fonts/short-stack';
@@ -17,6 +17,14 @@ import LoadingScreen from './screens/LoadingScreen';
 import HomeScreen from './screens/HomeScreen';
 import NoTeamFound from './screens/NoTeamFound';
 
+import Parachute from './screens/Parachute';
+import ParachuteActivity from './screens/ParachuteActivity';
+import ParachutePrototype from './screens/ParachutePrototype';
+import ParachuteResult from './screens/ParachuteResult';
+import ParachuteVideoMarking from './screens/ParachuteVideoMarking';
+
+import { initDatabase } from './src/services/db';
+
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
@@ -25,8 +33,23 @@ export default function App() {
     DynaPuff_400Regular,
     'Oliver-Regular': require('./assets/fonts/Oliver-Regular.ttf'),
   });
+  
+  const [isReady, setIsReady] = useState(false);
+  const dbInitialized = useRef(false);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    if (fontsLoaded && !dbInitialized.current) {
+      dbInitialized.current = true;
+      try {
+        initDatabase();
+      } catch (error) {
+        console.error('Database init failed:', error);
+      }
+      setIsReady(true);
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded || !isReady) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0a0e1a' }}>
         <ActivityIndicator size="large" color="#ffffff" />
@@ -38,24 +61,14 @@ export default function App() {
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator
-        id="RootStack"
         initialRouteName="Onboarding"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: '#0a0e1a' },
-          cardStyleInterpolator: ({ current, layouts }) => ({
-            cardStyle: {
-              opacity: current.progress,
-              transform: [
-                {
-                  translateX: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [layouts.screen.width * 0.3, 0],
-                  }),
-                },
-              ],
-            },
-          }),
+          transitionSpec:{
+            open: { animation: 'timing', config: { duration: 0 } },
+            close: { animation: 'timing', config: { duration: 0 } },
+          }
         }}
       >
         <Stack.Screen name="Onboarding" component={OnBoardingPage} />
@@ -65,6 +78,11 @@ export default function App() {
         <Stack.Screen name="Loading" component={LoadingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NoTeam" component={NoTeamFound} />
+        <Stack.Screen name="Parachute" component={Parachute} />
+        <Stack.Screen name="ParachuteActivity" component={ParachuteActivity} />
+        <Stack.Screen name="ParachutePrototype" component={ParachutePrototype} />
+        <Stack.Screen name="ParachuteVideoMarking" component={ParachuteVideoMarking} />
+        <Stack.Screen name="ParachuteResult" component={ParachuteResult} />
       </Stack.Navigator>
     </NavigationContainer>
   );

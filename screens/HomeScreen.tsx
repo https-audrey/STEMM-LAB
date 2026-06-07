@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -41,8 +42,6 @@ const HomePage: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<'physics' | 'biology' | 'chemistry' | 'mathematics' | null>(null);
 
   const getPhysicsAsset = () => {
-    // When no subject is selected (default state), show the unpressed 'phy.png'.
-    // Once any category is selected, it changes to 'phy2.png'.
     return selectedSubject === null
       ? require('../assets/HomescreenAssets/phy.png')
       : require('../assets/HomescreenAssets/phy2.png');
@@ -64,6 +63,13 @@ const HomePage: React.FC = () => {
     return selectedSubject === 'mathematics'
       ? require('../assets/HomescreenAssets/math2.png')
       : require('../assets/HomescreenAssets/math.png');
+  };
+
+  // Planet press handler - does nothing, just provides visual feedback
+  const handlePlanetPress = () => {
+    // Intentionally empty - planets don't navigate anywhere
+    // You can add a console.log here if needed for debugging
+    // console.log('Planet pressed - decorative only');
   };
 
   return (
@@ -162,7 +168,7 @@ const HomePage: React.FC = () => {
           resizeMode="contain"
         />
 
-        {/* Planet nodes mapped dynamically from configuration array */}
+        {/* Planet nodes - TouchableOpacity with empty onPress (decorative only) */}
         {PLANETS.map((planet) => (
           <TouchableOpacity
             key={planet.id}
@@ -176,6 +182,7 @@ const HomePage: React.FC = () => {
               },
             ]}
             activeOpacity={0.7}
+            onPress={handlePlanetPress}  // Empty function - does nothing
           >
             <Image
               source={planet.source}
@@ -222,8 +229,15 @@ const HomePage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity style={styles.levelsButton} activeOpacity={0.7}>
+        {/* Levels Button - ONLY THIS leads to Parachute Challenge */}
+        <TouchableOpacity 
+          style={styles.levelsButton} 
+          activeOpacity={0.7} 
+          onPress={() => {
+            const newSessionId = `session_${Date.now()}`;
+            navigation.navigate('Parachute', { currentSessionId: newSessionId });
+          }}
+        >
           <Image
             source={require('../assets/HomescreenAssets/levels.png')}
             style={styles.levelsImage}

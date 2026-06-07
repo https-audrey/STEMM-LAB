@@ -26,7 +26,16 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow STEMM Lab to use your camera for recording experiments.",
+          "microphonePermission": "Allow STEMM Lab to record audio."
+        }
+      ],
+      "expo-video"
     ]
   }
 }
