@@ -352,6 +352,7 @@ const barStyles = StyleSheet.create({
         width: s(60),
         textAlign: 'right',
         marginRight: s(6),
+        marginLeft: s(-10),
     },
     barsWrapper: {
         flex: 1,
