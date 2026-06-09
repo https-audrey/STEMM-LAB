@@ -26,6 +26,11 @@ import InstructionPage from './screens/act5/InstructionPage';
 import ExperimentPage from './screens/act5/ExperimentPage';
 import RecordingResultPage from './screens/act5/RecordingResultPage';
 import ResultCompPage from './screens/act5/ResultCompPage';
+import Reflection1Page from './screens/act5/Reflection1Page';
+import Reflection2Page from './screens/act5/Reflection2Page';
+import Reflection3Page from './screens/act5/Reflection3Page';
+import Act5DiscussionPage from './screens/act5/Act5DiscussionPage';
+import Act5CurriculumPage from './screens/act5/Act5CurriculumPage';
 import TeamPageChem from './screens/TeamPageChem';
 import LeaderboardPage from './screens/LeaderboardPage';
 import ProfilePage from './screens/ProfilePage';
@@ -88,6 +93,11 @@ export default function App() {
         <Stack.Screen name="Act5Experiment" component={ExperimentPage} />
         <Stack.Screen name="Act5RecordingResult" component={RecordingResultPage} />
         <Stack.Screen name="Act5ResultComp" component={ResultCompPage} />
+        <Stack.Screen name="Act5Reflection1" component={Reflection1Page} />
+        <Stack.Screen name="Act5Reflection2" component={Reflection2Page} />
+        <Stack.Screen name="Act5Reflection3" component={Reflection3Page} />
+        <Stack.Screen name="Act5Discussion" component={Act5DiscussionPage} />
+        <Stack.Screen name="Act5Curriculum" component={Act5CurriculumPage} />
         <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
         <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
         <Stack.Screen name="Profile" component={ProfilePage} />

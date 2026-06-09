@@ -92,7 +92,7 @@ const ResultCompPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Home');
+        navigation.navigate('Act5Reflection1', { docIds });
     };
 
     // ── Render a single horizontal bar ─────────────────────────────

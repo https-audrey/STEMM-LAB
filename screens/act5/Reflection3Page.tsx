@@ -17,14 +17,14 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { addDocument } from '../../services/firestoreService';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act5Reflection1'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act5Reflection3'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const Reflection1Page: React.FC = () => {
+const Reflection3Page: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const route = useRoute<any>();
     const docIds: string[] = route.params?.docIds || [];
@@ -36,7 +36,11 @@ const Reflection1Page: React.FC = () => {
         navigation.goBack();
     };
 
-    const handleNext = async () => {
+    const handleBack = () => {
+        navigation.goBack();
+    };
+
+    const handleContinue = async () => {
         if (!answer.trim()) {
             Alert.alert('Please write your answer', 'You need to write your answer before proceeding.');
             return;
@@ -46,17 +50,17 @@ const Reflection1Page: React.FC = () => {
         try {
             await addDocument('reflections', {
                 activityId: 'act5',
-                reflectionNumber: 1,
-                question: 'Which movement was the hardest to keep the vibration low?',
+                reflectionNumber: 3,
+                question: 'Reflection 3',
                 answer: answer.trim(),
                 docIds,
                 createdAt: new Date().toISOString(),
             });
 
-            // Navigate to Reflection 2
-            navigation.navigate('Act5Reflection2', { docIds });
+            // Navigate to Discussion page
+            navigation.navigate('Act5Discussion', { docIds });
         } catch (error) {
-            console.error('[Reflection1] Error saving answer:', error);
+            console.error('[Reflection3] Error saving answer:', error);
             Alert.alert('Error', 'Failed to save your answer. Please try again.');
         } finally {
             setSaving(false);
@@ -94,7 +98,7 @@ const Reflection1Page: React.FC = () => {
                     {/* Reflection box container */}
                     <View style={styles.boxContainer}>
                         <Image
-                            source={require('../../assets/Act5ReflectionAssets/reflectionBox1.png')}
+                            source={require('../../assets/Act5ReflectionAssets/reflectionBox3.png')}
                             style={styles.reflectionBox}
                             resizeMode="contain"
                         />
@@ -123,23 +127,37 @@ const Reflection1Page: React.FC = () => {
                             )}
                         </View>
 
-                        {/* Next button — bottom right inside the container */}
-                        <TouchableOpacity
-                            style={styles.nextButton}
-                            onPress={handleNext}
-                            activeOpacity={0.8}
-                            disabled={saving}
-                        >
-                            {saving ? (
-                                <ActivityIndicator size="small" color="#08121E" />
-                            ) : (
+                        {/* Button row — Back on left, Continue on right */}
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={styles.backButton}
+                                onPress={handleBack}
+                                activeOpacity={0.8}
+                            >
                                 <Image
-                                    source={require('../../assets/Act5ReflectionAssets/nextBtn.png')}
-                                    style={styles.nextImage}
+                                    source={require('../../assets/Act5ReflectionAssets/backBtn.png')}
+                                    style={styles.backImage}
                                     resizeMode="contain"
                                 />
-                            )}
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.continueButton}
+                                onPress={handleContinue}
+                                activeOpacity={0.8}
+                                disabled={saving}
+                            >
+                                {saving ? (
+                                    <ActivityIndicator size="small" color="#08121E" />
+                                ) : (
+                                    <Image
+                                        source={require('../../assets/EquipmentAssets/continueBtn.png')}
+                                        style={styles.continueImage}
+                                        resizeMode="contain"
+                                    />
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     {/* Saturn planet — bottom of the screen */}
@@ -234,18 +252,33 @@ const styles = StyleSheet.create({
         height: s(20),
     },
 
-    /* Next button — bottom right inside the container */
-    nextButton: {
+    /* Button row — Back and Continue side by side at the bottom */
+    buttonRow: {
         position: 'absolute',
         bottom: s(28),
+        left: s(22),
         right: s(22),
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        zIndex: 10,
+    },
+    backButton: {
         width: s(100),
         height: s(41),
-        zIndex: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    nextImage: {
+    backImage: {
+        width: '100%',
+        height: '100%',
+    },
+    continueButton: {
+        width: s(141),
+        height: s(41),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    continueImage: {
         width: '100%',
         height: '100%',
     },
@@ -261,4 +294,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Reflection1Page;
+export default Reflection3Page;
