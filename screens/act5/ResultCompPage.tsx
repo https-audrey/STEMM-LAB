@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     /* Chart area — overlaid on the result‑box image inside dashed border */
     chartArea: {
         position: 'absolute',
-        top: s(115),
+        top: s(135),
         alignSelf: 'center',
         width: s(335),
         height: s(370),
