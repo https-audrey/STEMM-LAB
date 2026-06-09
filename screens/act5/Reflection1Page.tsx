@@ -209,11 +209,12 @@ const styles = StyleSheet.create({
     /* Text input area — overlaid on the reflection box inside the dashed border */
     inputArea: {
         position: 'absolute',
-        top: s(155),
+        top: s(190),
         alignSelf: 'center',
         width: s(310),
         height: s(340),
         zIndex: 10,
+        left: s(40),
     },
     textInput: {
         width: '100%',
@@ -237,10 +238,10 @@ const styles = StyleSheet.create({
     /* Next button — bottom right inside the container */
     nextButton: {
         position: 'absolute',
-        bottom: s(28),
+        bottom: s(16),
         right: s(22),
-        width: s(100),
-        height: s(41),
+        width: s(120),
+        height: s(51),
         zIndex: 10,
         justifyContent: 'center',
         alignItems: 'center',

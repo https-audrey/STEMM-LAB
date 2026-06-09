@@ -227,11 +227,12 @@ const styles = StyleSheet.create({
     /* Text input area — overlaid on the reflection box inside the dashed border */
     inputArea: {
         position: 'absolute',
-        top: s(155),
+        top: s(195),
         alignSelf: 'center',
         width: s(310),
         height: s(340),
         zIndex: 10,
+        left: s(40),
     },
     textInput: {
         width: '100%',
@@ -263,20 +264,22 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     backButton: {
-        width: s(100),
-        height: s(41),
+        width: s(120),
+        height: s(51),
         justifyContent: 'center',
         alignItems: 'center',
+        bottom: s(-10),
     },
     backImage: {
         width: '100%',
         height: '100%',
     },
     nextButton: {
-        width: s(100),
-        height: s(41),
+        width: s(120),
+        height: s(51),
         justifyContent: 'center',
         alignItems: 'center',
+        bottom: s(-10),
     },
     nextImage: {
         width: '100%',
