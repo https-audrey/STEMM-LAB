@@ -8,6 +8,8 @@ import { useFonts } from 'expo-font';
 import { ShortStack_400Regular } from '@expo-google-fonts/short-stack';
 import { DynaPuff_400Regular } from '@expo-google-fonts/dynapuff';
 
+import { AuthProvider } from './context/AuthContext';
+
 import { RootStackParamList } from './types/navigation';
 import OnBoardingPage from './screens/OnBoardingPage';
 import LoginScreen from './screens/LoginScreen';
@@ -21,6 +23,9 @@ import Act5StartPage from './screens/act5/StartPage';
 import AuthenticationPage from './screens/act5/AuthenticationPage';
 import EquipmentPage from './screens/act5/EquipmentPage';
 import InstructionPage from './screens/act5/InstructionPage';
+import ExperimentPage from './screens/act5/ExperimentPage';
+import RecordingResultPage from './screens/act5/RecordingResultPage';
+import ResultCompPage from './screens/act5/ResultCompPage';
 import TeamPageChem from './screens/TeamPageChem';
 import LeaderboardPage from './screens/LeaderboardPage';
 import ProfilePage from './screens/ProfilePage';
@@ -44,6 +49,7 @@ export default function App() {
   }
 
   return (
+    <AuthProvider>
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator
@@ -79,11 +85,15 @@ export default function App() {
         <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
         <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
         <Stack.Screen name="Act5Instruction" component={InstructionPage} />
+        <Stack.Screen name="Act5Experiment" component={ExperimentPage} />
+        <Stack.Screen name="Act5RecordingResult" component={RecordingResultPage} />
+        <Stack.Screen name="Act5ResultComp" component={ResultCompPage} />
         <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
         <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
         <Stack.Screen name="Profile" component={ProfilePage} />
         <Stack.Screen name="Activity" component={ActivityPage} />
       </Stack.Navigator>
     </NavigationContainer>
+    </AuthProvider>
   );
 }

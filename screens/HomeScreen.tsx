@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Image,
+  Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -10,6 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
+import { FONTS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -22,6 +25,7 @@ const s = (v: number) => v * SCALE;
 
 const HomePage: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { profile } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<'physics' | 'biology' | 'chemistry' | 'mathematics' | null>(null);
 
   const getPhysicsAsset = () => {
@@ -58,12 +62,13 @@ const HomePage: React.FC = () => {
         style={styles.background}
         resizeMode="cover"
       >
-        {/* Header Section: "Hi! Alexander Isla" greeting & Astronaut */}
-        <Image
-          source={require('../assets/HomescreenAssets/hi.png')}
-          style={styles.hiGreeting}
-          resizeMode="contain"
-        />
+        {/* Header Section: "Hi!" text + dynamic user name */}
+        <View style={styles.greetingRow}>
+          <Text style={styles.hiText}>Hi! </Text>
+          <Text style={styles.nameText} numberOfLines={1}>
+            {profile?.fullName || 'Explorer'}
+          </Text>
+        </View>
         <Image
           source={require('../assets/HomescreenAssets/astronaut1.png')}
           style={styles.astronaut}
@@ -323,12 +328,25 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  hiGreeting: {
+  greetingRow: {
     position: 'absolute',
     top: s(70),
     left: s(38),
-    width: s(300),
+    width: s(280),
     height: s(60),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hiText: {
+    fontFamily: FONTS.title,
+    fontSize: s(32),
+    color: '#FFFFFF',
+  },
+  nameText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(22),
+    color: '#FFFFFF',
+    flexShrink: 1,
   },
   astronaut: {
     position: 'absolute',

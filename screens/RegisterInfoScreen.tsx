@@ -11,12 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
 import ProfanityFilter from '../utils/profanityFilter';
+import { signUp } from '../services/authService';
+import { setDocument, queryDocuments, where } from '../services/firestoreService';
+import { useAuth } from '../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'RegisterInfo'>;
 
@@ -34,9 +38,14 @@ type FormData = {
 
 const RegisterInfoScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<RootStackParamList, 'RegisterInfo'>>();
+  const role = route.params?.role || 'student';
+  const { refreshProfile } = useAuth();
   const filter = useMemo(() => new ProfanityFilter(), []);
 
   const [profanityError, setProfanityError] = useState('');
+  const [registerError, setRegisterError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     dateOfBirth: '',
@@ -79,14 +88,91 @@ const RegisterInfoScreen: React.FC = () => {
     }));
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    // Profanity check
     const hasProfanity = filter.isProfane(formData.usernameOrEmail);
-    console.log('[ProfanityFilter] Register check:', formData.usernameOrEmail, '| isProfane:', hasProfanity);
     if (hasProfanity) {
       setProfanityError('Please choose a different username.');
       return;
     }
-    navigation.navigate('Loading');
+
+    // Basic validation
+    if (!formData.fullName.trim() || !formData.usernameOrEmail.trim() || !formData.password) {
+      setRegisterError('Please fill in all required fields.');
+      return;
+    }
+    if (formData.password !== formData.passwordConfirmation) {
+      setRegisterError('Passwords do not match.');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setRegisterError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+    setRegisterError('');
+
+    try {
+      // 1. Create Firebase Auth account
+      const user = await signUp(formData.usernameOrEmail.trim(), formData.password);
+
+      // 2. Generate a unique display username from full name + 2 random digits
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      const baseUsername = nameParts.length > 1
+        ? `${nameParts[0]}.${nameParts[nameParts.length - 1]}`
+        : nameParts[0];
+
+      let displayUsername = '';
+      let isUnique = false;
+      let attempts = 0;
+
+      while (!isUnique && attempts < 10) {
+        const randomNum = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+        displayUsername = `${baseUsername}${randomNum}`;
+
+        // Check if this username already exists in Firestore
+        const existing = await queryDocuments('users', [
+          where('displayUsername', '==', displayUsername),
+        ]);
+        if (existing.length === 0) {
+          isUnique = true;
+        }
+        attempts++;
+      }
+
+      // 3. Save user profile to Firestore (using UID as doc ID)
+      await setDocument('users', user.uid, {
+        uid: user.uid,
+        fullName: formData.fullName.trim(),
+        dateOfBirth: formData.dateOfBirth,
+        username: formData.usernameOrEmail.trim(),
+        displayUsername: displayUsername,
+        role: role,
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log('[Register] Success! UID:', user.uid, 'Username:', displayUsername);
+
+      // 4. Refresh AuthContext so all screens show the new user's profile
+      await refreshProfile();
+
+      // Navigate to loading/home
+      navigation.navigate('Loading');
+    } catch (error: any) {
+      let message = 'Registration failed. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'This email is already registered. Try logging in.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password is too weak. Use at least 6 characters.';
+      }
+      setRegisterError(message);
+      console.log('[Register] Error:', error.code, error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -256,17 +342,27 @@ const RegisterInfoScreen: React.FC = () => {
                 />
               </View>
 
+              {/* Register error message */}
+              {registerError !== '' && (
+                <Text style={styles.errorText}>{registerError}</Text>
+              )}
+
               {/* Register Button */}
               <TouchableOpacity
                 style={styles.registerButton}
                 onPress={handleRegister}
                 activeOpacity={0.8}
+                disabled={loading}
               >
-                <Image
-                  source={require('../assets/RegisterAssets/registerBtn.png')}
-                  style={styles.fullImage}
-                  resizeMode="contain"
-                />
+                {loading ? (
+                  <ActivityIndicator size="small" color="#08121E" />
+                ) : (
+                  <Image
+                    source={require('../assets/RegisterAssets/registerBtn.png')}
+                    style={styles.fullImage}
+                    resizeMode="contain"
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>
