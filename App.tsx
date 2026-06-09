@@ -23,6 +23,12 @@ import ParachutePrototype from './screens/ParachutePrototype';
 import ParachuteResult from './screens/ParachuteResult';
 import ParachuteVideoMarking from './screens/ParachuteVideoMarking';
 
+import HandFan from './screens/HandFan';
+import HandFanActivity from './screens/HandFanActivity';
+import HandFanPrototype from './screens/HandFanPrototype';
+import HandFanMarking from './screens/HandFanMarking';
+import HandFanResult from './screens/HandFanResult';
+
 import { initDatabase } from './src/services/db';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -83,6 +89,11 @@ export default function App() {
         <Stack.Screen name="ParachutePrototype" component={ParachutePrototype} />
         <Stack.Screen name="ParachuteVideoMarking" component={ParachuteVideoMarking} />
         <Stack.Screen name="ParachuteResult" component={ParachuteResult} />
+        <Stack.Screen name="HandFan" component={HandFan} />
+        <Stack.Screen name="HandFanActivity" component={HandFanActivity} />
+        <Stack.Screen name="HandFanPrototype" component={HandFanPrototype} />
+        <Stack.Screen name="HandFanMarking" component={HandFanMarking} />
+        <Stack.Screen name="HandFanResult" component={HandFanResult} />
       </Stack.Navigator>
     </NavigationContainer>
   );
