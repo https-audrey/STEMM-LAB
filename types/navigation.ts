@@ -45,6 +45,24 @@ export type RootStackParamList = {
     };
   }
 
+  Earthquake: { currentSessionId: string };
+  EarthquakeActivity: { currentSessionId: string; forceNewSession?: boolean; didSubmitSuccessfully?: boolean };
+  EarthquakePrototype: {
+    currentSessionId: string;
+    prototype: string;
+    description: string;
+  };
+  EarthquakeResult: {
+    data: {
+      currentSessionId: string;
+      prototypeKey: string;
+      description: string;
+      peakAccel: number;
+      avgAccel: number;
+      isHistoricalView: boolean;
+    };
+  }
+
   Parachute: { currentSessionId: string };
   ParachuteActivity: { currentSessionId: string; forceNewSession?: boolean; didSubmitSuccessfully?: boolean };
   

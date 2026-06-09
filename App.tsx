@@ -29,6 +29,11 @@ import HandFanPrototype from './screens/HandFanPrototype';
 import HandFanMarking from './screens/HandFanMarking';
 import HandFanResult from './screens/HandFanResult';
 
+import Earthquake from './screens/Earthquake';
+import EarthquakeActivity from './screens/EarthquakeActivity';
+import EarthquakePrototype from './screens/EarthquakePrototype';
+import EarthquakeResult from './screens/EarthquakeResult';
+
 import { initDatabase } from './src/services/db';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -94,6 +99,10 @@ export default function App() {
         <Stack.Screen name="HandFanPrototype" component={HandFanPrototype} />
         <Stack.Screen name="HandFanMarking" component={HandFanMarking} />
         <Stack.Screen name="HandFanResult" component={HandFanResult} />
+        <Stack.Screen name="Earthquake" component={Earthquake} />
+        <Stack.Screen name="EarthquakeActivity" component={EarthquakeActivity} />
+        <Stack.Screen name="EarthquakePrototype" component={EarthquakePrototype} />
+        <Stack.Screen name="EarthquakeResult" component={EarthquakeResult} />
       </Stack.Navigator>
     </NavigationContainer>
   );

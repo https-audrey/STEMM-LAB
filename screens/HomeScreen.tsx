@@ -235,7 +235,7 @@ const HomePage: React.FC = () => {
           activeOpacity={0.7} 
           onPress={() => {
             const newSessionId = `session_${Date.now()}`;
-            navigation.navigate('HandFan', { currentSessionId: newSessionId });
+            navigation.navigate('Earthquake', { currentSessionId: newSessionId });
           }}
         >
           <Image

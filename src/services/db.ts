@@ -57,6 +57,17 @@ export interface HandFanPrototypeRecord {
   force: number;
 }
 
+export interface EarthquakePrototypeRecord {
+  id?: number;
+  session_id?: string;
+  timestamp?: string;
+
+  prototype_key: string;
+  description: string;
+  peakAccel: number;
+  avgAccel: number;
+}
+
 export const initDatabase = (): void => {
   if (!db) {
     console.log('Database not available (web or error)');
@@ -69,6 +80,7 @@ export const initDatabase = (): void => {
 
       DROP TABLE IF EXISTS handFan_trials;
       DROP TABLE IF EXISTS parachute_trials;
+      DROP TABLE IF EXISTS earthQuake_trials;
 
       CREATE TABLE IF NOT EXISTS parachute_trials (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,6 +130,22 @@ export const initDatabase = (): void => {
 
         bend_angle REAL NOT NULL,
         force REAL NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS earthquake_trials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        session_id TEXT NOT NULL,
+
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        prototype_key TEXT NOT NULL,
+
+        description TEXT NOT NULL,
+
+        peakAccel REAL NOT NULL,
+
+        avgAccel REAL NOT NULL
       );
     `);
     console.log('Database initialized successfully');
@@ -361,6 +389,112 @@ export const getHFTrialsBySession = (
       `,
       [sessionId]
     ) as HandFanPrototypeRecord[];
+  } catch {
+    return [];
+  }
+};
+
+//Earthquake DB
+
+export const saveEarthquakeTrialRecord = (record: EarthquakePrototypeRecord & { session_id: string }): void => {
+  if (!db) {
+    console.log('Database not available, using localStorage fallback');
+    const records = JSON.parse(localStorage.getItem('earthquake_records') || '[]');
+    records.push({ 
+      ...record, 
+      id: Date.now(), 
+      timestamp: new Date().toISOString() 
+    });
+    localStorage.setItem('earthquake_records', JSON.stringify(records));
+    return;
+  }
+
+  try {
+    db.runSync(
+      `
+      INSERT OR REPLACE INTO earthquake_trials (
+          session_id,
+          prototype_key,
+          description,
+          peakAccel,
+          avgAccel
+      )
+      VALUES (?, ?, ?, ?, ?)
+      `,
+      [
+          record.session_id,
+          record.prototype_key,
+          record.description,
+          record.peakAccel,
+          record.avgAccel,
+      ]
+      );
+  } catch (error) {
+    console.error('Save error:', error);
+  }
+};
+
+export const getEarthquakeRecordsByPrototype = (prototypeKey: string): EarthquakePrototypeRecord[] => {
+  if (!db) {
+    const records = JSON.parse(localStorage.getItem('earthquake_records') || '[]');
+    return records.filter((r: EarthquakePrototypeRecord) => r.prototype_key === prototypeKey);
+  }
+
+  try {
+    const result = db.getAllSync(
+      'SELECT * FROM earthquake_trials WHERE prototype_key = ? ORDER BY id DESC',
+      [prototypeKey]
+    );
+    return result as EarthquakePrototypeRecord[];
+  } catch (error) {
+    console.error('Get records error:', error);
+    return [];
+  }
+};
+
+export const getEarthquakeAllRecords = (): EarthquakePrototypeRecord[] => {
+  if (!db) {
+    return JSON.parse(localStorage.getItem('earthquake_records') || '[]');
+  }
+
+  try {
+    const result = db.getAllSync('SELECT * FROM earthquake_trials ORDER BY id DESC');
+    return result as EarthquakePrototypeRecord[];
+  } catch (error) {
+    console.error('Get all records error:', error);
+    return [];
+  }
+};
+
+export const clearEarthquakeAllRecords = (): void => {
+  if (!db) {
+    localStorage.removeItem('earthquake_records');
+    return;
+  }
+
+  try {
+    db.execSync('DELETE FROM earthquake_trials;');
+    console.log('All records cleared');
+  } catch (error) {
+    console.error('Error clearing records:', error);
+  }
+};
+
+export const getEarthquakeTrialsBySession = (
+  sessionId: string
+): EarthquakePrototypeRecord[] => {
+  if (!db) return [];
+
+  try {
+    return db.getAllSync(
+      `
+      SELECT *
+      FROM earthquake_trials
+      WHERE session_id = ?
+      ORDER BY id DESC
+      `,
+      [sessionId]
+    ) as EarthquakePrototypeRecord[];
   } catch {
     return [];
   }
