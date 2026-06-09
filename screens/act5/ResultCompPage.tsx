@@ -144,37 +144,7 @@ const ResultCompPage: React.FC = () => {
         </View>
     );
 
-    // ── Render the x‑axis labels (0 – 10) ──────────────────────────
-    const renderXAxis = () => {
-        const ticks = Array.from({ length: 11 }, (_, i) => i);
-        return (
-            <View style={barStyles.xAxisRow}>
-                {ticks.map((t) => (
-                    <Text key={t} style={barStyles.xTick}>
-                        {t}
-                    </Text>
-                ))}
-            </View>
-        );
-    };
 
-    // ── Render the legend row ──────────────────────────────────────
-    const renderLegend = () => (
-        <View style={barStyles.legendRow}>
-            <View style={barStyles.legendItem}>
-                <View style={[barStyles.legendSwatch, { backgroundColor: '#A3C27B' }]} />
-                <Text style={barStyles.legendText}>Speed</Text>
-            </View>
-            <View style={barStyles.legendItem}>
-                <View style={[barStyles.legendSwatch, { backgroundColor: '#E8D87C' }]} />
-                <Text style={barStyles.legendText}>Smoothness</Text>
-            </View>
-            <View style={barStyles.legendItem}>
-                <View style={[barStyles.legendSwatch, { backgroundColor: '#7BA3D4' }]} />
-                <Text style={barStyles.legendText}>Range of Motion</Text>
-            </View>
-        </View>
-    );
 
     return (
         <View style={styles.container}>
@@ -222,18 +192,14 @@ const ResultCompPage: React.FC = () => {
                                 <Text style={styles.emptyText}>No recordings yet.</Text>
                             </View>
                         ) : (
-                            <>
-                                <ScrollView
-                                    contentContainerStyle={styles.scrollContent}
-                                    showsVerticalScrollIndicator={false}
-                                >
-                                    {recordings.map((rec, idx) =>
-                                        renderRecordingGroup(rec, idx),
-                                    )}
-                                    {renderXAxis()}
-                                </ScrollView>
-                                {renderLegend()}
-                            </>
+                            <ScrollView
+                                contentContainerStyle={styles.scrollContent}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {recordings.map((rec, idx) =>
+                                    renderRecordingGroup(rec, idx),
+                                )}
+                            </ScrollView>
                         )}
                     </View>
 
@@ -405,42 +371,7 @@ const barStyles = StyleSheet.create({
         borderRadius: s(3),
     },
 
-    /* X‑axis labels */
-    xAxisRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginLeft: s(66),
-        marginRight: s(2),
-        marginTop: s(4),
-    },
-    xTick: {
-        fontFamily: FONTS.title,
-        fontSize: s(10),
-        color: '#08121E',
-    },
 
-    /* Legend */
-    legendRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: s(10),
-        gap: s(12),
-    },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    legendSwatch: {
-        width: s(10),
-        height: s(10),
-        borderRadius: s(2),
-        marginRight: s(4),
-    },
-    legendText: {
-        fontFamily: FONTS.title,
-        fontSize: s(9),
-        color: '#08121E',
-    },
 });
 
 export default ResultCompPage;
