@@ -12,8 +12,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
-import { getEarthquakeRecordsByPrototype, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../src/services/db';
+import { RootStackParamList } from '../../types/navigation';
+import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../src/services/db';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
@@ -162,6 +162,9 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
             Alert.alert('Reflection Required', 'Please complete your team reflection.');
             return;
         }
+
+        saveSessionReflection(currentSessionId, 'earthquake', reflection);
+        markSessionSubmitted(currentSessionId);
 
         Alert.alert('Activity Submitted', 'Your Earthquake-Resistant Structure report has been saved!', [
             {

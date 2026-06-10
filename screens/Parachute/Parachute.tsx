@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
-type NavProp = StackNavigationProp<RootStackParamList, 'HandFan'>;
+type NavProp = StackNavigationProp<RootStackParamList, 'Parachute'>;
 
-export default function HandFan() {
+export default function Parachute() {
     const navigation = useNavigation<NavProp>();
-    const route = useRoute<RouteProp<RootStackParamList, 'HandFan'>>();
+    const route = useRoute<RouteProp<RootStackParamList, 'Parachute'>>();
 
     const currentSessionId = route.params?.currentSessionId ?? '';
 
@@ -25,7 +25,7 @@ export default function HandFan() {
             `session_${Date.now()}`;
 
         navigation.navigate(
-            'HandFanActivity',
+            'ParachuteActivity',
             {
                 currentSessionId:
                     newSessionId,
@@ -35,19 +35,21 @@ export default function HandFan() {
     };
 
     const equipment = [
-        "Paper and cardboard",
+        "Small toy (e.g. army toy soldier)",
+        "Table or elevated surface",
+        "Paper or plastic sheets",
+        "Suspension string strands",
         "Scissors",
-        "Mobile phone",
-        "Sticky Tape ",
-        "STEMM Mobile App",
+        "Adhesive tape",
     ];
 
     const instruction = [
-        "Stand paper upright on a table.",
-        "Fan air from 30 cm away.",
-        "Observe and record movement.",
-        "Repeat with different fan designs and fan distance (15cm, 30, 45cm)",
-        "Repeat with a cardboard instead of a paper vertical.",
+        "Drop the toy without a parachute and record the fall (baseline test).",
+        "Build a parachute using provided materials.",
+        "Drop the toy from the same height and record the fall.",
+        "Review speed and landing accuracy results in the app.",
+        "Redesign and test up to three prototypes within 20 minutes.",
+        "Upload videos, results, and team reflections.",
     ];
 
     return (
@@ -59,7 +61,7 @@ export default function HandFan() {
                 >
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </Pressable>
-                <Text style={styles.title}>Hand Fan Challenge</Text>
+                <Text style={styles.title}>Parachute Challenge</Text>
                 <View style={styles.rightSpacer} />
             </View>
 
@@ -67,7 +69,8 @@ export default function HandFan() {
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>🎯 Engineering Challenge Overview</Text>
                     <Text style={styles.descriptionText}>
-                        Students test how air movement affects flexible materials. 
+                        Design, construct, and structurally validate a parachute profile for a physical toy element. 
+                        The objective is to maximize air drag, minimize ground terminal impact force, and maintain landing stabilization zones under set structural constraints.
                     </Text>
                 </View>
 

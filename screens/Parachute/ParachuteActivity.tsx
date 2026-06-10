@@ -12,15 +12,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
-import { getRecordsByPrototype, PrototypeRecord, getTrialsBySession } from '../src/services/db';
-
+import { RootStackParamList } from '../../types/navigation';
+import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../src/services/db';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
 
 export default function ParachuteActivity({ navigation, route }: Props) {
     const { currentSessionId } = route.params;
+
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+    const [isExpired, setIsExpired] = useState(false);
+    const TIMER_MINUTES = 1;
+    const STORAGE_KEY = `parachute_session_start_${currentSessionId}`;
 
     const [showSetupModal, setShowSetupModal] = useState(false);
     const [mass, setMass] = useState('');
@@ -40,33 +45,83 @@ export default function ParachuteActivity({ navigation, route }: Props) {
 
     const [isNewSession, setIsNewSession] = useState(true);
 
+    // Initialize timer on mount
+    useEffect(() => {
+        const initTimer = async () => {
+            let startTime: number;
+            const storedStartTime = await AsyncStorage.getItem(STORAGE_KEY);
+            
+            if (!storedStartTime || (route.params as any)?.forceNewSession) {
+                startTime = Date.now();
+                await AsyncStorage.setItem(STORAGE_KEY, startTime.toString());
+            } else {
+                startTime = parseInt(storedStartTime);
+            }
+            
+            const elapsed = (Date.now() - startTime) / 1000;
+            const remaining = TIMER_MINUTES * 60 - elapsed;
+            
+            if (remaining <= 0) {
+                setIsExpired(true);
+                setTimeRemaining(0);
+                await autoSubmit();
+                return;
+            }
+            
+            setTimeRemaining(remaining);
+            
+            const interval = setInterval(() => {
+                const currentElapsed = (Date.now() - startTime) / 1000;
+                const currentRemaining = TIMER_MINUTES * 60 - currentElapsed;
+                
+                if (currentRemaining <= 0) {
+                    clearInterval(interval);
+                    setIsExpired(true);
+                    setTimeRemaining(0);
+                    autoSubmit();
+                } else {
+                    setTimeRemaining(currentRemaining);
+                }
+            }, 1000);
+            
+            return () => clearInterval(interval);
+        };
+        
+        initTimer();
+    }, [currentSessionId, (route.params as any)?.forceNewSession]);
+
+    const autoSubmit = async () => {
+        const trials = getTrialsBySession(currentSessionId);
+        const completedCount = trials.length;
+        
+        Alert.alert(
+            'Time\'s Up!',
+            `Your ${TIMER_MINUTES} minutes have ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`,
+            [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        navigation.replace('Parachute', { currentSessionId });
+                    }
+                }
+            ]
+        );
+    };
+
+    const formatTime = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     useFocusEffect(
         React.useCallback(() => {
+            const trials = getTrialsBySession(currentSessionId);
 
-            const trials =
-                getTrialsBySession(
-                    currentSessionId
-                );
-
-            const hBaseline =
-                trials.filter(
-                    x => x.prototype_key === 'baseline'
-                );
-
-            const hProto1 =
-                trials.filter(
-                    x => x.prototype_key === 'prototype1'
-                );
-
-            const hProto2 =
-                trials.filter(
-                    x => x.prototype_key === 'prototype2'
-                );
-
-            const hProto3 =
-                trials.filter(
-                    x => x.prototype_key === 'prototype3'
-                );
+            const hBaseline = trials.filter(x => x.prototype_key === 'baseline');
+            const hProto1 = trials.filter(x => x.prototype_key === 'prototype1');
+            const hProto2 = trials.filter(x => x.prototype_key === 'prototype2');
+            const hProto3 = trials.filter(x => x.prototype_key === 'prototype3');
 
             setHistory({
                 baseline: hBaseline,
@@ -94,7 +149,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 setIsSessionActive(true);
                 const firstRecord = hBaseline[0] || hProto1[0];
                 if (firstRecord && !mass) {
-                    setMass((firstRecord.mass * 1000).toString()); 
+                    setMass((firstRecord.mass * 1000).toString());
                     setHeight(firstRecord.height.toString());
                 }
                 setShowSetupModal(false);
@@ -102,7 +157,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 setShowSetupModal(true);
                 setIsNewSession(true);
             }
-        }, [route.params, isSessionActive])
+        }, [route.params, isSessionActive, currentSessionId])
     );
 
     useEffect(() => {
@@ -144,6 +199,11 @@ export default function ParachuteActivity({ navigation, route }: Props) {
     }, [navigation, hasUnsavedChanges, history]);
 
     const handlePrototypePress = (prototypeKey: PrototypeKey) => {
+        if (isExpired) {
+            Alert.alert('Session Expired', 'Your 20 minutes have ended. Please start a new session.');
+            return;
+        }
+        
         const parsedMass = parseFloat(mass);
         const parsedHeight = parseFloat(height);
         
@@ -207,12 +267,12 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 )}
 
                 <Pressable
-                    style={[styles.actionButton, (trialsCount > 0 || (!isLocked && !trialsCount)) && styles.completedButton, isLocked && styles.lockedButton]}
-                    onPress={() => !isLocked && handlePrototypePress(key)}
-                    disabled={isLocked}
+                    style={[styles.actionButton, (trialsCount > 0 || (!isLocked && !trialsCount)) && styles.completedButton, (isLocked || isExpired) && styles.lockedButton]}
+                    onPress={() => !isLocked && !isExpired && handlePrototypePress(key)}
+                    disabled={isLocked || isExpired}
                 >
                     <Text style={styles.actionText}>
-                        {buttonText}
+                        {isExpired ? 'Session Expired' : buttonText}
                     </Text>
                 </Pressable>
             </View>
@@ -226,6 +286,11 @@ export default function ParachuteActivity({ navigation, route }: Props) {
     };
 
     const handleSubmit = () => {
+        if (isExpired) {
+            Alert.alert('Session Expired', 'Your 20 minutes have ended. Please start a new session.');
+            return;
+        }
+        
         if (!history.baseline.length) {
             Alert.alert('Incomplete Activity', 'Please complete the baseline test first.');
             return;
@@ -240,6 +305,9 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             Alert.alert('Reflection Required', 'Please complete your team reflection.');
             return;
         }
+
+        saveSessionReflection(currentSessionId, 'parachute', reflection);
+        markSessionSubmitted(currentSessionId);
 
         Alert.alert('Activity Submitted', 'Your parachute analytics report has been saved!', [
             {
@@ -320,12 +388,23 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                     <View style={styles.headerSpacer} />
                 </View>
 
+                {/* Timer Display */}
+                <View style={[styles.timerCard, isExpired && styles.timerCardExpired]}>
+                    <Ionicons name="time-outline" size={20} color={isExpired ? '#ff4757' : '#00d2d3'} />
+                    <Text style={[styles.timerText, isExpired && styles.timerTextExpired]}>
+                        {isExpired ? '⏰ Session Expired' : `Time Remaining: ${timeRemaining !== null ? formatTime(timeRemaining) : '20:00'}`}
+                    </Text>
+                </View>
+
                 <View style={styles.infoCard}>
                     <Text style={styles.infoText}>Session Tracking ID: {currentSessionId}</Text>
                     <Text style={styles.infoText}>Object Mass: {mass || '--'} g</Text>
                     <Text style={styles.infoText}>Drop Height: {height || '--'} m</Text>
                     {!isNewSession && history.baseline.length > 0 && (
                         <Text style={styles.infoText}>✅ Session in progress - Add more prototypes or review existing ones</Text>
+                    )}
+                    {isExpired && (
+                        <Text style={styles.warningText}>⚠️ Time has expired. Please start a new session.</Text>
                     )}
                 </View>
 
@@ -349,8 +428,8 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <Pressable style={styles.submitButton} onPress={handleSubmit}>
-                        <Text style={styles.submitText}>Submit Activity</Text>
+                    <Pressable style={[styles.submitButton, isExpired && styles.disabledButton]} onPress={handleSubmit} disabled={isExpired}>
+                        <Text style={styles.submitText}>{isExpired ? 'Session Expired' : 'Submit Activity'}</Text>
                     </Pressable>
                 </View>
             </ScrollView>
@@ -386,6 +465,27 @@ const styles = StyleSheet.create({
     backButton: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(128,128,128,0.5)' },
     title: { flex: 1, textAlign: 'center', color: '#fff', fontSize: 26, fontWeight: 'bold' },
     headerSpacer: { width: 44 },
+    
+    timerCard: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        gap: 8,
+        backgroundColor: 'rgba(0,210,211,0.15)', 
+        borderRadius: 12, 
+        padding: 12, 
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#00d2d3',
+    },
+    timerCardExpired: {
+        backgroundColor: 'rgba(255,71,87,0.15)',
+        borderColor: '#ff4757',
+    },
+    timerText: { color: '#00d2d3', fontSize: 14, fontWeight: '600' },
+    timerTextExpired: { color: '#ff4757' },
+    warningText: { color: '#ffa502', fontSize: 13, marginTop: 8 },
+    
     infoCard: { backgroundColor: 'rgba(128,128,128,0.5)', borderRadius: 20, padding: 18, marginBottom: 25 },
     infoText: { color: '#fff', fontSize: 14, marginBottom: 6 },
     card: { backgroundColor: 'rgba(128,128,128,0.5)', borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
@@ -407,5 +507,6 @@ const styles = StyleSheet.create({
     buttonContainer: { marginTop: 10, marginBottom: 30 },
     badgeText: { color: '#ffa502', fontSize: 12, alignSelf: 'center', fontWeight: '600' },
     statsPreview: { color: '#ddd', fontSize: 13, marginBottom: 12, fontStyle: 'italic' },
-    reflectionPreview: { color: '#aaa', fontSize: 12, marginTop: 10, fontStyle: 'italic' }
+    reflectionPreview: { color: '#aaa', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
+    disabledButton: { opacity: 0.5 },
 });

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Alert, ScrollView, Dimensions, Touch
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 type NavProp = StackNavigationProp<RootStackParamList, 'ParachuteVideoMarking'>;
 type RouteProps = RouteProp<RootStackParamList, 'ParachuteVideoMarking'>;

@@ -8,8 +8,8 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
-import { saveHFTrialRecord } from '../src/services/db';
+import { RootStackParamList } from '../../types/navigation';
+import { saveHFTrialRecord } from '../../src/services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanResult'>;
 

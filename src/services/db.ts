@@ -86,6 +86,15 @@ export interface SoundMapRecord {
   dot_color: string;
 }
 
+export interface ActivitySession {
+  session_id: string;
+  activity_type: string;  // 'parachute', 'handfan', 'earthquake', 'sound'
+  reflection: string | null;
+  submitted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const initDatabase = (): void => {
   if (!db) {
     console.log('Database not available (web or error)');
@@ -100,6 +109,7 @@ export const initDatabase = (): void => {
       DROP TABLE IF EXISTS parachute_trials;
       DROP TABLE IF EXISTS earthquake_trials;
       DROP TABLE IF EXISTS sound_trials;
+      DROP TABLE IF EXISTS activity_sessions;
 
       CREATE TABLE IF NOT EXISTS parachute_trials (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,6 +199,15 @@ export const initDatabase = (): void => {
         duration REAL NOT NULL,
 
         dot_color TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS activity_sessions (
+        session_id TEXT PRIMARY KEY,
+        activity_type TEXT NOT NULL,  -- 'parachute', 'handfan', 'earthquake', 'sound'
+        reflection TEXT,
+        submitted_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('Database initialized successfully');
@@ -635,5 +654,104 @@ export const getSoundTrialsBySession = (
     ) as SoundMapRecord[];
   } catch {
     return [];
+  }
+};
+
+//Session
+export const saveSessionReflection = (
+  sessionId: string,
+  activityType: string,
+  reflection: string
+): void => {
+  if (!db) {
+    // localStorage fallback
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '[]');
+    const existingIndex = sessions.findIndex((s: any) => s.session_id === sessionId);
+    
+    const sessionData = {
+      session_id: sessionId,
+      activity_type: activityType,
+      reflection: reflection,
+      updated_at: new Date().toISOString()
+    };
+    
+    if (existingIndex >= 0) {
+      sessions[existingIndex] = { ...sessions[existingIndex], ...sessionData };
+    } else {
+      sessions.push({
+        ...sessionData,
+        created_at: new Date().toISOString(),
+        submitted_at: null
+      });
+    }
+    
+    localStorage.setItem('activity_sessions', JSON.stringify(sessions));
+    return;
+  }
+
+  try {
+    db.runSync(
+      `
+      INSERT OR REPLACE INTO activity_sessions (
+        session_id,
+        activity_type,
+        reflection,
+        updated_at
+      )
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      `,
+      [sessionId, activityType, reflection]
+    );
+  } catch (error) {
+    console.error('Save reflection error:', error);
+  }
+};
+
+// Get session reflection
+export const getSessionReflection = (sessionId: string): string | null => {
+  if (!db) {
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '[]');
+    const session = sessions.find((s: any) => s.session_id === sessionId);
+    return session?.reflection || null;
+  }
+
+  try {
+    const result = db.getFirstSync(
+      `
+      SELECT reflection FROM activity_sessions
+      WHERE session_id = ?
+      `,
+      [sessionId]
+    ) as {reflection?: string} | undefined;
+    return result?.reflection || null;
+  } catch (error) {
+    console.error('Get reflection error:', error);
+    return null;
+  }
+};
+
+// Mark session as submitted
+export const markSessionSubmitted = (sessionId: string): void => {
+  if (!db) {
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '[]');
+    const index = sessions.findIndex((s: any) => s.session_id === sessionId);
+    if (index >= 0) {
+      sessions[index].submitted_at = new Date().toISOString();
+      localStorage.setItem('activity_sessions', JSON.stringify(sessions));
+    }
+    return;
+  }
+
+  try {
+    db.runSync(
+      `
+      UPDATE activity_sessions
+      SET submitted_at = CURRENT_TIMESTAMP
+      WHERE session_id = ?
+      `,
+      [sessionId]
+    );
+  } catch (error) {
+    console.error('Mark submitted error:', error);
   }
 };

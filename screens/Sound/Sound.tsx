@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
-type NavProp = StackNavigationProp<RootStackParamList, 'Earthquake'>;
+type NavProp = StackNavigationProp<RootStackParamList, 'Sound'>;
 
-export default function Earthquake() {
+export default function Sound() {
     const navigation = useNavigation<NavProp>();
-    const route = useRoute<RouteProp<RootStackParamList, 'Earthquake'>>();
+    const route = useRoute<RouteProp<RootStackParamList, 'Sound'>>();
 
     const currentSessionId = route.params?.currentSessionId ?? '';
 
@@ -25,7 +25,7 @@ export default function Earthquake() {
             `session_${Date.now()}`;
 
         navigation.navigate(
-            'EarthquakeActivity',
+            'SoundActivity',
             {
                 currentSessionId:
                     newSessionId,
@@ -35,15 +35,13 @@ export default function Earthquake() {
     };
 
     const equipment = [
-        "Cardboard, paper, scissors, sticky tape, plastic/paper cups. ",
-        "Mobile phone with vibration sensor",
+        "Mobile phone with STEMM Lab app ",
     ];
 
     const instruction = [
-        "Build an anti-vibration layer, by folding paper/cardboard.",
-        "Place a flat cardboard platform on top.",
-        "Place the phone in the centre and activate vibration mode on the STEMM App.",
-        "Modify the structure to reduce movement (e.g. more pillars, more folds, etc).",
+        "Measure noise from different actions (dropping objects (pens, books) talking, walking, stamping your feet).",
+        "Record sound levels and locations.",
+        "Map loud and quiet zones.",
     ];
 
     return (
@@ -55,7 +53,7 @@ export default function Earthquake() {
                 >
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </Pressable>
-                <Text style={styles.title}>Earthquake-Resistant Structure</Text>
+                <Text style={styles.title}>Sound Pollution Hunter</Text>
                 <View style={styles.rightSpacer} />
             </View>
 
@@ -63,7 +61,7 @@ export default function Earthquake() {
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>🎯 Engineering Challenge Overview</Text>
                     <Text style={styles.descriptionText}>
-                        Students design structures that withstand vibration, simulating earthquakes.
+                        Students measure and compare sound levels in different classroom activities.
                     </Text>
                 </View>
 

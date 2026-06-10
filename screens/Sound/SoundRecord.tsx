@@ -10,8 +10,8 @@ import {
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
-import { saveSoundRecord } from '../src/services/db';
+import { RootStackParamList } from '../../types/navigation';
+import { saveSoundRecord } from '../../src/services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundRecord'>;
 

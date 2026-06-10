@@ -9,7 +9,7 @@ import {
 import { Accelerometer } from 'expo-sensors';
 import { Vibration } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,

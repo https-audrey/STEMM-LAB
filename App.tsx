@@ -17,26 +17,26 @@ import LoadingScreen from './screens/LoadingScreen';
 import HomeScreen from './screens/HomeScreen';
 import NoTeamFound from './screens/NoTeamFound';
 
-import Parachute from './screens/Parachute';
-import ParachuteActivity from './screens/ParachuteActivity';
-import ParachutePrototype from './screens/ParachutePrototype';
-import ParachuteResult from './screens/ParachuteResult';
-import ParachuteVideoMarking from './screens/ParachuteVideoMarking';
+import Parachute from './screens/Parachute/Parachute';
+import ParachuteActivity from './screens/Parachute/ParachuteActivity';
+import ParachutePrototype from './screens/Parachute/ParachutePrototype';
+import ParachuteResult from './screens/Parachute/ParachuteResult';
+import ParachuteVideoMarking from './screens/Parachute/ParachuteVideoMarking';
 
-import HandFan from './screens/HandFan';
-import HandFanActivity from './screens/HandFanActivity';
-import HandFanPrototype from './screens/HandFanPrototype';
-import HandFanMarking from './screens/HandFanMarking';
-import HandFanResult from './screens/HandFanResult';
+import HandFan from './screens/HandFan/HandFan';
+import HandFanActivity from './screens/HandFan/HandFanActivity';
+import HandFanPrototype from './screens/HandFan/HandFanPrototype';
+import HandFanMarking from './screens/HandFan/HandFanMarking';
+import HandFanResult from './screens/HandFan/HandFanResult';
 
-import Earthquake from './screens/Earthquake';
-import EarthquakeActivity from './screens/EarthquakeActivity';
-import EarthquakePrototype from './screens/EarthquakePrototype';
-import EarthquakeResult from './screens/EarthquakeResult';
+import Earthquake from './screens/Earthquake/Earthquake';
+import EarthquakeActivity from './screens/Earthquake/EarthquakeActivity';
+import EarthquakePrototype from './screens/Earthquake/EarthquakePrototype';
+import EarthquakeResult from './screens/Earthquake/EarthquakeResult';
 
-import Sound from './screens/Sound';
-import SoundActivity from './screens/SoundActivity';
-import SoundRecord from './screens/SoundRecord';
+import Sound from './screens/Sound/Sound';
+import SoundActivity from './screens/Sound/SoundActivity';
+import SoundRecord from './screens/Sound/SoundRecord';
 
 import { initDatabase } from './src/services/db';
 

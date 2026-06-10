@@ -15,8 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
-import { RootStackParamList } from '../types/navigation';
-import { getSoundTrialsBySession, SoundMapRecord } from '../src/services/db';
+import { RootStackParamList } from '../../types/navigation';
+import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../src/services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 
@@ -195,6 +195,9 @@ export default function SoundActivity({ navigation, route }: Props) {
             Alert.alert('Reflection Required', 'Please complete your team reflection.');
             return;
         }
+
+        saveSessionReflection(currentSessionId, 'sound', reflection);
+        markSessionSubmitted(currentSessionId);
 
         Alert.alert('Activity Submitted', 'Your Sound Pollution Hunter report has been saved!', [
             {
@@ -405,7 +408,7 @@ export default function SoundActivity({ navigation, route }: Props) {
 
                     <View style={styles.legendRow}>
                         <View style={[styles.legendColor, { backgroundColor: '#341f97' }]} />
-                        <Text style={styles.legendText}>100+ dB - Dangerous</Text>
+                        <Text style={styles.legendText}>100-120 - Dangerous</Text>
                     </View>
                 </View>
 

@@ -12,8 +12,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
-import { getHFRecordsByPrototype, HandFanPrototypeRecord, getHFTrialsBySession } from '../src/services/db';
+import { RootStackParamList } from '../../types/navigation';
+import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, getHFTrialsBySession } from '../../src/services/db';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
@@ -214,6 +214,9 @@ export default function HandFanActivity({ navigation, route }: Props) {
             Alert.alert('Reflection Required', 'Please complete your team reflection.');
             return;
         }
+
+        saveSessionReflection(currentSessionId, 'handfan', reflection);
+        markSessionSubmitted(currentSessionId);
 
         Alert.alert('Activity Submitted', 'Your Hand Fan Challenge report has been saved!', [
             {
