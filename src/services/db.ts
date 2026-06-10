@@ -68,6 +68,24 @@ export interface EarthquakePrototypeRecord {
   avgAccel: number;
 }
 
+export interface SoundMapRecord {
+  id?: number;
+  session_id?: string;
+  timestamp?: string;
+
+  latitude: number;
+  longitude: number;
+  accuracy: number | null;
+  location_description: string;
+
+  action: string;
+
+  sound_level_db: number;
+  duration: number;
+
+  dot_color: string;
+}
+
 export const initDatabase = (): void => {
   if (!db) {
     console.log('Database not available (web or error)');
@@ -80,7 +98,8 @@ export const initDatabase = (): void => {
 
       DROP TABLE IF EXISTS handFan_trials;
       DROP TABLE IF EXISTS parachute_trials;
-      DROP TABLE IF EXISTS earthQuake_trials;
+      DROP TABLE IF EXISTS earthquake_trials;
+      DROP TABLE IF EXISTS sound_trials;
 
       CREATE TABLE IF NOT EXISTS parachute_trials (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -146,6 +165,30 @@ export const initDatabase = (): void => {
         peakAccel REAL NOT NULL,
 
         avgAccel REAL NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS sound_trials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        session_id TEXT NOT NULL,
+
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        latitude REAL NOT NULL,
+
+        longitude REAL NOT NULL,
+
+        accuracy REAL,
+
+        location_description TEXT NOT NULL,
+
+        action TEXT NOT NULL,
+
+        sound_level_db REAL NOT NULL,
+
+        duration REAL NOT NULL,
+
+        dot_color TEXT NOT NULL
       );
     `);
     console.log('Database initialized successfully');
@@ -495,6 +538,101 @@ export const getEarthquakeTrialsBySession = (
       `,
       [sessionId]
     ) as EarthquakePrototypeRecord[];
+  } catch {
+    return [];
+  }
+};
+
+//Sound Map
+export const saveSoundRecord = (record: SoundMapRecord & { session_id: string }): void => {
+  if (!db) {
+    console.log('Database not available, using localStorage fallback');
+    const records = JSON.parse(localStorage.getItem('sound_records') || '[]');
+    records.push({ 
+      ...record, 
+      id: Date.now(), 
+      timestamp: new Date().toISOString() 
+    });
+    localStorage.setItem('sound_records', JSON.stringify(records));
+    return;
+  }
+
+  try {
+    db.runSync(
+      `
+      INSERT OR REPLACE INTO sound_trials (
+          session_id,
+          latitude,
+          longitude,
+          accuracy,
+          location_description,
+          action,
+          sound_level_db,
+          duration,
+          dot_color
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+          record.session_id,
+          record.latitude,
+          record.longitude,
+          record.accuracy,
+          record.location_description,
+          record.action,
+          record.sound_level_db,
+          record.duration,
+          record.dot_color
+      ]
+      );
+  } catch (error) {
+    console.error('Save error:', error);
+  }
+};
+
+export const getSoundAllRecords = (): SoundMapRecord[] => {
+  if (!db) {
+    return JSON.parse(localStorage.getItem('sound_records') || '[]');
+  }
+
+  try {
+    const result = db.getAllSync('SELECT * FROM sound_trials ORDER BY id DESC');
+    return result as SoundMapRecord[];
+  } catch (error) {
+    console.error('Get all records error:', error);
+    return [];
+  }
+};
+
+export const clearSoundAllRecords = (): void => {
+  if (!db) {
+    localStorage.removeItem('sound_records');
+    return;
+  }
+
+  try {
+    db.execSync('DELETE FROM sound_trials;');
+    console.log('All records cleared');
+  } catch (error) {
+    console.error('Error clearing records:', error);
+  }
+};
+
+export const getSoundTrialsBySession = (
+  sessionId: string
+): SoundMapRecord[] => {
+  if (!db) return [];
+
+  try {
+    return db.getAllSync(
+      `
+      SELECT *
+      FROM sound_trials
+      WHERE session_id = ?
+      ORDER BY id DESC
+      `,
+      [sessionId]
+    ) as SoundMapRecord[];
   } catch {
     return [];
   }

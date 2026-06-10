@@ -63,6 +63,17 @@ export type RootStackParamList = {
     };
   }
 
+  Sound: { currentSessionId: string };
+  SoundActivity: { currentSessionId: string; forceNewSession?: boolean; didSubmitSuccessfully?: boolean };
+  SoundRecord: {
+    currentSessionId: string;
+    latitude: number;
+    longitude: number;
+    accuracy: number | null;
+    location_description: string;
+    action: string;
+  };
+
   Parachute: { currentSessionId: string };
   ParachuteActivity: { currentSessionId: string; forceNewSession?: boolean; didSubmitSuccessfully?: boolean };
   

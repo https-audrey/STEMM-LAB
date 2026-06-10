@@ -34,6 +34,10 @@ import EarthquakeActivity from './screens/EarthquakeActivity';
 import EarthquakePrototype from './screens/EarthquakePrototype';
 import EarthquakeResult from './screens/EarthquakeResult';
 
+import Sound from './screens/Sound';
+import SoundActivity from './screens/SoundActivity';
+import SoundRecord from './screens/SoundRecord';
+
 import { initDatabase } from './src/services/db';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -103,6 +107,9 @@ export default function App() {
         <Stack.Screen name="EarthquakeActivity" component={EarthquakeActivity} />
         <Stack.Screen name="EarthquakePrototype" component={EarthquakePrototype} />
         <Stack.Screen name="EarthquakeResult" component={EarthquakeResult} />
+        <Stack.Screen name="Sound" component={Sound} />
+        <Stack.Screen name="SoundActivity" component={SoundActivity} />
+        <Stack.Screen name="SoundRecord" component={SoundRecord} />
       </Stack.Navigator>
     </NavigationContainer>
   );

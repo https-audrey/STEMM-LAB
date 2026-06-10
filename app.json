@@ -31,11 +31,23 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow STEMM Lab to use your camera for recording experiments.",
-          "microphonePermission": "Allow STEMM Lab to record audio."
+          "cameraPermission": "Allow STEMM Lab to use your camera for recording experiments."
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow STEMM Lab to access your location for mapping sound zones.",
+          "locationWhenInUsePermission": "Allow STEMM Lab to use your location while using the app."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow STEMM Lab to measure sound levels for the Sound Pollution Hunter activity."
+        }
+      ]
     ]
   }
 }
