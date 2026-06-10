@@ -35,6 +35,7 @@ import TeamPageChem from './screens/TeamPageChem';
 import LeaderboardPage from './screens/LeaderboardPage';
 import ProfilePage from './screens/ProfilePage';
 import ActivityPage from './screens/ActivityPage';
+import RateActivityPage from './screens/RateActivity/RateActivityPage';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -102,6 +103,7 @@ export default function App() {
         <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
         <Stack.Screen name="Profile" component={ProfilePage} />
         <Stack.Screen name="Activity" component={ActivityPage} />
+        <Stack.Screen name="RateActivity" component={RateActivityPage} />
       </Stack.Navigator>
     </NavigationContainer>
     </AuthProvider>
