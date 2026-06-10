@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     /* 5 Stars Row — positioned inside the rate box */
     starsContainer: {
         position: 'absolute',
-        top: s(145),
+        top: s(165),
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     },
     starButton: {
         marginHorizontal: s(6),
-        padding: s(4),
+        padding: s(2),
     },
     starImage: {
         width: s(50),
@@ -263,7 +263,8 @@ const styles = StyleSheet.create({
     /* Comment / Feedback area */
     commentContainer: {
         position: 'absolute',
-        top: s(270),
+        top: s(290),
+        left: s(45),
         alignSelf: 'center',
         width: s(300),
         height: s(180),
@@ -272,16 +273,13 @@ const styles = StyleSheet.create({
     commentInput: {
         width: '100%',
         height: '100%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: s(12),
+        backgroundColor: 'transparent',
         paddingHorizontal: s(14),
         paddingTop: s(14),
         paddingBottom: s(14),
         fontSize: s(13),
         fontFamily: 'ShortStack_400Regular',
         color: '#333333',
-        borderWidth: 1,
-        borderColor: '#CCCCCC',
     },
     placeholderWrapper: {
         position: 'absolute',
