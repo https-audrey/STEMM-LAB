@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveTrialRecord } from '../../src/services/db';
+import { saveTrialRecord } from '../../services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteResult'>;
 

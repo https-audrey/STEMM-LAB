@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveEarthquakeTrialRecord } from '../../src/services/db';
+import { saveEarthquakeTrialRecord } from '../../services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeResult'>;
 

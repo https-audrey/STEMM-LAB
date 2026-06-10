@@ -40,7 +40,7 @@ import Sound from './screens/Sound/Sound';
 import SoundActivity from './screens/Sound/SoundActivity';
 import SoundRecord from './screens/Sound/SoundRecord';
 
-import { initDatabase } from './src/services/db';
+import { initDatabase } from './services/db';
 import CreateTeamPage from './screens/CreateTeamPage';
 import Act5StartPage from './screens/act5/StartPage';
 import AuthenticationPage from './screens/act5/AuthenticationPage';

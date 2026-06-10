@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveHFTrialRecord } from '../../src/services/db';
+import { saveHFTrialRecord } from '../../services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanResult'>;
 

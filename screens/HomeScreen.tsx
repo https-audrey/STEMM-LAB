@@ -163,6 +163,10 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={[styles.planetNode, { top: s(703), left: s(68), width: s(100), height: s(100), zIndex: 5 }]}
           activeOpacity={0.7}
+          onPress={() => {
+            const newSessionId = `session_${Date.now()}`;
+            navigation.navigate('Parachute', { currentSessionId: newSessionId });
+          }}
         >
           <Image
             source={require('../assets/HomescreenAssets/planet 1.png')}
@@ -175,6 +179,10 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={[styles.planetNode, { top: s(670), left: s(240), width: s(100), height: s(100), zIndex: 5 }]}
           activeOpacity={0.7}
+          onPress={() => {
+            const newSessionId = `session_${Date.now()}`;
+            navigation.navigate('Sound', { currentSessionId: newSessionId });
+          }}
         >
           <Image
             source={require('../assets/HomescreenAssets/planet 2.png')}
@@ -187,6 +195,10 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={[styles.planetNode, { top: s(573), left: s(123), width: s(100), height: s(100), zIndex: 5 }]}
           activeOpacity={0.7}
+          onPress={() => {
+            const newSessionId = `session_${Date.now()}`;
+            navigation.navigate('HandFan', { currentSessionId: newSessionId });
+          }}
         >
           <Image
             source={require('../assets/HomescreenAssets/planet 3.png')}
@@ -199,6 +211,10 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={[styles.planetNode, { top: s(455), left: s(56), width: s(100), height: s(100), zIndex: 5 }]}
           activeOpacity={0.7}
+          onPress={() => {
+            const newSessionId = `session_${Date.now()}`;
+            navigation.navigate('Earthquake', { currentSessionId: newSessionId });
+          }}
         >
           <Image
             source={require('../assets/HomescreenAssets/planet 4.png')}

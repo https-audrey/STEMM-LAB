@@ -144,7 +144,7 @@ const ExperimentPage1: React.FC = () => {
 
                 {/* Mars planet bottom */}
                 <Image
-                    source={require('../../assets/AuthenticationAssets/Mars.png')}
+                    source={require('../../assets/act6/mars.png')}
                     style={styles.marsPlanet}
                     resizeMode="contain"
                 />

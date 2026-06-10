@@ -16,7 +16,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
 import { RootStackParamList } from '../../types/navigation';
-import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../src/services/db';
+import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 

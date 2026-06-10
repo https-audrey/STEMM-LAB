@@ -68,7 +68,7 @@ const AuthenticationPage: React.FC = () => {
 
                 {/* Mars planet — bottom of the screen */}
                 <Image
-                    source={require('../../assets/AuthenticationAssets/bigMars.png')}
+                    source={require('../../assets/act6/mars.png')}
                     style={styles.marsPlanet}
                     resizeMode="contain"
                 />

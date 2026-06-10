@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../src/services/db';
+import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../services/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;

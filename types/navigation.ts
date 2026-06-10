@@ -32,10 +32,6 @@ export type RootStackParamList = {
   Act6Experiment1: undefined;
   Act7Start: undefined;
   Act7Authentication: undefined;
-};
-
-
-
 
   HandFan: { currentSessionId: string };
   HandFanActivity: { currentSessionId: string; forceNewSession?: boolean; didSubmitSuccessfully?: boolean };

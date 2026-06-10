@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../src/services/db';
+import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../services/db';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
