@@ -16,7 +16,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
 import { RootStackParamList } from '../../types/navigation';
-import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
+import { getSessionReflection, getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
+import { addDocument } from '../../services/firestoreService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 
@@ -185,7 +186,7 @@ export default function SoundActivity({ navigation, route }: Props) {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!trials.length) {
             Alert.alert('Incomplete Activity', 'Please add at least one sound recording.');
             return;
@@ -198,6 +199,15 @@ export default function SoundActivity({ navigation, route }: Props) {
 
         saveSessionReflection(currentSessionId, 'sound', reflection);
         markSessionSubmitted(currentSessionId);
+
+        const readings = getSoundTrialsBySession(currentSessionId);
+        
+        await addDocument('sound_submissions', {
+            sessionId: currentSessionId,
+            readings: readings,
+            reflection: reflection,
+            submittedAt: new Date().toISOString(),
+        });
 
         Alert.alert('Activity Submitted', 'Your Sound Pollution Hunter report has been saved!', [
             {
@@ -279,6 +289,12 @@ export default function SoundActivity({ navigation, route }: Props) {
                                     <Text style={styles.detailLabel}>Sound Level:</Text>
                                     <Text style={[styles.detailValue, { color: getDotColor(selectedMarker.sound_level_db), fontWeight: 'bold' }]}>
                                         {selectedMarker.sound_level_db.toFixed(1)} dB
+                                    </Text>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Average Sound:</Text>
+                                    <Text style={styles.detailValue}>
+                                        {selectedMarker.avg_db?.toFixed(1) ?? 'N/A'} dB
                                     </Text>
                                 </View>
                                 <View style={styles.detailRow}>

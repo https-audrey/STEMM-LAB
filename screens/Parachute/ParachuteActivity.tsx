@@ -15,6 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../services/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addDocument } from '../../services/firestoreService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
@@ -285,7 +286,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (isExpired) {
             Alert.alert('Session Expired', 'Your 20 minutes have ended. Please start a new session.');
             return;
@@ -308,6 +309,15 @@ export default function ParachuteActivity({ navigation, route }: Props) {
 
         saveSessionReflection(currentSessionId, 'parachute', reflection);
         markSessionSubmitted(currentSessionId);
+
+        const readings = getTrialsBySession(currentSessionId);
+                
+        await addDocument('parachute_submissions', {
+            sessionId: currentSessionId,
+            readings: readings,
+            reflection: reflection,
+            submittedAt: new Date().toISOString(),
+        });
 
         Alert.alert('Activity Submitted', 'Your parachute analytics report has been saved!', [
             {

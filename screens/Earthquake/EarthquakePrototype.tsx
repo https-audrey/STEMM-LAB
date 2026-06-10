@@ -10,6 +10,7 @@ import { Accelerometer } from 'expo-sensors';
 import { Vibration } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
+import { useBatteryWarning } from '../../hooks/useBatteryWarning';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -25,6 +26,8 @@ export default function EarthquakePrototype({
     prototype,
     description,
   } = route.params;
+
+  const {checkBatteryBeforeActivity} = useBatteryWarning();
 
   const [isTesting, setIsTesting] = useState(false);
   const [peakAccel, setPeakAccel] = useState(0);
@@ -54,7 +57,13 @@ export default function EarthquakePrototype({
     };
   }, []);
 
-  const startTest = async () => {
+  const startTest = () => {
+    checkBatteryBeforeActivity('Earthquake Simulation (vibration)', () => {
+      startEarthquakeTest();
+    }, 0.20)
+  }
+
+  const startEarthquakeTest = async () => {
     try {
         setPeakAccel(0);
         setAvgAccel(0);

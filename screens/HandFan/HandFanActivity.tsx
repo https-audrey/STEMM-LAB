@@ -14,7 +14,7 @@ import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/nativ
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, getHFTrialsBySession } from '../../services/db';
-
+import { addDocument } from '../../services/firestoreService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
 
@@ -203,7 +203,7 @@ export default function HandFanActivity({ navigation, route }: Props) {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         
         if (!trials.length) {
             Alert.alert('Incomplete Activity', 'Please complete the prototype.');
@@ -217,6 +217,15 @@ export default function HandFanActivity({ navigation, route }: Props) {
 
         saveSessionReflection(currentSessionId, 'handfan', reflection);
         markSessionSubmitted(currentSessionId);
+
+        const readings = getHFTrialsBySession(currentSessionId);
+                
+        await addDocument('handfan_submissions', {
+            sessionId: currentSessionId,
+            readings: readings,
+            reflection: reflection,
+            submittedAt: new Date().toISOString(),
+        });
 
         Alert.alert('Activity Submitted', 'Your Hand Fan Challenge report has been saved!', [
             {

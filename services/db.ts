@@ -81,6 +81,7 @@ export interface SoundMapRecord {
   action: string;
 
   sound_level_db: number;
+  avg_db: number;
   duration: number;
 
   dot_color: string;
@@ -195,6 +196,8 @@ export const initDatabase = (): void => {
         action TEXT NOT NULL,
 
         sound_level_db REAL NOT NULL,
+
+        avg_db REAL NOT NULL,
 
         duration REAL NOT NULL,
 
@@ -587,10 +590,11 @@ export const saveSoundRecord = (record: SoundMapRecord & { session_id: string })
           location_description,
           action,
           sound_level_db,
+          avg_db,
           duration,
           dot_color
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
           record.session_id,
@@ -600,6 +604,7 @@ export const saveSoundRecord = (record: SoundMapRecord & { session_id: string })
           record.location_description,
           record.action,
           record.sound_level_db,
+          record.avg_db,
           record.duration,
           record.dot_color
       ]

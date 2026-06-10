@@ -14,6 +14,7 @@ import {
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
+import { useBatteryWarning } from '../../hooks/useBatteryWarning';
 
 type Props =
   NativeStackScreenProps<
@@ -31,6 +32,8 @@ export default function ParachutePrototype({
     mass,
     height,
   } = route.params;
+
+  const {checkBatteryBeforeActivity} = useBatteryWarning();
 
   const cameraRef = useRef<any>(null);
 
@@ -63,7 +66,13 @@ export default function ParachutePrototype({
     );
   }
 
-  const startRecording = async () => {
+  const startRecording = () => {
+    checkBatteryBeforeActivity('Parachute Video Recording', () => {
+      startParachuteRecording();
+    })
+  }
+
+  const startParachuteRecording = async () => {
     try {
       if (!cameraRef.current) return;
 

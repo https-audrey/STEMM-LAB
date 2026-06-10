@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSoundRecord } from '../../services/db';
+import { useBatteryWarning } from '../../hooks/useBatteryWarning';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundRecord'>;
 
@@ -24,6 +25,8 @@ export default function SoundRecord({ route, navigation }: Props) {
         location_description,
         action,
     } = route.params;
+
+    const {checkBatteryBeforeActivity} = useBatteryWarning();
 
     const [isRecording, setIsRecording] = useState(false);
     const [hasPermission, setHasPermission] = useState(false);
@@ -69,6 +72,12 @@ export default function SoundRecord({ route, navigation }: Props) {
             console.error('Microphone permission error:', error);
         }
     };
+
+    const startRecord = () => {
+        checkBatteryBeforeActivity('Sound Recording (microphone)', () => {
+            startRecording();
+        })
+    }
 
     const startRecording = async () => {
         try {
@@ -164,6 +173,7 @@ export default function SoundRecord({ route, navigation }: Props) {
                 location_description,
                 action,
                 sound_level_db: peakDB,
+                avg_db: avgDB,
                 duration: duration,
                 dot_color: getDotColor(peakDB),
             });
@@ -277,7 +287,7 @@ export default function SoundRecord({ route, navigation }: Props) {
 
             <View style={styles.buttonContainer}>
                 {!isRecording ? (
-                    <Pressable style={styles.startButton} onPress={startRecording}>
+                    <Pressable style={styles.startButton} onPress={startRecord}>
                         <Ionicons name="mic" size={24} color="white" />
                         <Text style={styles.buttonText}>Start Recording</Text>
                     </Pressable>

@@ -14,7 +14,7 @@ import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/nativ
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../services/db';
-
+import { addDocument } from '../../services/firestoreService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
 
@@ -151,7 +151,7 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         
         if (!trials.length) {
             Alert.alert('Incomplete Activity', 'Please complete the prototype.');
@@ -165,6 +165,15 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
 
         saveSessionReflection(currentSessionId, 'earthquake', reflection);
         markSessionSubmitted(currentSessionId);
+
+        const readings = getEarthquakeTrialsBySession(currentSessionId);
+                        
+        await addDocument('earthquake_submissions', {
+            sessionId: currentSessionId,
+            readings: readings,
+            reflection: reflection,
+            submittedAt: new Date().toISOString(),
+        });
 
         Alert.alert('Activity Submitted', 'Your Earthquake-Resistant Structure report has been saved!', [
             {

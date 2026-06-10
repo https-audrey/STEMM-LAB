@@ -15,6 +15,7 @@ import {
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
+import { useBatteryWarning } from '../../hooks/useBatteryWarning';
 
 type Props =
   NativeStackScreenProps<
@@ -34,6 +35,8 @@ export default function HandFanPrototype({
     material,
     stiffness,
   } = route.params;
+
+  const {checkBatteryBeforeActivity} = useBatteryWarning();
 
   const cameraRef = useRef<any>(null);
 
@@ -66,7 +69,13 @@ export default function HandFanPrototype({
     );
   }
 
-  const startRecording = async () => {
+  const startRecording = () => {
+    checkBatteryBeforeActivity('Hand Fan Video Recording', () => {
+      startCameraRecording();
+    })
+  }
+
+  const startCameraRecording = async () => {
     try {
       if (!cameraRef.current) return;
 
