@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Start'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act7Start'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
@@ -26,7 +26,7 @@ const StartPage: React.FC = () => {
   };
 
   const handleStart = () => {
-    navigation.navigate('Act6Authentication');
+    navigation.navigate('Act7Authentication');
   };
 
   return (
@@ -49,24 +49,24 @@ const StartPage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Title bubble — "Reaction Board Challenge" */}
+        {/* Title bubble — "Breathing Pace Trainer" */}
         <Image
-          source={require('../../assets/act6/act6Title.png')}
+          source={require('../../assets/act7/act7Title.png')}
           style={styles.titleBubble}
           resizeMode="contain"
         />
 
         {/* Meteor / asteroid — center of screen */}
         <Image
-          source={require('../../assets/act6/act6Meteor.png')}
+          source={require('../../assets/act7/act7Meteor.png')}
           style={styles.meteor}
           resizeMode="contain"
         />
 
-        {/* "Mars" label — on top of the meteor */}
+        {/* "Jupiter" label — on top of the meteor */}
         <Image
-          source={require('../../assets/act6/mars.png')}
-          style={styles.marsLabel}
+          source={require('../../assets/act7/jupiter.png')}
+          style={styles.jupiterLabel}
           resizeMode="contain"
         />
 
@@ -90,10 +90,10 @@ const StartPage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Mars planet — bottom of the screen */}
+        {/* Jupiter planet — bottom of the screen */}
         <Image
-          source={require('../../assets/AuthenticationAssets/bigMars.png')}
-          style={styles.marsPlanet}
+          source={require('../../assets/AuthenticationAssets/bigJupiter.png')}
+          style={styles.jupiterPlanet}
           resizeMode="contain"
         />
       </ImageBackground>
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     height: s(45),
   },
 
-  /* Title bubble — "Reaction Board Challenge" */
+  /* Title bubble — "Breathing Pace Trainer" */
   titleBubble: {
     position: 'absolute',
     top: s(140),
@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     left: s(-50),
   },
 
-  /* "Mars" label — positioned on top of the meteor */
-  marsLabel: {
+  /* "Jupiter" label — positioned on top of the meteor */
+  jupiterLabel: {
     position: 'absolute',
     top: s(380),
     alignSelf: 'center',
@@ -183,8 +183,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  /* Mars planet — bottom of screen, partially cut off */
-  marsPlanet: {
+  /* Jupiter planet — bottom of screen, partially cut off */
+  jupiterPlanet: {
     position: 'absolute',
     bottom: s(-30),
     right: s(-40),

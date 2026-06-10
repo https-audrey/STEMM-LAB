@@ -22,6 +22,13 @@ import CreateTeamPage from './screens/CreateTeamPage';
 import Act5StartPage from './screens/act5/StartPage';
 import AuthenticationPage from './screens/act5/AuthenticationPage';
 import Act6StartPage from './screens/act6/StartPage';
+import Act6AuthenticationPage from './screens/act6/AuthenticationPage';
+import Act6EquipmentPage from './screens/act6/EquipmentPage';
+import Act6InstructionPage from './screens/act6/InstructionPage';
+import Act6Phase1StartPage from './screens/act6/Phase1StartPage';
+import Act6ExperimentPage1 from './screens/act6/ExperimentPage1';
+import Act7StartPage from './screens/act7/StartPage';
+import Act7AuthenticationPage from './screens/act7/AuthenticationPage';
 import EquipmentPage from './screens/act5/EquipmentPage';
 import InstructionPage from './screens/act5/InstructionPage';
 import ExperimentPage from './screens/act5/ExperimentPage';
@@ -89,7 +96,14 @@ export default function App() {
           <Stack.Screen name="NoTeam" component={NoTeamFound} />
           <Stack.Screen name="CreateTeam" component={CreateTeamPage} />
           <Stack.Screen name="Act5Start" component={Act5StartPage} />
-        <Stack.Screen name="Act6Start" component={Act6StartPage} />
+          <Stack.Screen name="Act6Start" component={Act6StartPage} />
+          <Stack.Screen name="Act6Authentication" component={Act6AuthenticationPage} />
+          <Stack.Screen name="Act6Equipment" component={Act6EquipmentPage} />
+          <Stack.Screen name="Act6Instruction" component={Act6InstructionPage} />
+          <Stack.Screen name="Act6Phase1Start" component={Act6Phase1StartPage} />
+          <Stack.Screen name="Act6Experiment1" component={Act6ExperimentPage1} />
+          <Stack.Screen name="Act7Start" component={Act7StartPage} />
+          <Stack.Screen name="Act7Authentication" component={Act7AuthenticationPage} />
           <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
           <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
           <Stack.Screen name="Act5Instruction" component={InstructionPage} />

@@ -25,6 +25,13 @@ export type RootStackParamList = {
   Profile: undefined;
   Activity: undefined;
   Act6Start: undefined;
+  Act6Authentication: undefined;
+  Act6Equipment: undefined;
+  Act6Instruction: undefined;
+  Act6Phase1Start: undefined;
+  Act6Experiment1: undefined;
+  Act7Start: undefined;
+  Act7Authentication: undefined;
 };
 
 

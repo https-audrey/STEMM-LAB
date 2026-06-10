@@ -219,6 +219,7 @@ const ActivityPage: React.FC = () => {
                     <TouchableOpacity
                         style={[styles.planetNode, { top: s(115), left: s(210), width: s(110), height: s(110), zIndex: 5 }]}
                         activeOpacity={0.7}
+                        onPress={() => navigation.navigate('Act6Start')}
                     >
                         <Image
                             source={require('../assets/HomescreenAssets/planet 6.png')}
@@ -231,6 +232,7 @@ const ActivityPage: React.FC = () => {
                     <TouchableOpacity
                         style={[styles.planetNode, { top: s(60), left: s(65), width: s(105), height: s(105), zIndex: 5 }]}
                         activeOpacity={0.7}
+                        onPress={() => navigation.navigate('Act7Start')}
                     >
                         <Image
                             source={require('../assets/ActivityAssets/planet 7.png')}
