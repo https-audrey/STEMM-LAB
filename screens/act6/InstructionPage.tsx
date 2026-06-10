@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     /* Instruction Box Container */
     boxContainer: {
         position: 'absolute',
-        top: s(340),
+        top: s(250),
         alignSelf: 'center',
         width: s(374),
         height: s(583),
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     /* Continue button — aligned bottom right inside the container */
     continueButton: {
         position: 'absolute',
-        bottom: s(28),
+        bottom: s(130),
         right: s(22),
         width: s(141),
         height: s(41),

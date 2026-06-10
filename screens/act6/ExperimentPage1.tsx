@@ -46,7 +46,7 @@ const ExperimentPage1: React.FC = () => {
                 const now = Date.now();
                 const totalTime = (now - (startTimeRef.current || now)) / 1000;
                 setTimer(totalTime);
-                
+
                 // Calculate speed: We'll assume a "distance" of 1.0 meters for the whole task
                 // Speed = distance / time
                 const currentSpeed = 1.0 / Math.max(totalTime, 0.1);
@@ -65,7 +65,7 @@ const ExperimentPage1: React.FC = () => {
             startTimeRef.current = Date.now();
         }
 
-        setCats(prev => prev.map(cat => 
+        setCats(prev => prev.map(cat =>
             cat.id === id ? { ...cat, visible: false } : cat
         ));
     };
@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: s(150),
         alignSelf: 'center',
-        width: s(390),
-        height: s(90),
+        width: s(380),
+        height: s(80),
     },
 
     /* Cats */
@@ -206,11 +206,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: s(100),
         height: s(100),
-        padding: s(5),
+        padding: s(1),
     },
     catImg: {
-        width: '100%',
-        height: '100%',
+        width: '140%',
+        height: '140%',
+        left: s(-50),
+        top: s(-30)
     },
 
     /* Mars planet */
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     /* Speed parameter */
     parameterContainer: {
         position: 'absolute',
-        bottom: s(100),
+        bottom: s(60),
         left: s(50),
         width: s(160),
         height: s(50),
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
     },
     speedText: {
         fontFamily: FONTS.title, // ShortStack
-        fontSize: s(15),
+        fontSize: s(13),
         color: '#07181f',
         marginLeft: s(15),
         marginTop: s(2),
