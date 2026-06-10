@@ -218,6 +218,7 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={[styles.planetNode, { top: s(390), left: s(277), width: s(100), height: s(100), zIndex: 1 }]}
           activeOpacity={0.7}
+          onPress={() => navigation.navigate('Act6Start')}
         >
           <Image
             source={require('../assets/HomescreenAssets/planet 6.png')}

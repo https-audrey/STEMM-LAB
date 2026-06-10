@@ -24,6 +24,7 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   Profile: undefined;
   Activity: undefined;
+  Act6Start: undefined;
 };
 
 
