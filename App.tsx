@@ -26,7 +26,11 @@ import Act6AuthenticationPage from './screens/act6/AuthenticationPage';
 import Act6EquipmentPage from './screens/act6/EquipmentPage';
 import Act6InstructionPage from './screens/act6/InstructionPage';
 import Act6Phase1StartPage from './screens/act6/Phase1StartPage';
+import Act6Phase2StartPage from './screens/act6/Phase2StartPage';
 import Act6ExperimentPage1 from './screens/act6/ExperimentPage1';
+import Act6ExperimentPage2 from './screens/act6/ExperimentPage2';
+import Act6Phase1ResultPage from './screens/act6/Phase1ResultPage';
+import Act6Phase2ResultPage from './screens/act6/Phase2ResultPage';
 import Act7StartPage from './screens/act7/StartPage';
 import Act7AuthenticationPage from './screens/act7/AuthenticationPage';
 import EquipmentPage from './screens/act5/EquipmentPage';
@@ -101,7 +105,11 @@ export default function App() {
           <Stack.Screen name="Act6Equipment" component={Act6EquipmentPage} />
           <Stack.Screen name="Act6Instruction" component={Act6InstructionPage} />
           <Stack.Screen name="Act6Phase1Start" component={Act6Phase1StartPage} />
+          <Stack.Screen name="Act6Phase2Start" component={Act6Phase2StartPage} />
           <Stack.Screen name="Act6Experiment1" component={Act6ExperimentPage1} />
+          <Stack.Screen name="Act6Experiment2" component={Act6ExperimentPage2} />
+          <Stack.Screen name="Act6Phase1Result" component={Act6Phase1ResultPage} />
+          <Stack.Screen name="Act6Phase2Result" component={Act6Phase2ResultPage} />
           <Stack.Screen name="Act7Start" component={Act7StartPage} />
           <Stack.Screen name="Act7Authentication" component={Act7AuthenticationPage} />
           <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />

@@ -16,14 +16,14 @@ import { FONTS } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 import { addDocument } from '../../services/firestoreService';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Experiment1'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Experiment2'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const ExperimentPage1: React.FC = () => {
+const ExperimentPage2: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const { profile } = useAuth();
 
@@ -47,8 +47,7 @@ const ExperimentPage1: React.FC = () => {
                 const totalTime = (now - (startTimeRef.current || now)) / 1000;
                 setTimer(totalTime);
 
-                // Calculate speed: We'll assume a "distance" of 1.0 meters for the whole task
-                // Speed = distance / time
+                // Calculate speed
                 const currentSpeed = 1.0 / Math.max(totalTime, 0.1);
                 setSpeed(currentSpeed);
             }, 50);
@@ -82,13 +81,14 @@ const ExperimentPage1: React.FC = () => {
                 speed: parseFloat(finalSpeed.toFixed(2)),
                 duration: parseFloat(finalTime.toFixed(2)),
                 act: 6,
-                phase: 1,
+                phase: 2, // Identifying Phase 2
                 createdAt: new Date(),
             };
 
             await addDocument('experiments', resultData);
 
-            navigation.navigate('Act6Phase1Result');
+            // Navigate to Phase 2 Result page
+            navigation.navigate('Act6Phase2Result');
         } catch (error) {
             console.error('Save failed:', error);
             Alert.alert('Error', 'Failed to save your result.');
@@ -246,4 +246,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ExperimentPage1;
+export default ExperimentPage2;

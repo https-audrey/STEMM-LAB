@@ -29,7 +29,11 @@ export type RootStackParamList = {
   Act6Equipment: undefined;
   Act6Instruction: undefined;
   Act6Phase1Start: undefined;
+  Act6Phase2Start: undefined;
   Act6Experiment1: undefined;
+  Act6Experiment2: undefined;
+  Act6Phase1Result: undefined;
+  Act6Phase2Result: undefined;
   Act7Start: undefined;
   Act7Authentication: undefined;
 };

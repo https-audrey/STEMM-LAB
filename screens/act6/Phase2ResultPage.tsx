@@ -16,14 +16,14 @@ import { useAuth } from '../../context/AuthContext';
 import { FONTS } from '../../utils/theme';
 import { queryDocuments, where, orderBy, limit } from '../../services/firestoreService';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase1Result'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase2Result'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const Phase1ResultPage: React.FC = () => {
+const Phase2ResultPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
   const { profile } = useAuth();
   const [speed, setSpeed] = useState<number | null>(null);
@@ -37,7 +37,7 @@ const Phase1ResultPage: React.FC = () => {
         const results = await queryDocuments('experiments', [
           where('userId', '==', profile?.uid || 'anonymous'),
           where('act', '==', 6),
-          where('phase', '==', 1),
+          where('phase', '==', 2), // Fetching Phase 2 result
           orderBy('createdAt', 'desc'),
           limit(1),
         ]);
@@ -60,7 +60,8 @@ const Phase1ResultPage: React.FC = () => {
   };
 
   const handleContinue = () => {
-    navigation.navigate('Act6Phase2Start');
+    // Navigate to next activity or phase
+    navigation.navigate('Home'); 
   };
 
   return (
@@ -93,7 +94,7 @@ const Phase1ResultPage: React.FC = () => {
         {/* Result Box */}
         <View style={styles.boxContainer}>
           <ImageBackground
-            source={require('../../assets/act6PhaseResultAssets/phase1ResultBox.png')}
+            source={require('../../assets/act6PhaseResultAssets/phase2ResultBox.png')}
             style={styles.resultBox}
             resizeMode="contain"
           >
@@ -264,4 +265,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Phase1ResultPage;
+export default Phase2ResultPage;
