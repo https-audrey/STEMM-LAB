@@ -56,56 +56,56 @@ export default function App() {
 
   return (
     <AuthProvider>
-    <NavigationContainer>
-      <StatusBar style="light" />
-      <Stack.Navigator
-        id="RootStack"
-        initialRouteName="Onboarding"
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { backgroundColor: '#0a0e1a' },
-          cardStyleInterpolator: ({ current, layouts }) => ({
-            cardStyle: {
-              opacity: current.progress,
-              transform: [
-                {
-                  translateX: current.progress.interpolate({
-                     inputRange: [0, 1],
-                     outputRange: [layouts.screen.width * 0.3, 0],
-                  }),
-                },
-              ],
-            },
-          }),
-        }}
-      >
-        <Stack.Screen name="Onboarding" component={OnBoardingPage} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="RegisterRole" component={RegisterRoleScreen} />
-        <Stack.Screen name="RegisterInfo" component={RegisterInfoScreen} />
-        <Stack.Screen name="Loading" component={LoadingScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="NoTeam" component={NoTeamFound} />
-        <Stack.Screen name="CreateTeam" component={CreateTeamPage} />
-        <Stack.Screen name="Act5Start" component={Act5StartPage} />
-        <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
-        <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
-        <Stack.Screen name="Act5Instruction" component={InstructionPage} />
-        <Stack.Screen name="Act5Experiment" component={ExperimentPage} />
-        <Stack.Screen name="Act5RecordingResult" component={RecordingResultPage} />
-        <Stack.Screen name="Act5ResultComp" component={ResultCompPage} />
-        <Stack.Screen name="Act5Reflection1" component={Reflection1Page} />
-        <Stack.Screen name="Act5Reflection2" component={Reflection2Page} />
-        <Stack.Screen name="Act5Reflection3" component={Reflection3Page} />
-        <Stack.Screen name="Act5Discussion" component={Act5DiscussionPage} />
-        <Stack.Screen name="Act5Curriculum" component={Act5CurriculumPage} />
-        <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
-        <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
-        <Stack.Screen name="Profile" component={ProfilePage} />
-        <Stack.Screen name="Activity" component={ActivityPage} />
-        <Stack.Screen name="RateActivity" component={RateActivityPage} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <Stack.Navigator
+          id="RootStack"
+          initialRouteName="Onboarding"
+          screenOptions={{
+            headerShown: false,
+            cardStyle: { backgroundColor: '#0a0e1a' },
+            cardStyleInterpolator: ({ current, layouts }) => ({
+              cardStyle: {
+                opacity: current.progress,
+                transform: [
+                  {
+                    translateX: current.progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [layouts.screen.width * 0.3, 0],
+                    }),
+                  },
+                ],
+              },
+            }),
+          }}
+        >
+          <Stack.Screen name="Onboarding" component={OnBoardingPage} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="RegisterRole" component={RegisterRoleScreen} />
+          <Stack.Screen name="RegisterInfo" component={RegisterInfoScreen} />
+          <Stack.Screen name="Loading" component={LoadingScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="NoTeam" component={NoTeamFound} />
+          <Stack.Screen name="CreateTeam" component={CreateTeamPage} />
+          <Stack.Screen name="Act5Start" component={Act5StartPage} />
+          <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
+          <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
+          <Stack.Screen name="Act5Instruction" component={InstructionPage} />
+          <Stack.Screen name="Act5Experiment" component={ExperimentPage} />
+          <Stack.Screen name="Act5RecordingResult" component={RecordingResultPage} />
+          <Stack.Screen name="Act5ResultComp" component={ResultCompPage} />
+          <Stack.Screen name="Act5Reflection1" component={Reflection1Page} />
+          <Stack.Screen name="Act5Reflection2" component={Reflection2Page} />
+          <Stack.Screen name="Act5Reflection3" component={Reflection3Page} />
+          <Stack.Screen name="Act5Discussion" component={Act5DiscussionPage} />
+          <Stack.Screen name="Act5Curriculum" component={Act5CurriculumPage} />
+          <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
+          <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
+          <Stack.Screen name="Profile" component={ProfilePage} />
+          <Stack.Screen name="Activity" component={ActivityPage} />
+          <Stack.Screen name="RateActivity" component={RateActivityPage} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </AuthProvider>
   );
 }
