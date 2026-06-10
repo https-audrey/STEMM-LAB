@@ -111,7 +111,7 @@ const Phase1StartPage: React.FC = () => {
 
         {/* Mars planet — bottom of the screen */}
         <Image
-          source={require('../../assets/AuthenticationAssets/Mars.png')}
+          source={require('../../assets/act6/mars.png')}
           style={styles.marsPlanet}
           resizeMode="contain"
         />
