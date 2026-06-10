@@ -26,8 +26,7 @@ const NoTeamFound: React.FC = () => {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleCreateTeam = () => {
-    // Action when user taps "+ Create New Team" button
-    console.log('Create New Team tapped');
+    navigation.navigate('CreateTeam');
   };
 
   const handleJoinTeam = () => {
@@ -50,12 +49,6 @@ const NoTeamFound: React.FC = () => {
           resizeMode="contain"
         />
 
-        {/* Decorative Top-Right Star */}
-        <Image
-          source={require('../assets/OnBoardingAssets/star1.png')}
-          style={styles.topRightStar}
-          resizeMode="contain"
-        />
 
         {/* Central Gray Box */}
         <ImageBackground
@@ -230,11 +223,11 @@ const NoTeamFound: React.FC = () => {
         {/* Levels Button */}
         <TouchableOpacity
           style={styles.levelsButton}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Activity')}
           activeOpacity={0.7}
         >
           <Image
-            source={require('../assets/HomescreenAssets/levels.png')}
+            source={require('../assets/HomescreenAssets/activity.png')}
             style={styles.levelsImage}
             resizeMode="contain"
           />
@@ -243,7 +236,7 @@ const NoTeamFound: React.FC = () => {
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Leaderboard')}
           activeOpacity={0.7}
         >
           <Image
@@ -256,7 +249,7 @@ const NoTeamFound: React.FC = () => {
         {/* Profile Button */}
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Profile')}
           activeOpacity={0.7}
         >
           <Image
@@ -282,26 +275,19 @@ const styles = StyleSheet.create({
   },
   welcomeBanner: {
     position: 'absolute',
-    top: s(70),
-    width: s(368),
-    height: s(58),
+    top: s(55),
+    left: s(35),
+    width: s(390),
+    height: s(93),
     alignSelf: 'center',
     zIndex: 10,
   },
-  topRightStar: {
-    position: 'absolute',
-    top: s(55),
-    left: s(370),
-    width: s(40),
-    height: s(40),
-    zIndex: 11,
-  },
   grayBox: {
     position: 'absolute',
-    top: s(142),
+    top: s(195),
     alignSelf: 'center',
     width: s(380),
-    height: s(472),
+    height: s(440),
     paddingHorizontal: s(20),
     zIndex: 5,
   },
@@ -318,10 +304,11 @@ const styles = StyleSheet.create({
     marginTop: s(15),
   },
   step1Title: {
-    width: s(260),
-    height: s(22),
+    width: s(280),
+    height: s(32),
     alignSelf: 'center',
-    marginTop: s(15),
+    left: s(-20),
+    marginTop: s(10),
   },
   createButtonContainer: {
     width: '100%',
@@ -330,22 +317,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    left: s(-35),
   },
   createButton: {
-    width: s(190),
-    height: s(46),
-    left: s(-25),
+    width: s(210),
+    height: s(66),
+    left: s(-20),
   },
   arrowIcon: {
     width: s(80),
     height: s(60),
     position: 'absolute',
-    left: s(200),
+    left: s(270),
     top: s(-10),
   },
   orDivider: {
-    width: s(340),
-    height: s(25),
+    width: s(355),
+    height: s(40),
     alignSelf: 'center',
     marginTop: s(10),
   },
@@ -353,13 +341,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     height: s(110),
-    marginTop: s(15),
+    marginTop: s(12),
     alignItems: 'center',
+    left: s(-10),
   },
   astronaut: {
-    width: s(80),
-    height: s(100),
-    marginRight: s(15),
+    width: s(160),
+    height: s(180),
+    marginRight: s(-50),
+    left: s(-25),
   },
   joinControlsColumn: {
     flex: 1,
@@ -418,18 +408,18 @@ const styles = StyleSheet.create({
   },
   ufo: {
     position: 'absolute',
-    top: s(680),
-    left: s(310),
-    width: s(90),
-    height: s(95),
+    top: s(640),
+    left: s(260),
+    width: s(220),
+    height: s(200),
     zIndex: 2,
   },
   leftStar: {
     position: 'absolute',
-    top: s(725),
+    top: s(700),
     left: s(25),
-    width: s(55),
-    height: s(55),
+    width: s(75),
+    height: s(75),
     zIndex: 3,
   },
   navbarBox: {

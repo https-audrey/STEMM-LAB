@@ -11,11 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
+import { signIn } from '../services/authService';
+import { queryDocuments, where } from '../services/firestoreService';
+import { useAuth } from '../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -25,11 +30,72 @@ const hp = (percent: number) => (SCREEN_H * percent) / 100;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { refreshProfile } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleLogin = () => {
-    navigation.navigate('Home');
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setErrorMsg('Please enter your email/username and password.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      let emailToUse = username.trim();
+
+      // If input doesn't look like an email, treat it as a username
+      if (!emailToUse.includes('@')) {
+        // Look up the user's email by their displayUsername
+        const users = await queryDocuments('users', [
+          where('displayUsername', '==', emailToUse),
+        ]);
+
+        if (users.length === 0) {
+          // Also try matching the username field (email stored as username)
+          const usersByUsername = await queryDocuments('users', [
+            where('username', '==', emailToUse),
+          ]);
+          if (usersByUsername.length === 0) {
+            setErrorMsg('No account found with this username.');
+            setLoading(false);
+            return;
+          }
+          emailToUse = usersByUsername[0].username as string;
+        } else {
+          emailToUse = users[0].username as string;
+        }
+      }
+
+      // Sign in with the resolved email
+      await signIn(emailToUse, password);
+
+      // Refresh profile so all screens show the correct user data
+      await refreshProfile();
+
+      // Navigate to Loading (matches register flow)
+      navigation.navigate('Loading');
+    } catch (error: any) {
+      // Map Firebase error codes to user-friendly messages
+      let message = 'Login failed. Please try again.';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        message = 'Invalid email/username or password.';
+      } else if (error.code === 'auth/wrong-password') {
+        message = 'Incorrect password.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Too many attempts. Please try again later.';
+      }
+      setErrorMsg(message);
+      console.log('[Login] Error:', error.code, error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -116,17 +182,27 @@ const LoginScreen: React.FC = () => {
                 />
               </View>
 
+              {/* Error message */}
+              {errorMsg !== '' && (
+                <Text style={styles.errorText}>{errorMsg}</Text>
+              )}
+
               {/* Login button */}
               <TouchableOpacity
                 style={styles.loginButton}
                 onPress={handleLogin}
                 activeOpacity={0.8}
+                disabled={loading}
               >
-                <Image
-                  source={require('../assets/LoginAssets/loginBtn.png')}
-                  style={styles.fullImage}
-                  resizeMode="contain"
-                />
+                {loading ? (
+                  <ActivityIndicator size="small" color="#08121E" />
+                ) : (
+                  <Image
+                    source={require('../assets/LoginAssets/loginBtn.png')}
+                    style={styles.fullImage}
+                    resizeMode="contain"
+                  />
+                )}
               </TouchableOpacity>
 
             </View>
@@ -152,7 +228,7 @@ const LoginScreen: React.FC = () => {
               {/* Google button */}
               <TouchableOpacity
                 style={styles.googleButton}
-                onPress={handleLogin}
+                onPress={() => console.log('[Login] Google sign-in not configured yet')}
                 activeOpacity={0.8}
               >
                 <Image
@@ -224,7 +300,8 @@ const styles = StyleSheet.create({
     height: hp(60),
     marginTop: hp(-5),
     alignSelf: 'center',
-    left: 6
+    left: 6,
+    zIndex: 2,
   },
 
   meteor1Inner: {
@@ -348,6 +425,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.title,
     fontSize: 11,               // reduced
     color: '#ffffff',
+    marginTop: hp(0.5),
+  },
+
+  errorText: {
+    fontFamily: FONTS.title,
+    fontSize: 8,
+    color: '#ff4d4d',
+    textAlign: 'center',
     marginTop: hp(0.5),
   },
 });
