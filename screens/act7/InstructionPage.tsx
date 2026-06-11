@@ -26,7 +26,7 @@ const Act7InstructionPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Act7Reflection'); //later change it into Act7Experiment
+        navigation.navigate('Act7Experiment1');
     };
 
     return (

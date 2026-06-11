@@ -51,6 +51,8 @@ export type RootStackParamList = {
   Act7Reflection: { docIds: string[] };
   Act7Discussion: { docIds: string[] };
   Act7Curriculum: undefined;
+  Act7Experiment1: undefined;
+  Act7Result1: { docIds: string[] };
 };
 
 

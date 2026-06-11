@@ -46,6 +46,8 @@ import Act7InstructionPage from './screens/act7/InstructionPage';
 import Act7ReflectionPage from './screens/act7/ReflectionPage';
 import Act7DiscussionPage from './screens/act7/DiscussionPage';
 import Act7CurriculumPage from './screens/act7/CurriculumPage';
+import Act7ExperimentPage1 from './screens/act7/ExperimentPage1';
+import Act7ResultPage1 from './screens/act7/ResultPage1';
 import EquipmentPage from './screens/act5/EquipmentPage';
 import InstructionPage from './screens/act5/InstructionPage';
 import ExperimentPage from './screens/act5/ExperimentPage';
@@ -140,6 +142,8 @@ export default function App() {
           <Stack.Screen name="Act7Reflection" component={Act7ReflectionPage} />
           <Stack.Screen name="Act7Discussion" component={Act7DiscussionPage} />
           <Stack.Screen name="Act7Curriculum" component={Act7CurriculumPage} />
+          <Stack.Screen name="Act7Experiment1" component={Act7ExperimentPage1} />
+          <Stack.Screen name="Act7Result1" component={Act7ResultPage1} />
           <Stack.Screen name="RateActivity" component={RateActivityPage} />
           <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
           <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
