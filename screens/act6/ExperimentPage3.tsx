@@ -100,8 +100,8 @@ const ExperimentPage3: React.FC = () => {
     };
 
     const calculatePointAccuracy = (d: number) => {
-        const minTolerance = s(5); // strictly accurate within 5px
-        const maxTolerance = s(20); // completely inaccurate after 20px
+        const minTolerance = s(8); // traditional accuracy tolerance
+        const maxTolerance = s(32);
         if (d <= minTolerance) return 100;
         if (d >= maxTolerance) return 0;
         return 100 * (1 - (d - minTolerance) / (maxTolerance - minTolerance));
@@ -122,64 +122,74 @@ const ExperimentPage3: React.FC = () => {
             return;
         }
 
-        // Limit the frequency of points slightly for smoothness vs performance
+        const newPoints = [];
         if (pointsRef.current.length > 0) {
             const last = pointsRef.current[pointsRef.current.length - 1];
-            const d = Math.sqrt((locationX - last.x) ** 2 + (locationY - last.y) ** 2);
-            if (d < s(2)) { // Increased density (was 5)
-                return;
+            const dist = Math.sqrt((locationX - last.x) ** 2 + (locationY - last.y) ** 2);
+            
+            // Marker Smoothing: If distance is too large, interpolate intermediate points to create a "line" effect
+            if (dist > s(2)) {
+                const steps = Math.floor(dist / s(2));
+                for (let i = 1; i <= steps; i++) {
+                    const t = i / steps;
+                    newPoints.push({
+                        x: last.x + (locationX - last.x) * t,
+                        y: last.y + (locationY - last.y) * t,
+                    });
+                }
+            } else {
+                newPoints.push({ x: locationX, y: locationY });
             }
+        } else {
+            newPoints.push({ x: locationX, y: locationY });
         }
 
-        const newPt = { x: locationX, y: locationY };
-        pointsRef.current.push(newPt);
+        // Add points and evaluate
+        for (const pt of newPoints) {
+            pointsRef.current.push(pt);
+            
+            const dToStar = getDistanceToStar(pt.x, pt.y, starVertices.current);
+            const ptAcc = calculatePointAccuracy(dToStar);
+            accuraciesRef.current.push(ptAcc);
 
-        // Accuracy evaluation
-        const dToStar = getDistanceToStar(locationX, locationY, starVertices.current);
-        const ptAcc = calculatePointAccuracy(dToStar);
-
-        accuraciesRef.current.push(ptAcc);
-        const sum = accuraciesRef.current.reduce((a, b) => a + b, 0);
-        const avgAcc = sum / accuraciesRef.current.length;
-        
-        // Coverage evaluation
-        for (const cp of checkpointsRef.current) {
-            if (!cp.visited) {
-                const d = Math.sqrt((locationX - cp.x) ** 2 + (locationY - cp.y) ** 2);
-                if (d < s(18)) { // Slightly tighter checkpoint radius
-                    cp.visited = true;
+            // Coverage evaluation
+            for (const cp of checkpointsRef.current) {
+                if (!cp.visited) {
+                    const d = Math.sqrt((pt.x - cp.x) ** 2 + (pt.y - cp.y) ** 2);
+                    if (d < s(22)) {
+                        cp.visited = true;
+                    }
                 }
             }
         }
 
+        // Accuracy Calculation (Reverted to simple average as requested)
+        const sum = accuraciesRef.current.reduce((a, b) => a + b, 0);
+        const avgAcc = accuraciesRef.current.length > 0 ? sum / accuraciesRef.current.length : 0;
+        setAccuracy(avgAcc);
+        
+        setPoints([...pointsRef.current]);
+
         const visitedCount = checkpointsRef.current.filter(cp => cp.visited).length;
         const totalCount = checkpointsRef.current.length;
         const coverage = visitedCount / totalCount;
-        
-        // Displayed accuracy is a mix of precision and coverage
-        const currentAccuracy = avgAcc * (0.5 + 0.5 * coverage); 
-        setAccuracy(currentAccuracy);
-        setPoints([...pointsRef.current]);
 
-        if (coverage >= 0.98) { // Finished drawing
-            handleFinish(currentAccuracy);
+        if (coverage >= 0.96) { // Completed
+            handleFinish(avgAcc);
         }
     };
 
     const handleTouchEnd = () => {
         if (isFinishedRef.current) return;
         
-        // If they started tracing, finish immediately when lifted
-        if (pointsRef.current.length > 10) {
-            const visitedCount = checkpointsRef.current.filter(cp => cp.visited).length;
-            const totalCount = checkpointsRef.current.length;
-            const coverage = visitedCount / totalCount;
-            
+        const visitedCount = checkpointsRef.current.filter(cp => cp.visited).length;
+        const totalCount = checkpointsRef.current.length;
+        const coverage = visitedCount / totalCount;
+
+        if (coverage >= 0.10) { // If they actually started
             const sum = accuraciesRef.current.reduce((a, b) => a + b, 0);
             const avgAcc = accuraciesRef.current.length > 0 ? sum / accuraciesRef.current.length : 0;
-            
-            const finalScore = avgAcc * coverage; // Final score penalized by missing parts
-            handleFinish(finalScore);
+            handleFinish(avgAcc);
         }
     };
 
@@ -356,9 +366,9 @@ const styles = StyleSheet.create({
     },
     tracePoint: {
         position: 'absolute',
-        width: s(8),
-        height: s(8),
-        borderRadius: s(4),
+        width: s(10),
+        height: s(10),
+        borderRadius: s(5),
         backgroundColor: 'white',
         opacity: 0.9,
     },
