@@ -70,12 +70,7 @@ const StartPage: React.FC = () => {
           resizeMode="contain"
         />
 
-        {/* Description bubble — overlaid on the meteor */}
-        <Image
-          source={require('../../assets/act5/desc.png')}
-          style={styles.descBubble}
-          resizeMode="contain"
-        />
+
 
         {/* START button — on the meteor */}
         <TouchableOpacity
@@ -91,11 +86,7 @@ const StartPage: React.FC = () => {
         </TouchableOpacity>
 
         {/* Jupiter planet — bottom of the screen */}
-        <Image
-          source={require('../../assets/AuthenticationAssets/bigJupiter.png')}
-          style={styles.jupiterPlanet}
-          resizeMode="contain"
-        />
+
       </ImageBackground>
     </View>
   );
@@ -151,22 +142,14 @@ const styles = StyleSheet.create({
   /* "Jupiter" label — positioned on top of the meteor */
   jupiterLabel: {
     position: 'absolute',
-    top: s(380),
+    top: s(700),
     alignSelf: 'center',
-    width: s(170),
-    height: s(65),
-    left: s(137),
+    width: s(440),
+    height: s(335),
+    left: s(0),
   },
 
-  /* Description bubble — overlaid on the meteor area */
-  descBubble: {
-    position: 'absolute',
-    top: s(455),
-    alignSelf: 'center',
-    width: s(320),
-    height: s(160),
-    left: s(60),
-  },
+
 
   /* START button — below description on the meteor */
   startButton: {
@@ -183,14 +166,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  /* Jupiter planet — bottom of screen, partially cut off */
-  jupiterPlanet: {
-    position: 'absolute',
-    bottom: s(-30),
-    right: s(-40),
-    width: s(480),
-    height: s(280),
-  },
+
 });
 
 export default StartPage;

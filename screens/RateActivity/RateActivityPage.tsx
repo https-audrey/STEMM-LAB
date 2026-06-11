@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     /* Rate Box Container */
     boxContainer: {
         position: 'absolute',
-        top: s(340),
+        top: s(320),
         alignSelf: 'center',
         width: s(374),
         height: s(583),
