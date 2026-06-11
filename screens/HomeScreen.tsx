@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     position: 'absolute',
-    top: s(135),
+    top: s(85),
     alignSelf: 'center',
     width: s(370),
     height: s(170),
@@ -367,8 +367,8 @@ const styles = StyleSheet.create({
     height: s(48),
   },
   categoryImage: {
-    width: '100%',
-    height: '100%',
+    width: '200%',
+    height: '160%',
   },
   levelsBox: {
     position: 'absolute',
