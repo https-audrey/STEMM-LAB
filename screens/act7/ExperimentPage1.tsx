@@ -9,6 +9,7 @@ import {
     ImageBackground,
     Animated,
     Alert,
+    Vibration,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -30,13 +31,14 @@ const ExperimentPage1: React.FC = () => {
     const { profile } = useAuth();
 
     const [isRecording, setIsRecording] = useState(false);
-    const [timerValue, setTimerValue] = useState(0); // in seconds
+    const [timerValue, setTimerValue] = useState(60); // countdown starting from 60
     const [respirationRate, setRespirationRate] = useState(0);
     const [useSimulation, setUseSimulation] = useState(false);
 
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const timerIntervalRef = useRef<any>(null);
     const startTimeRef = useRef<number>(0);
+    const isRecordingRef = useRef(false);
 
     // Breathing tracking refs
     const accelDataRef = useRef<{ x: number; y: number; z: number }[]>([]);
@@ -57,6 +59,11 @@ const ExperimentPage1: React.FC = () => {
         };
         checkSensors();
     }, []);
+
+    // Toggle recording ref
+    useEffect(() => {
+        isRecordingRef.current = isRecording;
+    }, [isRecording]);
 
     // Pulse animation
     useEffect(() => {
@@ -90,18 +97,24 @@ const ExperimentPage1: React.FC = () => {
 
         if (isRecording) {
             startTimeRef.current = Date.now();
-            setTimerValue(0);
+            setTimerValue(60);
             setRespirationRate(0);
             accelDataRef.current = [];
 
-            // Timer interval
+            // Timer interval (Countdown)
             timerIntervalRef.current = setInterval(() => {
-                setTimerValue(prev => prev + 1);
+                setTimerValue(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timerIntervalRef.current);
+                        handleRecord(); // Stop recording when timer hits 0
+                        return 0;
+                    }
+                    return prev - 1;
+                });
             }, 1000);
 
             if (useSimulation) {
                 simulationInterval = setInterval(() => {
-                    // Random breathing rate between 12 and 20
                     const rate = 12 + Math.floor(Math.random() * 8);
                     setRespirationRate(rate);
                 }, 3000);
@@ -109,18 +122,16 @@ const ExperimentPage1: React.FC = () => {
                 Accelerometer.setUpdateInterval(100);
                 accelSubscription = Accelerometer.addListener(data => {
                     accelDataRef.current.push(data);
-                    // Simple breathing detection logic
-                    // Every 50 samples (~5 seconds), calculate approximate breaths
-                    if (accelDataRef.current.length >= 50) {
-                        const samples = accelDataRef.current.slice(-50);
-                        // Focus on Z-axis (up/down on chest)
+                    
+                    // Increased sensitivity: Analyze every 30 samples (~3 seconds)
+                    if (accelDataRef.current.length >= 30) {
+                        const samples = accelDataRef.current.slice(-30);
                         const zs = samples.map(s => s.z);
                         const avg = zs.reduce((a, b) => a + b, 0) / zs.length;
 
-                        // Count peaks
                         let peaks = 0;
-                        let lastState = 0; // 0: neutral, 1: rising, -1: falling
-                        const threshold = 0.02; // sensitivity for breathing
+                        let lastState = 0; 
+                        const threshold = 0.012; // Lower threshold = Higher sensitivity
 
                         for (let i = 1; i < zs.length; i++) {
                             const diff = zs[i] - avg;
@@ -131,10 +142,10 @@ const ExperimentPage1: React.FC = () => {
                                 lastState = -1;
                             }
                         }
-                        // Multiply by 12 to get breaths per minute (5s * 12 = 60s)
-                        const bpm = peaks * 12;
+                        // Multiply by 20 to get BPM (3s * 20 = 60s)
+                        const bpm = peaks * 20;
                         setRespirationRate(bpm);
-                        accelDataRef.current = []; // Reset window
+                        accelDataRef.current = [];
                     }
                 });
             }
@@ -161,14 +172,17 @@ const ExperimentPage1: React.FC = () => {
     };
 
     const handleRecord = async () => {
-        if (isRecording) {
+        if (isRecordingRef.current) {
             setIsRecording(false);
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+            
+            // Vibrate device on stop
+            Vibration.vibrate(500);
 
             // Save result
             try {
-                const finalRate = respirationRate || 15; // default if 0
-                const duration = timerValue;
+                const finalRate = respirationRate || 15;
+                const duration = 60 - timerValue; // Actual elapsed time
 
                 const resultData = {
                     userId: profile?.uid || 'anonymous',
@@ -205,7 +219,7 @@ const ExperimentPage1: React.FC = () => {
 
     const handleRestart = () => {
         setIsRecording(false);
-        setTimerValue(0);
+        setTimerValue(60);
         setRespirationRate(0);
         accelDataRef.current = [];
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
