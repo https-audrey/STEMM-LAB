@@ -25,7 +25,6 @@ export type RootStackParamList = {
   TeamPageChem: undefined;
   Leaderboard: undefined;
   Profile: undefined;
-  Activity: undefined;
   Act6Start: undefined;
   Act6Authentication: undefined;
   Act6Equipment: undefined;

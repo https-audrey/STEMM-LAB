@@ -65,7 +65,6 @@ import Act5CurriculumPage from './screens/act5/Act5CurriculumPage';
 import TeamPageChem from './screens/TeamPageChem';
 import LeaderboardPage from './screens/LeaderboardPage';
 import ProfilePage from './screens/ProfilePage';
-import ActivityPage from './screens/ActivityPage';
 import RateActivityPage from './screens/RateActivity/RateActivityPage';
 import act6RateActivityPage from './screens/RateActivity/act6RateActivityPage';
 import act7RateActivityPage from './screens/RateActivity/act7RateAcitivityPage';
@@ -167,7 +166,6 @@ export default function App() {
           <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
           <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
           <Stack.Screen name="Profile" component={ProfilePage} />
-          <Stack.Screen name="Activity" component={ActivityPage} />
           <Stack.Screen name="Act6RateActivity" component={act6RateActivityPage} />
           <Stack.Screen name="Act7RateActivity" component={act7RateActivityPage} />
         </Stack.Navigator>
