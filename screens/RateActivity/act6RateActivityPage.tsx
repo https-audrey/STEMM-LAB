@@ -91,7 +91,7 @@ const Act6RateActivityPage: React.FC = () => {
                         activeOpacity={0.7}
                     >
                         <Image
-                            source={require('../../assets/act6/crossBtn.png')}
+                            source={require('../../assets/act5/crossBtn.png')}
                             style={styles.closeIcon}
                             resizeMode="contain"
                         />

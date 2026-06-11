@@ -68,7 +68,7 @@ const Phase3ResultPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Home');
+        navigation.navigate('Act6Reflection');
     };
 
     return (
