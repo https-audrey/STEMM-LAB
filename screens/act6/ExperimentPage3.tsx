@@ -100,8 +100,8 @@ const ExperimentPage3: React.FC = () => {
     };
 
     const calculatePointAccuracy = (d: number) => {
-        const minTolerance = s(8); // completely accurate within 8px
-        const maxTolerance = s(32); // completely inaccurate after 32px
+        const minTolerance = s(5); // strictly accurate within 5px
+        const maxTolerance = s(20); // completely inaccurate after 20px
         if (d <= minTolerance) return 100;
         if (d >= maxTolerance) return 0;
         return 100 * (1 - (d - minTolerance) / (maxTolerance - minTolerance));
@@ -122,11 +122,11 @@ const ExperimentPage3: React.FC = () => {
             return;
         }
 
-        // Limit the frequency of points to avoid lag
+        // Limit the frequency of points slightly for smoothness vs performance
         if (pointsRef.current.length > 0) {
             const last = pointsRef.current[pointsRef.current.length - 1];
             const d = Math.sqrt((locationX - last.x) ** 2 + (locationY - last.y) ** 2);
-            if (d < s(5)) {
+            if (d < s(2)) { // Increased density (was 5)
                 return;
             }
         }
@@ -141,41 +141,45 @@ const ExperimentPage3: React.FC = () => {
         accuraciesRef.current.push(ptAcc);
         const sum = accuraciesRef.current.reduce((a, b) => a + b, 0);
         const avgAcc = sum / accuraciesRef.current.length;
-        setAccuracy(avgAcc);
-
-        // Checkpoint visitation
+        
+        // Coverage evaluation
         for (const cp of checkpointsRef.current) {
             if (!cp.visited) {
                 const d = Math.sqrt((locationX - cp.x) ** 2 + (locationY - cp.y) ** 2);
-                if (d < s(22)) {
+                if (d < s(18)) { // Slightly tighter checkpoint radius
                     cp.visited = true;
                 }
             }
         }
 
+        const visitedCount = checkpointsRef.current.filter(cp => cp.visited).length;
+        const totalCount = checkpointsRef.current.length;
+        const coverage = visitedCount / totalCount;
+        
+        // Displayed accuracy is a mix of precision and coverage
+        const currentAccuracy = avgAcc * (0.5 + 0.5 * coverage); 
+        setAccuracy(currentAccuracy);
         setPoints([...pointsRef.current]);
 
-        // Evaluate completion coverage
-        const visited = checkpointsRef.current.filter(cp => cp.visited).length;
-        const total = checkpointsRef.current.length;
-        const coverage = visited / total;
-
-        if (coverage >= 0.92) {
-            handleFinish(avgAcc);
+        if (coverage >= 0.98) { // Finished drawing
+            handleFinish(currentAccuracy);
         }
     };
 
     const handleTouchEnd = () => {
         if (isFinishedRef.current) return;
-        const visited = checkpointsRef.current.filter(cp => cp.visited).length;
-        const total = checkpointsRef.current.length;
-        const coverage = visited / total;
-
-        // If user traced at least 70% and lifted finger, finish
-        if (coverage >= 0.70) {
+        
+        // If they started tracing, finish immediately when lifted
+        if (pointsRef.current.length > 10) {
+            const visitedCount = checkpointsRef.current.filter(cp => cp.visited).length;
+            const totalCount = checkpointsRef.current.length;
+            const coverage = visitedCount / totalCount;
+            
             const sum = accuraciesRef.current.reduce((a, b) => a + b, 0);
             const avgAcc = accuraciesRef.current.length > 0 ? sum / accuraciesRef.current.length : 0;
-            handleFinish(avgAcc);
+            
+            const finalScore = avgAcc * coverage; // Final score penalized by missing parts
+            handleFinish(finalScore);
         }
     };
 
