@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   categoriesRow: {
     position: 'absolute',
-    top: s(235),
+    top: s(200),
     width: '100%',
     height: s(50),
   },
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   levelsBox: {
     position: 'absolute',
-    top: s(285),
+    top: s(270),
     alignSelf: 'center',
     width: s(374),
     height: s(553),
