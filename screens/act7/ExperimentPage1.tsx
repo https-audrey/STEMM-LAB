@@ -116,7 +116,7 @@ const ExperimentPage1: React.FC = () => {
                         // Focus on Z-axis (up/down on chest)
                         const zs = samples.map(s => s.z);
                         const avg = zs.reduce((a, b) => a + b, 0) / zs.length;
-                        
+
                         // Count peaks
                         let peaks = 0;
                         let lastState = 0; // 0: neutral, 1: rising, -1: falling
@@ -255,7 +255,7 @@ const ExperimentPage1: React.FC = () => {
                             resizeMode="contain"
                         />
                         <Text style={styles.respirationText}>
-                             {respirationRate} BPM
+                            {respirationRate} BPM
                         </Text>
                     </View>
 
@@ -367,13 +367,14 @@ const styles = StyleSheet.create({
     },
     respirationContainer: {
         position: 'absolute',
-        top: s(190),
+        top: s(170),
         alignSelf: 'center',
-        width: s(260),
-        height: s(45),
+        width: s(220),
+        height: s(50),
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: s(10),
+        left: s(30),
     },
     respirationBox: {
         position: 'absolute',
@@ -389,10 +390,10 @@ const styles = StyleSheet.create({
     },
     timerContainer: {
         position: 'absolute',
-        top: s(255),
+        top: s(215),
         alignSelf: 'center',
-        width: s(150),
-        height: s(100),
+        width: s(140),
+        height: s(90),
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -405,11 +406,12 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.title,
         fontSize: s(14),
         color: '#08121E',
-        marginTop: s(15),
+        marginTop: s(27),
+        left: s(18),
     },
     recordButtonContainer: {
         position: 'absolute',
-        top: s(360),
+        top: s(300),
         alignSelf: 'center',
         width: s(100),
         height: s(100),
