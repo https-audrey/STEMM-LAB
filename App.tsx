@@ -47,7 +47,11 @@ import Act7ReflectionPage from './screens/act7/ReflectionPage';
 import Act7DiscussionPage from './screens/act7/DiscussionPage';
 import Act7CurriculumPage from './screens/act7/CurriculumPage';
 import Act7ExperimentPage1 from './screens/act7/ExperimentPage1';
+import Act7ExperimentPage2 from './screens/act7/ExperimentPage2';
+import Act7ExperimentPage3 from './screens/act7/ExperimentPage3';
 import Act7ResultPage1 from './screens/act7/ResultPage1';
+import Act7ResultPage2 from './screens/act7/ResultPage2';
+import Act7ResultPage3 from './screens/act7/ResultPage3';
 import EquipmentPage from './screens/act5/EquipmentPage';
 import InstructionPage from './screens/act5/InstructionPage';
 import ExperimentPage from './screens/act5/ExperimentPage';
@@ -144,6 +148,10 @@ export default function App() {
           <Stack.Screen name="Act7Curriculum" component={Act7CurriculumPage} />
           <Stack.Screen name="Act7Experiment1" component={Act7ExperimentPage1} />
           <Stack.Screen name="Act7Result1" component={Act7ResultPage1} />
+          <Stack.Screen name="Act7Result2" component={Act7ResultPage2} />
+          <Stack.Screen name="Act7Result3" component={Act7ResultPage3} />
+          <Stack.Screen name="Act7Experiment2" component={Act7ExperimentPage2} />
+          <Stack.Screen name="Act7Experiment3" component={Act7ExperimentPage3} />
           <Stack.Screen name="RateActivity" component={RateActivityPage} />
           <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
           <Stack.Screen name="Act5Equipment" component={EquipmentPage} />

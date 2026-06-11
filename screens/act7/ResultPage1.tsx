@@ -76,8 +76,8 @@ const Act7ResultPage1: React.FC = () => {
     };
 
     const handleContinue = () => {
-        // Navigate forward to reflection
-        navigation.navigate('Act7Reflection', { docIds });
+        // Navigate forward to experiment 2
+        navigation.navigate('Act7Experiment2', { docIds });
     };
 
     const handleAddRecording = () => {
@@ -149,7 +149,7 @@ const Act7ResultPage1: React.FC = () => {
                 {/* Result box container */}
                 <View style={styles.boxContainer}>
                     <Image
-                        source={require('../../assets/RecordingResultAssets/resultBox.png')}
+                        source={require('../../assets/RecordingResultAssets/act7ResultBox1.png')}
                         style={styles.resultBox}
                         resizeMode="contain"
                     />

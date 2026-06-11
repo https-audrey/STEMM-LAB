@@ -42,17 +42,6 @@ const HomePage: React.FC = () => {
       : require('../assets/HomescreenAssets/bio.png');
   };
 
-  const getChemistryAsset = () => {
-    return selectedSubject === 'chemistry'
-      ? require('../assets/HomescreenAssets/chem2.png')
-      : require('../assets/HomescreenAssets/chem.png');
-  };
-
-  const getMathematicsAsset = () => {
-    return selectedSubject === 'mathematics'
-      ? require('../assets/HomescreenAssets/math2.png')
-      : require('../assets/HomescreenAssets/math.png');
-  };
 
   return (
     <View style={styles.container}>
@@ -77,7 +66,7 @@ const HomePage: React.FC = () => {
 
         {/* Info Box */}
         <Image
-          source={require('../assets/HomescreenAssets/box.png')}
+          source={require('../assets/HomescreenAssets/boxTopLvl.png')}
           style={styles.infoBox}
           resizeMode="contain"
         />
@@ -116,11 +105,7 @@ const HomePage: React.FC = () => {
             onPress={() => setSelectedSubject(prev => prev === 'chemistry' ? null : 'chemistry')}
             activeOpacity={0.8}
           >
-            <Image
-              source={getChemistryAsset()}
-              style={styles.categoryImage}
-              resizeMode="contain"
-            />
+
           </TouchableOpacity>
 
           {/* Mathematics Tab */}
@@ -129,11 +114,7 @@ const HomePage: React.FC = () => {
             onPress={() => setSelectedSubject(prev => prev === 'mathematics' ? null : 'mathematics')}
             activeOpacity={0.8}
           >
-            <Image
-              source={getMathematicsAsset()}
-              style={styles.categoryImage}
-              resizeMode="contain"
-            />
+
           </TouchableOpacity>
         </View>
 
@@ -145,103 +126,114 @@ const HomePage: React.FC = () => {
         />
 
         {/* Levels Box Map Section */}
-        <View pointerEvents="none" style={styles.levelsBox}>
-          <Image
-            source={require('../assets/HomescreenAssets/levelsBox.png')}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Planet 1 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(703), left: s(68), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
+        <ImageBackground
+          source={require('../assets/ActivityAssets/levelBox.png')}
+          style={styles.levelsBox}
+          resizeMode="stretch"
         >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 1.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Level Title Header Banner */}
+          <View pointerEvents="none" style={styles.levelTitleBanner}>
+            <Image
+              source={require('../assets/HomescreenAssets/levelTitle.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="contain"
+            />
+          </View>
+          <View pointerEvents="none" style={styles.gradeTitleText}>
+            <Image
+              source={require('../assets/HomescreenAssets/Grade 8 - Physics.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="contain"
+            />
+          </View>
 
-        {/* Planet 2 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(670), left: s(240), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 2.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 1 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(430), left: s(33), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 1.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 3 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(573), left: s(123), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 3.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 2 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(400), left: s(210), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 2.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 4 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(455), left: s(56), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 4.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 3 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(310), left: s(88), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 3.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 5 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(553), left: s(277), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('Act5Start')}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 5.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 4 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(190), left: s(25), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 4.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 6 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(390), left: s(277), width: s(100), height: s(100), zIndex: 1 }]}
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('Act6Start')}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 6.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 5 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(290), left: s(240), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Act5Start')}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 5.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Level Title Header Banner (rendered on top of Planet 6 visually) */}
-        <View pointerEvents="none" style={[styles.levelTitleBanner, { zIndex: 3 }]}>
-          <Image
-            source={require('../assets/HomescreenAssets/levelTitle.png')}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
-          />
-        </View>
-        <View pointerEvents="none" style={[styles.gradeTitleText, { zIndex: 3 }]}>
-          <Image
-            source={require('../assets/HomescreenAssets/Grade 8 - Physics.png')}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
-          />
-        </View>
+          {/* Planet 6 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(115), left: s(210), width: s(110), height: s(110), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Act6Start')}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 6.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+
+          {/* Planet 7 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(60), left: s(65), width: s(105), height: s(105), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Act7Start')}
+          >
+            <Image
+              source={require('../assets/ActivityAssets/planet 7.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </ImageBackground>
 
         {/* Bottom Navigation Bar */}
         <Image
@@ -365,7 +357,7 @@ const styles = StyleSheet.create({
   },
   categoriesRow: {
     position: 'absolute',
-    top: s(318),
+    top: s(235),
     width: '100%',
     height: s(50),
   },
@@ -380,31 +372,27 @@ const styles = StyleSheet.create({
   },
   levelsBox: {
     position: 'absolute',
-    top: s(378),
-    left: s(32),
-    width: s(376),
-    height: s(440),
-  },
-  planetNode: {
-    position: 'absolute',
-  },
-  planetImage: {
-    width: '100%',
-    height: '100%',
+    top: s(285),
+    alignSelf: 'center',
+    width: s(374),
+    height: s(553),
+    zIndex: 10,
   },
   levelTitleBanner: {
     position: 'absolute',
-    top: s(377),
-    left: s(32),
+    top: s(0),
+    alignSelf: 'center',
     width: s(374),
     height: s(54),
+    zIndex: 3,
   },
   gradeTitleText: {
     position: 'absolute',
-    top: s(390),
-    left: s(95),
+    top: s(13),
+    alignSelf: 'center',
     width: s(250),
     height: s(28),
+    zIndex: 3,
   },
   bigEarth: {
     position: 'absolute',

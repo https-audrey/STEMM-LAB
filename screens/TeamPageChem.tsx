@@ -152,12 +152,7 @@ const TeamPageChem: React.FC = () => {
           </View>
         </ImageBackground>
 
-        {/* To-Do List Box */}
-        <Image
-          source={require('../assets/TeamPageChemAssets/todoList.png')}
-          style={styles.todoBox}
-          resizeMode="stretch"
-        />
+
 
         {/* Create New Team Button */}
         <TouchableOpacity
@@ -430,17 +425,9 @@ const styles = StyleSheet.create({
     width: s(170),
     height: s(20),
   },
-  todoBox: {
-    position: 'absolute',
-    top: s(545),
-    alignSelf: 'center',
-    width: s(380),
-    height: s(150),
-    zIndex: 10,
-  },
   createButton: {
     position: 'absolute',
-    top: s(705),
+    top: s(545),
     left: s(30),
     width: s(230),
     height: s(50),
@@ -450,7 +437,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    top: s(765),
+    top: s(605),
     left: s(30),
     zIndex: 10,
   },
@@ -483,7 +470,7 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(645),
+    top: s(485),
     right: s(5),
     width: s(160),
     height: s(160),

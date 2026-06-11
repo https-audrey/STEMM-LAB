@@ -53,6 +53,10 @@ export type RootStackParamList = {
   Act7Curriculum: undefined;
   Act7Experiment1: undefined;
   Act7Result1: { docIds: string[] };
+  Act7Result2: { docIds: string[] };
+  Act7Result3: { docIds: string[] };
+  Act7Experiment2: { docIds?: string[] } | undefined;
+  Act7Experiment3: { docIds?: string[] } | undefined;
 };
 
 
