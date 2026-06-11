@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Alert,
     View,
@@ -16,6 +16,7 @@ import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../services/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
+import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
@@ -25,7 +26,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
 
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isExpired, setIsExpired] = useState(false);
-    const TIMER_MINUTES = 1;
+    const TIMER_MINUTES = 2;
     const STORAGE_KEY = `parachute_session_start_${currentSessionId}`;
 
     const [showSetupModal, setShowSetupModal] = useState(false);
@@ -44,10 +45,20 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         prototype3: [],
     });
 
+    const warningsSentRef = useRef({
+        tenMin: false,
+        fiveMin: false,
+        oneMin: false,
+    })
+
     const [isNewSession, setIsNewSession] = useState(true);
 
-    // Initialize timer on mount
+    const autoSubmittedRef = useRef(false);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
     useEffect(() => {
+        let isMounted = true; // Track if component is still mounted
+        
         const initTimer = async () => {
             let startTime: number;
             const storedStartTime = await AsyncStorage.getItem(STORAGE_KEY);
@@ -63,50 +74,131 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             const remaining = TIMER_MINUTES * 60 - elapsed;
             
             if (remaining <= 0) {
-                setIsExpired(true);
-                setTimeRemaining(0);
-                await autoSubmit();
+                if (isMounted) {
+                    setIsExpired(true);
+                    setTimeRemaining(0);
+                    if (!autoSubmittedRef.current) {
+                        autoSubmit();
+                    }
+                }
                 return;
             }
             
-            setTimeRemaining(remaining);
+            if (isMounted) {
+                setTimeRemaining(remaining);
+            }
             
-            const interval = setInterval(() => {
+            // Clear existing interval if any
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+            
+            intervalRef.current = setInterval(() => {
                 const currentElapsed = (Date.now() - startTime) / 1000;
                 const currentRemaining = TIMER_MINUTES * 60 - currentElapsed;
                 
                 if (currentRemaining <= 0) {
-                    clearInterval(interval);
-                    setIsExpired(true);
-                    setTimeRemaining(0);
-                    autoSubmit();
-                } else {
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                    }
+                    if (isMounted) {
+                        setIsExpired(true);
+                        setTimeRemaining(0);
+                        if (!autoSubmittedRef.current) {
+                            autoSubmit();
+                        }
+                    }
+                } else if (isMounted) {
                     setTimeRemaining(currentRemaining);
                 }
             }, 1000);
-            
-            return () => clearInterval(interval);
         };
         
         initTimer();
+        
+        // Cleanup function
+        return () => {
+            isMounted = false;
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
     }, [currentSessionId, (route.params as any)?.forceNewSession]);
 
-    const autoSubmit = async () => {
-        const trials = getTrialsBySession(currentSessionId);
-        const completedCount = trials.length;
+    useEffect(() => {
+        const sendWarningNotifications = async () => {
+            if (!timeRemaining || isExpired) return;
+            
+            const remainingSeconds = timeRemaining;
+            const remainingMinutes = remainingSeconds / 60;
+            
+            // 10 minutes warning (600 seconds = 10 minutes)
+
+            if (
+                remainingSeconds <= 600 &&
+                remainingSeconds > 595 &&
+                !warningsSentRef.current.tenMin
+            ) {
+                warningsSentRef.current.tenMin = true;
+
+                await sendNotification(
+                    '⚠️ 5 Minutes Remaining',
+                    'Your parachute session will end in 5 minutes.'
+                );
+            }
+            
+            // 1 minute warning (60 seconds = 1 minute)
+            // Only trigger ONCE when crossing below 61 seconds
+            if (
+                remainingSeconds <= 61 &&
+                remainingSeconds > 55 &&
+                !warningsSentRef.current.oneMin
+            ) {
+                warningsSentRef.current.oneMin = true;
+
+                await sendNotification(
+                    '⚠️ 1 Minute Remaining',
+                    'Your parachute session will end in 1 minute. Wrap up your current test!'
+                );
+            }
+        };
         
-        Alert.alert(
-            'Time\'s Up!',
-            `Your ${TIMER_MINUTES} minutes have ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`,
-            [
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        navigation.replace('Parachute', { currentSessionId });
-                    }
-                }
-            ]
-        );
+        sendWarningNotifications();
+    }, [timeRemaining, isExpired]); 
+
+    const autoSubmit = async () => {
+        if (autoSubmittedRef.current) return;
+
+        autoSubmittedRef.current = true;
+
+        try {
+            const trials = getTrialsBySession(currentSessionId);
+            const completedCount = trials.length;
+
+            await sendNotification(
+                '⏰ Time\'s Up!',
+                `Your parachute session has ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`
+            );
+
+            Alert.alert(
+                'Time\'s Up!',
+                `Your ${TIMER_MINUTES} minutes have ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`,
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            navigation.replace('Parachute', {
+                                currentSessionId,
+                            });
+                        },
+                    },
+                ]
+            );
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const formatTime = (seconds: number): string => {
@@ -319,23 +411,11 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             submittedAt: new Date().toISOString(),
         });
 
+        await cancelAllNotifications();
+
         Alert.alert('Activity Submitted', 'Your parachute analytics report has been saved!', [
             {
-                text: 'Start New Session',
-                onPress: () => {
-                    setMass('');
-                    setHeight('');
-                    setReflection('');
-                    setHasUnsavedChanges(false);
-                    setIsSessionActive(false);
-                    setIsNewSession(true);
-                    setShowSetupModal(true);
-                    const freshSessionId = `session_${Date.now()}`;
-                    navigation.replace('ParachuteActivity', { currentSessionId: freshSessionId, forceNewSession: true } as any);
-                }
-            },
-            {
-                text: 'Go to Home',
+                text: 'Done',
                 onPress: () => {
                     navigation.navigate('Home');
                 }

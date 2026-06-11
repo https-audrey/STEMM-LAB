@@ -7,6 +7,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { ShortStack_400Regular } from '@expo-google-fonts/short-stack';
 import { DynaPuff_400Regular } from '@expo-google-fonts/dynapuff';
+import * as Notifications from 'expo-notifications';
+import { configureNotifications } from './services/notificationService';
 
 import { AuthProvider } from './context/AuthContext';
 
@@ -91,6 +93,10 @@ export default function App() {
       setIsReady(true);
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    configureNotifications();
+  });
 
   if (!fontsLoaded || !isReady) {
     return (
