@@ -378,6 +378,13 @@ const styles = StyleSheet.create({
     height: s(553),
     zIndex: 10,
   },
+  planetNode: {
+    position: 'absolute',
+  },
+  planetImage: {
+    width: '100%',
+    height: '100%',
+  },
   levelTitleBanner: {
     position: 'absolute',
     top: s(0),
