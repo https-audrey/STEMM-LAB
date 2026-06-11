@@ -26,7 +26,7 @@ const Act6DiscussionPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('RateActivity'); // 🔁 Replace with your actual next screen if different
+        navigation.navigate('Act6Curriculum'); // 🔁 Replace with your actual next screen if different
     };
 
     return (

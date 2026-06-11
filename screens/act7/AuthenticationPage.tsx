@@ -29,7 +29,7 @@ const AuthenticationPage: React.FC = () => {
     };
 
     const handleStart = () => {
-        // navigation.navigate('Act7Equipment'); // Placeholder for next step
+        navigation.navigate('Act7Equipment'); 
     };
 
     return (
