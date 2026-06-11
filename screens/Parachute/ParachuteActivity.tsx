@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
-import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession } from '../../services/db';
+import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession, ensureSessionExists } from '../../services/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
@@ -174,30 +174,59 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         autoSubmittedRef.current = true;
 
         try {
-            const trials = getTrialsBySession(currentSessionId);
-            const completedCount = trials.length;
-
-            await sendNotification(
-                '⏰ Time\'s Up!',
-                `Your parachute session has ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`
+            ensureSessionExists(
+                currentSessionId,
+                'parachute'
             );
+
+            // Save reflection if available
+            if (reflection.trim()) {
+                saveSessionReflection(
+                    currentSessionId,
+                    'parachute',
+                    reflection
+                );
+            }
+
+            console.log('AUTO SUBMIT START');
+            console.log('Session ID:', currentSessionId);
+
+            markSessionSubmitted(currentSessionId);
+
+            console.log('SESSION MARKED SUBMITTED');
+
+            console.log('Auto submit session:', currentSessionId);
+
+            const readings = getTrialsBySession(currentSessionId);
+
+            console.log('Trials found:', readings.length);
+
+
+            await cancelAllNotifications();
+            // Upload to Firestore
+            await Promise.all([
+                addDocument('parachute_submissions', {
+                    sessionId: currentSessionId,
+                    readings,
+                    reflection,
+                    submittedAt: new Date().toISOString(),
+                }),
+
+                sendNotification(
+                    'Activity Auto-Submitted',
+                    `Time expired. ${readings.length} prototype records have been saved automatically.`
+                ),
+            ]);
+
+            navigation.navigate('Home');
+
+        } catch (error) {
+            console.error('Auto submit failed:', error);
 
             Alert.alert(
-                'Time\'s Up!',
-                `Your ${TIMER_MINUTES} minutes have ended. ${completedCount} prototype${completedCount !== 1 ? 's' : ''} have been saved.`,
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            navigation.replace('Parachute', {
-                                currentSessionId,
-                            });
-                        },
-                    },
-                ]
+                'Auto Submit Error',
+                'The session ended but automatic submission failed.'
             );
-        } catch (err) {
-            console.error(err);
         }
     };
 
@@ -403,24 +432,27 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         markSessionSubmitted(currentSessionId);
 
         const readings = getTrialsBySession(currentSessionId);
-                
-        await addDocument('parachute_submissions', {
-            sessionId: currentSessionId,
-            readings: readings,
-            reflection: reflection,
-            submittedAt: new Date().toISOString(),
-        });
 
-        await cancelAllNotifications();
+        try {
+            await cancelAllNotifications();
+            await Promise.all([
+                addDocument('parachute_submissions', {
+                    sessionId: currentSessionId,
+                    readings,
+                    reflection,
+                    submittedAt: new Date().toISOString(),
+                }),
 
-        Alert.alert('Activity Submitted', 'Your parachute analytics report has been saved!', [
-            {
-                text: 'Done',
-                onPress: () => {
-                    navigation.navigate('Home');
-                }
-            }
-        ]);
+                sendNotification(
+                    'Activity Submitted',
+                    'Your Parachute Drop Challenge report has been saved!'
+                ),
+            ]);
+
+            navigation.navigate('Home');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit activity');
+        }
     };
 
     const handleSetupConfirm = () => {

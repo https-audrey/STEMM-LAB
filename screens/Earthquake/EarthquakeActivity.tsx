@@ -15,6 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
+import { sendNotification } from '../../services/notificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
 
@@ -168,34 +169,25 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
 
         const readings = getEarthquakeTrialsBySession(currentSessionId);
                         
-        await addDocument('earthquake_submissions', {
-            sessionId: currentSessionId,
-            readings: readings,
-            reflection: reflection,
-            submittedAt: new Date().toISOString(),
-        });
+        try {
+            await Promise.all([
+                addDocument('earthquake_submissions', {
+                    sessionId: currentSessionId,
+                    readings,
+                    reflection,
+                    submittedAt: new Date().toISOString(),
+                }),
 
-        Alert.alert('Activity Submitted', 'Your Earthquake-Resistant Structure report has been saved!', [
-            {
-                text: 'Start New Session',
-                onPress: () => {
-                    setDescription('');
-                    setReflection('');
-                    setHasUnsavedChanges(false);
-                    setIsSessionActive(false);
-                    setIsNewSession(true);
-                    setShowSetupModal(true);
-                    const freshSessionId = `session_${Date.now()}`;
-                    navigation.replace('EarthquakeActivity', { currentSessionId: freshSessionId, forceNewSession: true } as any);
-                }
-            },
-            {
-                text: 'Go to Home',
-                onPress: () => {
-                    navigation.navigate('Home');
-                }
-            }
-        ]);
+                sendNotification(
+                    'Activity Submitted',
+                    'Your Earthquake-Resistant Challenge report has been saved!'
+                ),
+            ]);
+
+            navigation.navigate('Home');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit activity');
+        }
     };
 
     const handleSetupConfirm = () => {

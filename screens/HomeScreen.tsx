@@ -301,7 +301,7 @@ const HomePage: React.FC = () => {
         {/* Levels Button */}
         <TouchableOpacity
           style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
+          onPress={() => navigation.navigate('ActivityResult')}
           activeOpacity={0.7}
         >
           <Image

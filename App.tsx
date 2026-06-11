@@ -42,6 +42,8 @@ import Sound from './screens/Sound/Sound';
 import SoundActivity from './screens/Sound/SoundActivity';
 import SoundRecord from './screens/Sound/SoundRecord';
 
+import ActivityResult from './screens/ActivityResult';
+
 import { initDatabase } from './services/db';
 import CreateTeamPage from './screens/CreateTeamPage';
 import Act5StartPage from './screens/act5/StartPage';
@@ -181,6 +183,7 @@ export default function App() {
           <Stack.Screen name="Sound" component={Sound} />
           <Stack.Screen name="SoundActivity" component={SoundActivity} />
           <Stack.Screen name="SoundRecord" component={SoundRecord} />
+          <Stack.Screen name="ActivityResult" component={ActivityResult} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

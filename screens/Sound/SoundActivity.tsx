@@ -18,6 +18,7 @@ import * as Location from 'expo-location';
 import { RootStackParamList } from '../../types/navigation';
 import { getSessionReflection, getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
+import { sendNotification } from '../../services/notificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 
@@ -202,34 +203,25 @@ export default function SoundActivity({ navigation, route }: Props) {
 
         const readings = getSoundTrialsBySession(currentSessionId);
         
-        await addDocument('sound_submissions', {
-            sessionId: currentSessionId,
-            readings: readings,
-            reflection: reflection,
-            submittedAt: new Date().toISOString(),
-        });
+        try {
+            await Promise.all([
+                addDocument('sound_submissions', {
+                    sessionId: currentSessionId,
+                    readings,
+                    reflection,
+                    submittedAt: new Date().toISOString(),
+                }),
 
-        Alert.alert('Activity Submitted', 'Your Sound Pollution Hunter report has been saved!', [
-            {
-                text: 'Start New Session',
-                onPress: () => {
-                    setLocationDescription('');
-                    setAction('');
-                    setReflection('');
-                    setHasUnsavedChanges(false);
-                    setIsSessionActive(false);
-                    setIsNewSession(true);
-                    const freshSessionId = `session_${Date.now()}`;
-                    navigation.replace('SoundActivity', { currentSessionId: freshSessionId, forceNewSession: true } as any);
-                }
-            },
-            {
-                text: 'Go to Home',
-                onPress: () => {
-                    navigation.navigate('Home');
-                }
-            }
-        ]);
+                sendNotification(
+                    'Activity Submitted',
+                    'Your Sound Pollution Hunter report has been saved!'
+                ),
+            ]);
+
+            navigation.navigate('Home');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit activity');
+        }
     };
 
     return (

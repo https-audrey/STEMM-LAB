@@ -219,6 +219,22 @@ export const initDatabase = (): void => {
   }
 };
 
+export const getAllSessions = (): ActivitySession[] => {
+  if (!db) {
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '{}');
+    return Object.values(sessions);
+  }
+
+  try {
+    return db.getAllSync(`
+      SELECT * FROM activity_sessions ORDER BY submitted_at DESC
+    `) as ActivitySession[];
+  } catch (error) {
+    console.error('Get all sessions error:', error);
+    return [];
+  }
+};
+
 //Parachute DB
 
 export const saveTrialRecord = (record: PrototypeRecord & { session_id: string }): void => {
@@ -758,5 +774,34 @@ export const markSessionSubmitted = (sessionId: string): void => {
     );
   } catch (error) {
     console.error('Mark submitted error:', error);
+  }
+};
+
+export const ensureSessionExists = (
+  sessionId: string,
+  activityType: string
+): void => {
+  if (!db) return;
+
+  try {
+    db.runSync(
+      `
+      INSERT OR IGNORE INTO activity_sessions (
+        session_id,
+        activity_type,
+        created_at,
+        updated_at
+      )
+      VALUES (
+        ?,
+        ?,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+      `,
+      [sessionId, activityType]
+    );
+  } catch (error) {
+    console.error(error);
   }
 };

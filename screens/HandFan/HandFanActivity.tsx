@@ -15,6 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, getHFTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
+import { sendNotification } from '../../services/notificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
 
@@ -220,37 +221,25 @@ export default function HandFanActivity({ navigation, route }: Props) {
 
         const readings = getHFTrialsBySession(currentSessionId);
                 
-        await addDocument('handfan_submissions', {
-            sessionId: currentSessionId,
-            readings: readings,
-            reflection: reflection,
-            submittedAt: new Date().toISOString(),
-        });
+        try {
+            await Promise.all([
+                addDocument('handfan_submissions', {
+                    sessionId: currentSessionId,
+                    readings,
+                    reflection,
+                    submittedAt: new Date().toISOString(),
+                }),
 
-        Alert.alert('Activity Submitted', 'Your Hand Fan Challenge report has been saved!', [
-            {
-                text: 'Start New Session',
-                onPress: () => {
-                    setDesign('');
-                    setDistance('');
-                    setMaterial('');
-                    setStiffness('');
-                    setReflection('');
-                    setHasUnsavedChanges(false);
-                    setIsSessionActive(false);
-                    setIsNewSession(true);
-                    setShowSetupModal(true);
-                    const freshSessionId = `session_${Date.now()}`;
-                    navigation.replace('HandFanActivity', { currentSessionId: freshSessionId, forceNewSession: true } as any);
-                }
-            },
-            {
-                text: 'Go to Home',
-                onPress: () => {
-                    navigation.navigate('Home');
-                }
-            }
-        ]);
+                sendNotification(
+                    'Activity Submitted',
+                    'Your Hand Fan Challenge report has been saved!'
+                ),
+            ]);
+
+            navigation.navigate('Home');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit activity');
+        }
     };
 
     const handleSetupConfirm = () => {
