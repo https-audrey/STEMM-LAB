@@ -57,11 +57,19 @@ const HomePage: React.FC = () => {
             {profile?.fullName || 'Explorer'}
           </Text>
         </View>
-        <Image
-          source={require('../assets/HomescreenAssets/astronaut1.png')}
-          style={styles.astronaut}
-          resizeMode="contain"
-        />
+        <TouchableOpacity
+          style={{ }}
+          activeOpacity={0.7}
+          onPress={() => {
+            navigation.navigate('ActivityResult');
+          }}
+        >
+          <Image
+            source={require('../assets/HomescreenAssets/astronaut1.png')}
+            style={styles.astronaut}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
 
         {/* Info Box */}
         <Image
@@ -146,69 +154,69 @@ const HomePage: React.FC = () => {
             />
           </View>
 
-        {/* Planet 1 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(703), left: s(68), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-          onPress={() => {
-            const newSessionId = `session_${Date.now()}`;
-            navigation.navigate('Parachute', { currentSessionId: newSessionId });
-          }}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 1.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 1 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(430), left: s(68), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => {
+              const newSessionId = `session_${Date.now()}`;
+              navigation.navigate('Parachute', { currentSessionId: newSessionId });
+            }}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 1.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 2 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(670), left: s(240), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-          onPress={() => {
-            const newSessionId = `session_${Date.now()}`;
-            navigation.navigate('Sound', { currentSessionId: newSessionId });
-          }}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 2.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 2 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(405), left: s(200), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => {
+              const newSessionId = `session_${Date.now()}`;
+              navigation.navigate('Sound', { currentSessionId: newSessionId });
+            }}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 2.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 3 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(573), left: s(123), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-          onPress={() => {
-            const newSessionId = `session_${Date.now()}`;
-            navigation.navigate('HandFan', { currentSessionId: newSessionId });
-          }}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 3.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 3 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(310), left: s(80), width: s(115), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => {
+              const newSessionId = `session_${Date.now()}`;
+              navigation.navigate('HandFan', { currentSessionId: newSessionId });
+            }}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 3.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
-        {/* Planet 4 */}
-        <TouchableOpacity
-          style={[styles.planetNode, { top: s(455), left: s(56), width: s(100), height: s(100), zIndex: 5 }]}
-          activeOpacity={0.7}
-          onPress={() => {
-            const newSessionId = `session_${Date.now()}`;
-            navigation.navigate('Earthquake', { currentSessionId: newSessionId });
-          }}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/planet 4.png')}
-            style={styles.planetImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          {/* Planet 4 */}
+          <TouchableOpacity
+            style={[styles.planetNode, { top: s(190), left: s(40), width: s(100), height: s(100), zIndex: 5 }]}
+            activeOpacity={0.7}
+            onPress={() => {
+              const newSessionId = `session_${Date.now()}`;
+              navigation.navigate('Earthquake', { currentSessionId: newSessionId });
+            }}
+          >
+            <Image
+              source={require('../assets/HomescreenAssets/planet 4.png')}
+              style={styles.planetImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
 
           {/* Planet 5 */}
           <TouchableOpacity
@@ -279,19 +287,6 @@ const HomePage: React.FC = () => {
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('ActivityResult')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
             resizeMode="contain"
           />
         </TouchableOpacity>

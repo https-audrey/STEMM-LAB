@@ -62,7 +62,6 @@ export default function ActivityResult() {
         filterSessions();
     }, [activeFilter, allSessions]);
 
-    // 🔥 PARALLEL PROGRAMMING: Load all sessions concurrently
     const loadAllSessionsInParallel = async () => {
         setLoading(true);
         
