@@ -11,14 +11,14 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Instruction'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act7Instruction'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const InstructionPage: React.FC = () => {
+const Act7InstructionPage: React.FC = () => {
     const navigation = useNavigation<Nav>();
 
     const handleClose = () => {
@@ -26,7 +26,7 @@ const InstructionPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Act6Phase1Start');
+        navigation.navigate('Act7Experiment1');
     };
 
     return (
@@ -49,9 +49,9 @@ const InstructionPage: React.FC = () => {
                     />
                 </TouchableOpacity>
 
-                {/* Title bubble — "Reaction Board Challenge" */}
+                {/* Title bubble */}
                 <Image
-                    source={require('../../assets/act6/act6Title.png')}
+                    source={require('../../assets/act7/act7Title.png')}
                     style={styles.titleBubble}
                     resizeMode="contain"
                 />
@@ -59,7 +59,7 @@ const InstructionPage: React.FC = () => {
                 {/* Instruction box container and Continue Button */}
                 <View style={styles.boxContainer}>
                     <Image
-                        source={require('../../assets/InstructionsAssets/act6InstructionBox1.png')}
+                        source={require('../../assets/InstructionsAssets/act7InstructionBox.png')}
                         style={styles.instructionBox}
                         resizeMode="contain"
                     />
@@ -76,10 +76,10 @@ const InstructionPage: React.FC = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Mars planet — bottom of the screen */}
+                {/* Jupiter planet — bottom of the screen */}
                 <Image
-                    source={require('../../assets/act6/mars.png')}
-                    style={styles.marsPlanet}
+                    source={require('../../assets/act7/jupiter.png')}
+                    style={styles.jupiterPlanet}
                     resizeMode="contain"
                 />
             </ImageBackground>
@@ -97,8 +97,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Close button — top left corner */
     closeButton: {
         position: 'absolute',
         top: s(70),
@@ -113,8 +111,6 @@ const styles = StyleSheet.create({
         width: s(45),
         height: s(45),
     },
-
-    /* Title bubble — "Reaction Board Challenge" */
     titleBubble: {
         position: 'absolute',
         top: s(140),
@@ -123,11 +119,9 @@ const styles = StyleSheet.create({
         height: s(180),
         left: s(30),
     },
-
-    /* Instruction Box Container */
     boxContainer: {
         position: 'absolute',
-        top: s(250),
+        top: s(320),
         alignSelf: 'center',
         width: s(374),
         height: s(583),
@@ -137,11 +131,9 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Continue button — aligned bottom right inside the container */
     continueButton: {
         position: 'absolute',
-        bottom: s(130),
+        bottom: s(28),
         right: s(22),
         width: s(141),
         height: s(41),
@@ -151,9 +143,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Mars planet — bottom of screen, partially cut off */
-    marsPlanet: {
+    jupiterPlanet: {
         position: 'absolute',
         bottom: s(-30),
         right: s(-40),
@@ -163,4 +153,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default InstructionPage;
+export default Act7InstructionPage;

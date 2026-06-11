@@ -11,14 +11,14 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Instruction'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Instruction2'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const InstructionPage: React.FC = () => {
+const InstructionPage2: React.FC = () => {
     const navigation = useNavigation<Nav>();
 
     const handleClose = () => {
@@ -26,7 +26,7 @@ const InstructionPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Act6Phase1Start');
+        navigation.navigate('Act6Phase3Start');
     };
 
     return (
@@ -59,7 +59,7 @@ const InstructionPage: React.FC = () => {
                 {/* Instruction box container and Continue Button */}
                 <View style={styles.boxContainer}>
                     <Image
-                        source={require('../../assets/InstructionsAssets/act6InstructionBox1.png')}
+                        source={require('../../assets/InstructionsAssets/act6InstructionBox2.png')}
                         style={styles.instructionBox}
                         resizeMode="contain"
                     />
@@ -163,4 +163,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default InstructionPage;
+export default InstructionPage2;

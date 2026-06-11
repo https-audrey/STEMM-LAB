@@ -152,12 +152,7 @@ const TeamPageChem: React.FC = () => {
           </View>
         </ImageBackground>
 
-        {/* To-Do List Box */}
-        <Image
-          source={require('../assets/TeamPageChemAssets/todoList.png')}
-          style={styles.todoBox}
-          resizeMode="stretch"
-        />
+
 
         {/* Create New Team Button */}
         <TouchableOpacity
@@ -259,19 +254,6 @@ const TeamPageChem: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
@@ -314,7 +296,7 @@ const styles = StyleSheet.create({
   },
   topBox: {
     position: 'absolute',
-    top: s(80),
+    top: s(100),
     alignSelf: 'center',
     width: s(380),
     height: s(160),
@@ -323,7 +305,7 @@ const styles = StyleSheet.create({
   },
   boxTopBg: {
     position: 'absolute',
-    top: s(79),
+    top: s(99),
     alignSelf: 'center',
     width: s(383),
     height: s(162),
@@ -336,11 +318,14 @@ const styles = StyleSheet.create({
   gradeTitle: {
     width: s(220),
     height: s(30),
+    top: s(0),
+    left: s(-20)
   },
   arrowButton: {
     width: s(25),
     height: s(25),
-    marginLeft: s(5),
+    marginLeft: s(-30),
+    top: s(0)
   },
   indicatorsRow: {
     flexDirection: 'row',
@@ -351,10 +336,12 @@ const styles = StyleSheet.create({
     width: s(75),
     height: s(25),
     marginRight: s(5),
+    top: s(8)
   },
   percentIndicator: {
     width: s(50),
     height: s(25),
+    top: s(8)
   },
   planetsContainer: {
     position: 'absolute',
@@ -366,27 +353,27 @@ const styles = StyleSheet.create({
   smallEarthPlanet: {
     position: 'absolute',
     left: s(0),
-    bottom: s(0),
+    bottom: s(-7),
     width: s(90),
     height: s(60),
   },
   act2Planet: {
     position: 'absolute',
     left: s(170),
-    bottom: s(10),
-    width: s(42),
-    height: s(42),
+    bottom: s(3),
+    width: s(72),
+    height: s(72),
   },
   act3Planet: {
     position: 'absolute',
-    left: s(290),
-    bottom: s(10),
-    width: s(42),
-    height: s(42),
+    left: s(280),
+    bottom: s(3),
+    width: s(72),
+    height: s(72),
   },
   analysisBox: {
     position: 'absolute',
-    top: s(255),
+    top: s(295),
     alignSelf: 'center',
     width: s(380),
     height: s(275),
@@ -402,7 +389,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: s(12),
+    marginTop: s(23),
     width: s(229),
     height: s(24),
     alignSelf: 'center',
@@ -429,20 +416,13 @@ const styles = StyleSheet.create({
   weekText: {
     width: s(170),
     height: s(20),
-  },
-  todoBox: {
-    position: 'absolute',
-    top: s(545),
-    alignSelf: 'center',
-    width: s(380),
-    height: s(150),
-    zIndex: 10,
+    top: s(2),
   },
   createButton: {
     position: 'absolute',
-    top: s(705),
-    left: s(30),
-    width: s(230),
+    top: s(605),
+    left: s(40),
+    width: s(210),
     height: s(50),
     zIndex: 10,
   },
@@ -450,8 +430,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    top: s(765),
-    left: s(30),
+    top: s(665),
+    left: s(40),
     zIndex: 10,
   },
   codeBoxBackground: {
@@ -483,10 +463,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(645),
-    right: s(5),
-    width: s(160),
-    height: s(160),
+    top: s(585),
+    right: s(-5),
+    width: s(250),
+    height: s(250),
     zIndex: 15,
   },
   bigEarth: {
@@ -510,7 +490,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -522,31 +502,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -558,7 +526,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {

@@ -52,10 +52,33 @@ import Act6StartPage from './screens/act6/StartPage';
 import Act6AuthenticationPage from './screens/act6/AuthenticationPage';
 import Act6EquipmentPage from './screens/act6/EquipmentPage';
 import Act6InstructionPage from './screens/act6/InstructionPage';
+import Act6InstructionPage2 from './screens/act6/InstructionPage2';
 import Act6Phase1StartPage from './screens/act6/Phase1StartPage';
+import Act6Phase2StartPage from './screens/act6/Phase2StartPage';
+import Act6Phase3StartPage from './screens/act6/Phase3StartPage';
 import Act6ExperimentPage1 from './screens/act6/ExperimentPage1';
+import Act6ExperimentPage2 from './screens/act6/ExperimentPage2';
+import Act6ExperimentPage3 from './screens/act6/ExperimentPage3';
+import Act6Phase1ResultPage from './screens/act6/Phase1ResultPage';
+import Act6Phase2ResultPage from './screens/act6/Phase2ResultPage';
+import Act6Phase3ResultPage from './screens/act6/Phase3ResultPage';
+import Act6Phase1And2ResultPage from './screens/act6/Phase1&2ResultPage';
+import Act6ReflectionPage from './screens/act6/ReflectionPage';
+import Act6DiscussionPage from './screens/act6/DiscussionPage';
+import Act6CurriculumPage from './screens/act6/CurriculumPage';
 import Act7StartPage from './screens/act7/StartPage';
 import Act7AuthenticationPage from './screens/act7/AuthenticationPage';
+import Act7EquipmentPage from './screens/act7/EquipmentPage';
+import Act7InstructionPage from './screens/act7/InstructionPage';
+import Act7ReflectionPage from './screens/act7/ReflectionPage';
+import Act7DiscussionPage from './screens/act7/DiscussionPage';
+import Act7CurriculumPage from './screens/act7/CurriculumPage';
+import Act7ExperimentPage1 from './screens/act7/ExperimentPage1';
+import Act7ExperimentPage2 from './screens/act7/ExperimentPage2';
+import Act7ExperimentPage3 from './screens/act7/ExperimentPage3';
+import Act7ResultPage1 from './screens/act7/ResultPage1';
+import Act7ResultPage2 from './screens/act7/ResultPage2';
+import Act7ResultPage3 from './screens/act7/ResultPage3';
 import EquipmentPage from './screens/act5/EquipmentPage';
 import InstructionPage from './screens/act5/InstructionPage';
 import ExperimentPage from './screens/act5/ExperimentPage';
@@ -69,8 +92,9 @@ import Act5CurriculumPage from './screens/act5/Act5CurriculumPage';
 import TeamPageChem from './screens/TeamPageChem';
 import LeaderboardPage from './screens/LeaderboardPage';
 import ProfilePage from './screens/ProfilePage';
-import ActivityPage from './screens/ActivityPage';
 import RateActivityPage from './screens/RateActivity/RateActivityPage';
+import act6RateActivityPage from './screens/RateActivity/act6RateActivityPage';
+import act7RateActivityPage from './screens/RateActivity/act7RateAcitivityPage';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -146,10 +170,34 @@ export default function App() {
           <Stack.Screen name="Act6Authentication" component={Act6AuthenticationPage} />
           <Stack.Screen name="Act6Equipment" component={Act6EquipmentPage} />
           <Stack.Screen name="Act6Instruction" component={Act6InstructionPage} />
+          <Stack.Screen name="Act6Instruction2" component={Act6InstructionPage2} />
           <Stack.Screen name="Act6Phase1Start" component={Act6Phase1StartPage} />
+          <Stack.Screen name="Act6Phase2Start" component={Act6Phase2StartPage} />
+          <Stack.Screen name="Act6Phase3Start" component={Act6Phase3StartPage} />
           <Stack.Screen name="Act6Experiment1" component={Act6ExperimentPage1} />
+          <Stack.Screen name="Act6Experiment2" component={Act6ExperimentPage2} />
+          <Stack.Screen name="Act6Experiment3" component={Act6ExperimentPage3} />
+          <Stack.Screen name="Act6Phase1Result" component={Act6Phase1ResultPage} />
+          <Stack.Screen name="Act6Phase2Result" component={Act6Phase2ResultPage} />
+          <Stack.Screen name="Act6Phase3Result" component={Act6Phase3ResultPage} />
+          <Stack.Screen name="Act6Phase1And2Result" component={Act6Phase1And2ResultPage} />
+          <Stack.Screen name="Act6Reflection" component={Act6ReflectionPage} />
+          <Stack.Screen name="Act6Discussion" component={Act6DiscussionPage} />
+          <Stack.Screen name="Act6Curriculum" component={Act6CurriculumPage} />
           <Stack.Screen name="Act7Start" component={Act7StartPage} />
           <Stack.Screen name="Act7Authentication" component={Act7AuthenticationPage} />
+          <Stack.Screen name="Act7Equipment" component={Act7EquipmentPage} />
+          <Stack.Screen name="Act7Instruction" component={Act7InstructionPage} />
+          <Stack.Screen name="Act7Reflection" component={Act7ReflectionPage} />
+          <Stack.Screen name="Act7Discussion" component={Act7DiscussionPage} />
+          <Stack.Screen name="Act7Curriculum" component={Act7CurriculumPage} />
+          <Stack.Screen name="Act7Experiment1" component={Act7ExperimentPage1} />
+          <Stack.Screen name="Act7Result1" component={Act7ResultPage1} />
+          <Stack.Screen name="Act7Result2" component={Act7ResultPage2} />
+          <Stack.Screen name="Act7Result3" component={Act7ResultPage3} />
+          <Stack.Screen name="Act7Experiment2" component={Act7ExperimentPage2} />
+          <Stack.Screen name="Act7Experiment3" component={Act7ExperimentPage3} />
+          <Stack.Screen name="RateActivity" component={RateActivityPage} />
           <Stack.Screen name="Act5Authentication" component={AuthenticationPage} />
           <Stack.Screen name="Act5Equipment" component={EquipmentPage} />
           <Stack.Screen name="Act5Instruction" component={InstructionPage} />
@@ -164,8 +212,8 @@ export default function App() {
           <Stack.Screen name="TeamPageChem" component={TeamPageChem} />
           <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
           <Stack.Screen name="Profile" component={ProfilePage} />
-          <Stack.Screen name="Activity" component={ActivityPage} />
-          <Stack.Screen name="RateActivity" component={RateActivityPage} />
+          <Stack.Screen name="Act6RateActivity" component={act6RateActivityPage} />
+          <Stack.Screen name="Act7RateActivity" component={act7RateActivityPage} />
           <Stack.Screen name="Parachute" component={Parachute} />
           <Stack.Screen name="ParachuteActivity" component={ParachuteActivity} />
           <Stack.Screen name="ParachutePrototype" component={ParachutePrototype} />

@@ -220,19 +220,6 @@ const NoTeamFound: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
@@ -435,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -447,31 +434,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -483,7 +458,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {

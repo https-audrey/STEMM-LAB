@@ -246,19 +246,6 @@ const CreateTeamPage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
@@ -301,10 +288,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(-35),
-    left: s(260),
-    width: s(100),
-    height: s(105),
+    top: s(-30),
+    left: s(210),
+    width: s(170),
+    height: s(175),
     zIndex: 1,
   },
   boxTop: {
@@ -317,16 +304,16 @@ const styles = StyleSheet.create({
   },
   teamNameTitle: {
     position: 'absolute',
-    top: s(22),
+    top: s(38),
     left: s(20),
-    width: s(210),
-    height: s(32),
+    width: s(230),
+    height: s(37),
     zIndex: 2,
   },
   nameBoxTeam: {
     position: 'absolute',
-    top: s(62),
-    left: s(20),
+    top: s(82),
+    left: s(40),
     width: s(315),
     height: s(42),
     flexDirection: 'row',
@@ -347,14 +334,14 @@ const styles = StyleSheet.create({
   },
   gradeTitle: {
     position: 'absolute',
-    top: s(120),
+    top: s(145),
     left: s(122),
     width: s(190),
-    height: s(32),
+    height: s(37),
   },
   gradeBox: {
     position: 'absolute',
-    top: s(158),
+    top: s(188),
     left: s(120),
     width: s(240),
     height: s(42),
@@ -368,9 +355,9 @@ const styles = StyleSheet.create({
   meteor: {
     position: 'absolute',
     top: s(195),
-    left: s(-5),
-    width: s(165),
-    height: s(115),
+    left: s(0),
+    width: s(175),
+    height: s(125),
     zIndex: 10,
   },
   memberBox: {
@@ -383,43 +370,45 @@ const styles = StyleSheet.create({
   },
   teamMemTitle: {
     position: 'absolute',
-    top: s(12),
+    top: s(18),
     alignSelf: 'center',
-    width: s(190),
-    height: s(26),
+    width: s(200),
+    height: s(36),
   },
   lineDivider: {
     position: 'absolute',
-    top: s(48),
+    top: s(68),
     alignSelf: 'center',
     width: s(340),
-    height: s(4),
+    height: s(2),
   },
   searchBar: {
     position: 'absolute',
-    top: s(64),
+    top: s(84),
     alignSelf: 'center',
     width: s(320),
     height: s(34),
   },
   membersSelectedText: {
     position: 'absolute',
-    top: s(106),
-    left: s(25),
+    top: s(130),
+    left: s(40),
     width: s(200),
     height: s(18),
   },
   memberRow: {
     position: 'absolute',
     alignSelf: 'center',
-    width: s(315),
+    width: s(350),
     height: s(36),
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: s(30),
+    left: s(-10),
   },
   memberCard: {
-    width: '100%',
-    height: '100%',
+    width: '120%',
+    height: '120%',
   },
   crossButton: {
     position: 'absolute',
@@ -463,7 +452,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -475,31 +464,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -511,7 +488,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {

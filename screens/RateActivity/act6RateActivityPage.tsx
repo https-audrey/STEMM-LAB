@@ -17,14 +17,14 @@ import { RootStackParamList } from '../../types/navigation';
 import { addDocument } from '../../services/firestoreService';
 import { useAuth } from '../../context/AuthContext';
 
-type Nav = StackNavigationProp<RootStackParamList, 'RateActivity'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6RateActivity'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const RateActivityPage: React.FC = () => {
+const Act6RateActivityPage: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const { user } = useAuth();
 
@@ -37,7 +37,6 @@ const RateActivityPage: React.FC = () => {
     };
 
     const handleStarPress = (index: number) => {
-        // If user taps the same star that is the current rating, deselect it
         if (starRating === index) {
             setStarRating(0);
         } else {
@@ -46,13 +45,11 @@ const RateActivityPage: React.FC = () => {
     };
 
     const handleFinish = async () => {
-        // Validate: must select at least 1 star
         if (starRating === 0) {
             Alert.alert('Rating Required', 'Please select a star rating before submitting.');
             return;
         }
 
-        // Validate: must write a comment
         if (!comment.trim()) {
             Alert.alert('Comment Required', 'Please write your comment and feedback before submitting.');
             return;
@@ -67,13 +64,12 @@ const RateActivityPage: React.FC = () => {
                 createdAt: new Date(),
             });
 
-            // Navigate to Home screen
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' }],
             });
         } catch (error) {
-            console.error('[RateActivity] Error saving rating:', error);
+            console.error('[Act6RateActivity] Error saving rating:', error);
             Alert.alert('Error', 'Failed to save your rating. Please try again.');
         } finally {
             setSubmitting(false);
@@ -101,9 +97,9 @@ const RateActivityPage: React.FC = () => {
                         />
                     </TouchableOpacity>
 
-                    {/* Title bubble — "Stretch Speed & Gracefulness" */}
+                    {/* Title bubble */}
                     <Image
-                        source={require('../../assets/act5/act5Title.png')}
+                        source={require('../../assets/act6/act6Title.png')}
                         style={styles.titleBubble}
                         resizeMode="contain"
                     />
@@ -149,7 +145,6 @@ const RateActivityPage: React.FC = () => {
                                 multiline
                                 textAlignVertical="top"
                             />
-                            {/* Show placeholder image only when comment is empty */}
                             {comment.length === 0 && (
                                 <View pointerEvents="none" style={styles.placeholderWrapper}>
                                     <Image
@@ -178,8 +173,8 @@ const RateActivityPage: React.FC = () => {
 
                     {/* Saturn planet — bottom of screen */}
                     <Image
-                        source={require('../../assets/act5/saturnPlanet.png')}
-                        style={styles.saturnPlanet}
+                        source={require('../../assets/act6/mars.png')}
+                        style={styles.mars}
                         resizeMode="contain"
                     />
                 </ImageBackground>
@@ -198,8 +193,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Close button — top left corner */
     closeButton: {
         position: 'absolute',
         top: s(70),
@@ -214,8 +207,6 @@ const styles = StyleSheet.create({
         width: s(45),
         height: s(45),
     },
-
-    /* Title bubble — "Stretch Speed & Gracefulness" */
     titleBubble: {
         position: 'absolute',
         top: s(140),
@@ -225,8 +216,6 @@ const styles = StyleSheet.create({
         left: s(30),
         zIndex: 2,
     },
-
-    /* Rate Box Container */
     boxContainer: {
         position: 'absolute',
         top: s(320),
@@ -239,8 +228,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* 5 Stars Row — positioned inside the rate box */
     starsContainer: {
         position: 'absolute',
         top: s(165),
@@ -259,8 +246,6 @@ const styles = StyleSheet.create({
         width: s(50),
         height: s(50),
     },
-
-    /* Comment / Feedback area */
     commentContainer: {
         position: 'absolute',
         top: s(290),
@@ -292,8 +277,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Finish button */
     finishButton: {
         position: 'absolute',
         bottom: s(30),
@@ -306,9 +289,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-
-    /* Saturn planet — bottom of screen, partially cut off */
-    saturnPlanet: {
+    mars: {
         position: 'absolute',
         bottom: s(-30),
         right: s(-40),
@@ -318,4 +299,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default RateActivityPage;
+export default Act6RateActivityPage;
