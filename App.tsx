@@ -156,7 +156,6 @@ export default function App() {
           <Stack.Screen name="Leaderboard" component={LeaderboardPage} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="Activity" component={ActivityPage} />
-          <Stack.Screen name="RateActivity" component={RateActivityPage} />
           <Stack.Screen name="Act6RateActivity" component={act6RateActivityPage} />
           <Stack.Screen name="Act7RateActivity" component={act7RateActivityPage} />
         </Stack.Navigator>
