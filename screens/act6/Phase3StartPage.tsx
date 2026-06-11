@@ -14,14 +14,14 @@ import { RootStackParamList } from '../../types/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { FONTS } from '../../utils/theme';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase2Start'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase3Start'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const Phase2StartPage: React.FC = () => {
+const Phase3StartPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
   const { profile } = useAuth();
   const userName = profile?.fullName || 'Alexander';
@@ -31,7 +31,7 @@ const Phase2StartPage: React.FC = () => {
   };
 
   const handleStart = () => {
-    navigation.navigate('Act6Experiment2');
+    navigation.navigate('Act6Experiment3');
   };
 
   return (
@@ -61,9 +61,9 @@ const Phase2StartPage: React.FC = () => {
           resizeMode="contain"
         />
 
-        {/* "Phase 2" bubble */}
+        {/* "Phase 3" bubble */}
         <Image
-          source={require('../../assets/PhaseStartPageAssets/phase2.png')}
+          source={require('../../assets/PhaseStartPageAssets/phase3.png')}
           style={styles.phaseIndicator}
           resizeMode="contain"
         />
@@ -79,6 +79,14 @@ const Phase2StartPage: React.FC = () => {
               Player 1: {userName}
             </Text>
           </ImageBackground>
+
+          <TouchableOpacity style={styles.dropDownBtn} activeOpacity={0.7}>
+            <Image
+              source={require('../../assets/PhaseStartPageAssets/dropDownBtn.png')}
+              style={styles.dropDownImg}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Big START Button */}
@@ -178,6 +186,15 @@ const styles = StyleSheet.create({
     color: '#07181f',
     textAlign: 'center',
   },
+  dropDownBtn: {
+    marginLeft: s(10),
+    width: s(25),
+    height: s(25),
+  },
+  dropDownImg: {
+    width: '100%',
+    height: '100%',
+  },
 
   /* Start Button */
   startButton: {
@@ -214,4 +231,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Phase2StartPage;
+export default Phase3StartPage;

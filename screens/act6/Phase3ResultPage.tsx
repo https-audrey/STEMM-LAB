@@ -16,17 +16,17 @@ import { useAuth } from '../../context/AuthContext';
 import { FONTS } from '../../utils/theme';
 import { queryDocuments, where } from '../../services/firestoreService';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase1Result'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase3Result'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const Phase1ResultPage: React.FC = () => {
+const Phase3ResultPage: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const { profile } = useAuth();
-    const [speed, setSpeed] = useState<number | null>(null);
+    const [accuracy, setAccuracy] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
     const userName = profile?.fullName || 'Alexander';
@@ -37,7 +37,7 @@ const Phase1ResultPage: React.FC = () => {
                 const results = await queryDocuments('experiments', [
                     where('userId', '==', profile?.uid || 'anonymous'),
                     where('act', '==', 6),
-                    where('phase', '==', 1),
+                    where('phase', '==', 3),
                 ]);
 
                 if (results.length > 0) {
@@ -51,10 +51,10 @@ const Phase1ResultPage: React.FC = () => {
                         };
                         return getMs(b.createdAt) - getMs(a.createdAt);
                     });
-                    setSpeed(results[0].speed);
+                    setAccuracy(results[0].accuracy);
                 }
             } catch (error) {
-                console.error('Error fetching speed result:', error);
+                console.error('Error fetching accuracy result:', error);
             } finally {
                 setLoading(false);
             }
@@ -68,7 +68,7 @@ const Phase1ResultPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Act6Phase2Start');
+        navigation.navigate('Home');
     };
 
     return (
@@ -101,7 +101,7 @@ const Phase1ResultPage: React.FC = () => {
                 {/* Result Box */}
                 <View style={styles.boxContainer}>
                     <ImageBackground
-                        source={require('../../assets/act6PhaseResultAssets/phase1ResultBox.png')}
+                        source={require('../../assets/act6PhaseResultAssets/phase3ResultBox.png')}
                         style={styles.resultBox}
                         resizeMode="contain"
                     >
@@ -112,13 +112,13 @@ const Phase1ResultPage: React.FC = () => {
                             </Text>
                         </View>
 
-                        {/* Speed Result Overlay */}
-                        <View style={styles.speedOverlay}>
+                        {/* Accuracy Result Overlay */}
+                        <View style={styles.accuracyOverlay}>
                             {loading ? (
                                 <ActivityIndicator color="#07181f" />
                             ) : (
-                                <Text style={styles.speedText}>
-                                    {speed !== null ? speed.toFixed(2) : '0.00'} m/s
+                                <Text style={styles.accuracyText}>
+                                    {accuracy !== null ? `${accuracy.toFixed(0)} %` : '0 %'}
                                 </Text>
                             )}
                         </View>
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
         color: '#07181f',
     },
 
-    speedOverlay: {
+    accuracyOverlay: {
         position: 'absolute',
         top: s(238),
         width: s(150),
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    speedText: {
+    accuracyText: {
         fontFamily: FONTS.heading, // DynaPuff
         fontSize: s(20),
         color: '#07181f',
@@ -272,4 +272,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Phase1ResultPage;
+export default Phase3ResultPage;

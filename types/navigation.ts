@@ -20,6 +20,8 @@ export type RootStackParamList = {
   Act5Discussion: { docIds: string[] };
   Act5Curriculum: undefined;
   RateActivity: undefined;
+  Act6RateActivity: undefined;
+  Act7RateActivity: undefined;
   TeamPageChem: undefined;
   Leaderboard: undefined;
   Profile: undefined;
@@ -28,14 +30,27 @@ export type RootStackParamList = {
   Act6Authentication: undefined;
   Act6Equipment: undefined;
   Act6Instruction: undefined;
+  Act6Instruction2: undefined;
   Act6Phase1Start: undefined;
   Act6Phase2Start: undefined;
+  Act6Phase3Start: undefined;
   Act6Experiment1: undefined;
   Act6Experiment2: undefined;
+  Act6Experiment3: undefined;
   Act6Phase1Result: undefined;
   Act6Phase2Result: undefined;
+  Act6Phase3Result: undefined;
+  Act6Phase1And2Result: undefined;
+  Act6Reflection: { docIds: string[] };
+  Act6Discussion: { docIds: string[] };
+  Act6Curriculum: undefined;
   Act7Start: undefined;
   Act7Authentication: undefined;
+  Act7Equipment: undefined;
+  Act7Instruction: undefined;
+  Act7Reflection: { docIds: string[] };
+  Act7Discussion: { docIds: string[] };
+  Act7Curriculum: undefined;
 };
 
 

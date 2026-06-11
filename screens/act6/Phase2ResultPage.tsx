@@ -14,7 +14,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { FONTS } from '../../utils/theme';
-import { queryDocuments, where, orderBy, limit } from '../../services/firestoreService';
+import { queryDocuments, where } from '../../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase2Result'>;
 
@@ -38,11 +38,19 @@ const Phase2ResultPage: React.FC = () => {
           where('userId', '==', profile?.uid || 'anonymous'),
           where('act', '==', 6),
           where('phase', '==', 2), // Fetching Phase 2 result
-          orderBy('createdAt', 'desc'),
-          limit(1),
         ]);
 
         if (results.length > 0) {
+          // Sort in memory by createdAt descending to avoid composite index requirements
+          results.sort((a, b) => {
+            const getMs = (val: any) => {
+              if (!val) return 0;
+              if (typeof val.toDate === 'function') return val.toDate().getTime();
+              if (val.seconds) return val.seconds * 1000;
+              return new Date(val).getTime();
+            };
+            return getMs(b.createdAt) - getMs(a.createdAt);
+          });
           setSpeed(results[0].speed);
         }
       } catch (error) {
@@ -60,8 +68,8 @@ const Phase2ResultPage: React.FC = () => {
   };
 
   const handleContinue = () => {
-    // Navigate to next activity or phase
-    navigation.navigate('Home'); 
+    // Navigate to comparison page
+    navigation.navigate('Act6Phase1And2Result');
   };
 
   return (
@@ -205,7 +213,7 @@ const styles = StyleSheet.create({
   /* Text Overlays inside the box */
   nameOverlay: {
     position: 'absolute',
-    top: s(62),
+    top: s(97),
     width: s(280),
     height: s(40),
     justifyContent: 'center',
@@ -219,7 +227,7 @@ const styles = StyleSheet.create({
 
   speedOverlay: {
     position: 'absolute',
-    top: s(245),
+    top: s(238),
     width: s(150),
     height: s(60),
     justifyContent: 'center',
@@ -227,7 +235,7 @@ const styles = StyleSheet.create({
   },
   speedText: {
     fontFamily: FONTS.heading, // DynaPuff
-    fontSize: s(24),
+    fontSize: s(20),
     color: '#07181f',
     fontWeight: '400',
   },
@@ -235,7 +243,7 @@ const styles = StyleSheet.create({
   /* Continue Button */
   continueBtn: {
     position: 'absolute',
-    bottom: s(60),
+    bottom: s(80),
     width: s(160),
     height: s(60),
   },
@@ -251,7 +259,7 @@ const styles = StyleSheet.create({
     right: s(35),
     width: s(110),
     height: s(145),
-    zIndex: 3,
+    zIndex: 10,
   },
 
   /* Mars planet */

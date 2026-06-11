@@ -16,51 +16,65 @@ import { useAuth } from '../../context/AuthContext';
 import { FONTS } from '../../utils/theme';
 import { queryDocuments, where } from '../../services/firestoreService';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase1Result'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Act6Phase1And2Result'>;
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
-const Phase1ResultPage: React.FC = () => {
+const Phase1And2ResultPage: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const { profile } = useAuth();
-    const [speed, setSpeed] = useState<number | null>(null);
+    const [phase1Speed, setPhase1Speed] = useState<number | null>(null);
+    const [phase2Speed, setPhase2Speed] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
     const userName = profile?.fullName || 'Alexander';
 
     useEffect(() => {
-        const fetchResult = async () => {
+        const fetchResults = async () => {
             try {
-                const results = await queryDocuments('experiments', [
-                    where('userId', '==', profile?.uid || 'anonymous'),
+                const getMs = (val: any) => {
+                    if (!val) return 0;
+                    if (typeof val.toDate === 'function') return val.toDate().getTime();
+                    if (val.seconds) return val.seconds * 1000;
+                    return new Date(val).getTime();
+                };
+
+                const userId = profile?.uid || 'anonymous';
+
+                // Query Phase 1
+                const results1 = await queryDocuments('experiments', [
+                    where('userId', '==', userId),
                     where('act', '==', 6),
                     where('phase', '==', 1),
                 ]);
 
-                if (results.length > 0) {
-                    // Sort in memory by createdAt descending to avoid composite index requirements
-                    results.sort((a, b) => {
-                        const getMs = (val: any) => {
-                            if (!val) return 0;
-                            if (typeof val.toDate === 'function') return val.toDate().getTime();
-                            if (val.seconds) return val.seconds * 1000;
-                            return new Date(val).getTime();
-                        };
-                        return getMs(b.createdAt) - getMs(a.createdAt);
-                    });
-                    setSpeed(results[0].speed);
+                if (results1.length > 0) {
+                    results1.sort((a, b) => getMs(b.createdAt) - getMs(a.createdAt));
+                    setPhase1Speed(results1[0].speed);
+                }
+
+                // Query Phase 2
+                const results2 = await queryDocuments('experiments', [
+                    where('userId', '==', userId),
+                    where('act', '==', 6),
+                    where('phase', '==', 2),
+                ]);
+
+                if (results2.length > 0) {
+                    results2.sort((a, b) => getMs(b.createdAt) - getMs(a.createdAt));
+                    setPhase2Speed(results2[0].speed);
                 }
             } catch (error) {
-                console.error('Error fetching speed result:', error);
+                console.error('Error fetching speed results:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchResult();
+        fetchResults();
     }, [profile]);
 
     const handleClose = () => {
@@ -68,7 +82,7 @@ const Phase1ResultPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        navigation.navigate('Act6Phase2Start');
+        navigation.navigate('Act6Instruction2');
     };
 
     return (
@@ -98,28 +112,40 @@ const Phase1ResultPage: React.FC = () => {
                     resizeMode="contain"
                 />
 
-                {/* Result Box */}
+                {/* Comparison Result Box */}
                 <View style={styles.boxContainer}>
                     <ImageBackground
-                        source={require('../../assets/act6PhaseResultAssets/phase1ResultBox.png')}
+                        source={require('../../assets/act6PhaseResultAssets/phase1&2resultComp.png')}
                         style={styles.resultBox}
                         resizeMode="contain"
                     >
-                        {/* Player Name Overlay */}
-                        <View style={styles.nameOverlay}>
-                            <Text style={styles.playerNameText}>
-                                Player 1: {userName}
-                            </Text>
-                        </View>
-
-                        {/* Speed Result Overlay */}
-                        <View style={styles.speedOverlay}>
+                        {/* Player Row Container */}
+                        <View style={styles.rowsContainer}>
                             {loading ? (
-                                <ActivityIndicator color="#07181f" />
+                                <ActivityIndicator color="#07181f" size="large" />
                             ) : (
-                                <Text style={styles.speedText}>
-                                    {speed !== null ? speed.toFixed(2) : '0.00'} m/s
-                                </Text>
+                                <ImageBackground
+                                    source={require('../../assets/act6PhaseResultAssets/playerBox.png')}
+                                    style={styles.playerBox}
+                                    resizeMode="contain"
+                                >
+                                    <View style={styles.playerRowContent}>
+                                        <Text style={styles.rankText}>1</Text>
+                                        <Text style={styles.nameText} numberOfLines={1}>
+                                            {userName}
+                                        </Text>
+                                        <View style={styles.resultBubble}>
+                                            <Text style={styles.resultText}>
+                                                {phase1Speed !== null ? `${phase1Speed.toFixed(2)}m/s` : '0.00m/s'}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.resultBubble}>
+                                            <Text style={styles.resultText}>
+                                                {phase2Speed !== null ? `${phase2Speed.toFixed(2)}m/s` : '0.00m/s'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </ImageBackground>
                             )}
                         </View>
 
@@ -138,7 +164,7 @@ const Phase1ResultPage: React.FC = () => {
                     </ImageBackground>
                 </View>
 
-                {/* Astronaut */}
+                {/* Astronaut (in front of the box) */}
                 <Image
                     source={require('../../assets/PhaseStartPageAssets/astronaut5.png')}
                     style={styles.astronaut}
@@ -209,46 +235,66 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-    /* Text Overlays inside the box */
-    nameOverlay: {
+    /* Rows overlay inside the box */
+    rowsContainer: {
         position: 'absolute',
-        top: s(97),
-        width: s(280),
-        height: s(40),
-        justifyContent: 'center',
+        top: s(160),
+        width: s(320),
         alignItems: 'center',
     },
-    playerNameText: {
+    playerBox: {
+        width: s(310),
+        height: s(46),
+        justifyContent: 'center',
+    },
+    playerRowContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: '100%',
+        paddingHorizontal: s(10),
+    },
+    rankText: {
         fontFamily: FONTS.title, // ShortStack
-        fontSize: s(20),
+        fontSize: s(14),
         color: '#07181f',
+        width: s(15),
+        textAlign: 'center',
     },
-
-    speedOverlay: {
-        position: 'absolute',
-        top: s(238),
-        width: s(150),
-        height: s(60),
-        justifyContent: 'center',
+    nameText: {
+        fontFamily: FONTS.title, // ShortStack
+        fontSize: s(14),
+        color: '#07181f',
+        marginLeft: s(10),
+        flex: 1,
+    },
+    resultBubble: {
+        borderWidth: s(1.5),
+        borderColor: 'transparent',
+        borderRadius: s(12),
+        paddingHorizontal: s(6),
+        paddingVertical: s(2),
+        marginLeft: s(30),
+        minWidth: s(68),
         alignItems: 'center',
+        left: -10
     },
-    speedText: {
-        fontFamily: FONTS.heading, // DynaPuff
-        fontSize: s(20),
+    resultText: {
+        fontFamily: FONTS.title, // ShortStack
+        fontSize: s(11),
         color: '#07181f',
-        fontWeight: '400',
     },
 
     /* Continue Button */
     continueBtn: {
         position: 'absolute',
-        bottom: s(80),
+        bottom: s(40),
         width: s(160),
         height: s(60),
+        left: 95,
     },
     continueImg: {
-        width: '100%',
-        height: '100%',
+        width: '90%',
+        height: '90%',
     },
 
     /* Astronaut */
@@ -258,7 +304,7 @@ const styles = StyleSheet.create({
         right: s(35),
         width: s(110),
         height: s(145),
-        zIndex: 10,
+        zIndex: 10, // Renders in front of boxContainer (zIndex: 5)
     },
 
     /* Mars planet */
@@ -272,4 +318,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Phase1ResultPage;
+export default Phase1And2ResultPage;
