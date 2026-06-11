@@ -43,7 +43,7 @@ const Act7EquipmentPage: React.FC = () => {
                     activeOpacity={0.7}
                 >
                     <Image
-                        source={require('../../assets/act7/crossBtn.png')}
+                        source={require('../../assets/act5/crossBtn.png')}
                         style={styles.closeIcon}
                         resizeMode="contain"
                     />

@@ -112,7 +112,7 @@ const Act7ReflectionPage: React.FC = () => {
                             {answer.length === 0 && (
                                 <View style={styles.placeholderContainer} pointerEvents="none">
                                     <Image
-                                        source={require('../../assets/act5ReflectionAssets/Write your answers here.png')}
+                                        source={require('../../assets/Act5ReflectionAssets/Write your answers here.png')}
                                         style={styles.placeholderImage}
                                         resizeMode="contain"
                                     />
@@ -131,7 +131,7 @@ const Act7ReflectionPage: React.FC = () => {
                                 <ActivityIndicator size="small" color="#08121E" />
                             ) : (
                                 <Image
-                                    source={require('../../assets/Act6ReflectionAssets/nextBtn.png')}
+                                    source={require('../../assets/Act5ReflectionAssets/nextBtn.png')}
                                     style={styles.nextImage}
                                     resizeMode="contain"
                                 />
