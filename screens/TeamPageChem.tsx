@@ -51,7 +51,7 @@ const TeamPageChem: React.FC = () => {
 
           // Fetch member names
           if (latestTeam.memberIds && latestTeam.memberIds.length > 0) {
-            const profiles = await queryDocuments('profiles', [
+            const profiles = await queryDocuments('users', [
               where('uid', 'in', latestTeam.memberIds)
             ]);
             // Map names in order of memberIds or just alphabetically
