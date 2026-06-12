@@ -399,15 +399,15 @@ const styles = StyleSheet.create({
   },
   teamNameInput: {
     flex: 1,
-    height: s(40),
+    height: s(48),
     fontFamily: FONTS.ui,
-    fontSize: s(16),
+    fontSize: s(14),
     color: COLORS.darkText,
     paddingHorizontal: s(10),
   },
   teamCodeText: {
     fontFamily: FONTS.ui,
-    fontSize: s(15),
+    fontSize: s(12),
     color: COLORS.darkText,
     textAlign: 'center',
     marginTop: s(0),
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   },
   gradeInput: {
     fontFamily: FONTS.ui,
-    fontSize: s(16),
+    fontSize: s(15),
     color: COLORS.darkText,
     textAlign: 'center',
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     top: s(84),
     alignSelf: 'center',
     width: s(320),
-    height: s(34),
+    height: s(40),
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -462,6 +462,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.ui,
     fontSize: s(14),
     color: COLORS.darkText,
+    top: s(3)
   },
   searchIconContainer: {
     width: s(40),
@@ -485,6 +486,7 @@ const styles = StyleSheet.create({
     marginTop: s(160),
     width: '100%',
     alignItems: 'center',
+    top: s(-130)
   },
   memberRow: {
     position: 'absolute',
@@ -514,15 +516,17 @@ const styles = StyleSheet.create({
   },
   numberText: {
     fontFamily: FONTS.ui,
-    fontSize: s(16),
+    fontSize: s(12),
     color: COLORS.darkText,
     fontWeight: 'bold',
+    left: s(8)
   },
   memberNameText: {
     flex: 1,
     fontFamily: FONTS.ui,
     fontSize: s(16),
     color: COLORS.darkText,
+    left: s(8)
   },
   crossButton: {
     padding: s(5),
