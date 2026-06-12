@@ -278,27 +278,25 @@ const TeamPageChem: React.FC = () => {
 
         {/* Member List Box */}
         <ImageBackground
-           source={require('../assets/TeamPageChemAssets/memberBoxTeam.png')}
-           style={styles.memberBox}
-           resizeMode="stretch"
+          source={require('../assets/TeamPageChemAssets/memberBoxTeam.png')}
+          style={styles.memberBox}
+          resizeMode="stretch"
         >
-           <View style={styles.memberListTitleBubble}>
-              <Text style={styles.memberListTitleText}>Member List</Text>
-           </View>
-           <ScrollView 
-              style={styles.memberListScroll}
-              contentContainerStyle={styles.memberListScrollContent}
-              showsVerticalScrollIndicator={false}
-           >
-              {memberNames.map((name, index) => (
-                <Text key={index} style={styles.memberNameText}>
-                  {index + 1}. {name}
-                </Text>
-              ))}
-              {memberNames.length === 0 && (
-                <Text style={styles.memberNameText}>No members found</Text>
-              )}
-           </ScrollView>
+
+          <ScrollView
+            style={styles.memberListScroll}
+            contentContainerStyle={styles.memberListScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {memberNames.map((name, index) => (
+              <Text key={index} style={styles.memberNameText}>
+                {index + 1}. {name}
+              </Text>
+            ))}
+            {memberNames.length === 0 && (
+              <Text style={styles.memberNameText}>No members found</Text>
+            )}
+          </ScrollView>
         </ImageBackground>
 
 
@@ -445,7 +443,7 @@ const styles = StyleSheet.create({
   },
   topBox: {
     position: 'absolute',
-    top: s(100),
+    top: s(80),
     alignSelf: 'center',
     width: s(380),
     height: s(160),
@@ -454,7 +452,7 @@ const styles = StyleSheet.create({
   },
   boxTopBg: {
     position: 'absolute',
-    top: s(99),
+    top: s(79),
     alignSelf: 'center',
     width: s(383),
     height: s(162),
@@ -531,7 +529,7 @@ const styles = StyleSheet.create({
   },
   memberBox: {
     position: 'absolute',
-    top: s(580),
+    top: s(545),
     alignSelf: 'center',
     width: s(380),
     height: s(155),
@@ -539,31 +537,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: s(25),
     paddingTop: s(15),
   },
-  memberListTitleBubble: {
-    backgroundColor: '#ffffff',
-    borderWidth: s(1.5),
-    borderColor: '#08121e',
-    borderRadius: s(15),
-    paddingHorizontal: s(15),
-    paddingVertical: s(3),
-    alignSelf: 'flex-start',
-    marginLeft: s(-5),
-    marginTop: s(-5),
-  },
-  memberListTitleText: {
-    fontFamily: FONTS.ui,
-    fontSize: s(13),
-    color: '#08121e',
-    fontWeight: 'bold',
-  },
+
   memberListScroll: {
-    marginTop: s(10),
+    marginTop: s(35),
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     borderRadius: s(15),
     padding: s(10),
     borderWidth: s(1),
-    borderColor: '#000000',
+    borderColor: 'transparent',
+    left: s(6)
   },
   memberListScrollContent: {
     paddingBottom: s(10),
@@ -576,7 +559,7 @@ const styles = StyleSheet.create({
   },
   analysisBox: {
     position: 'absolute',
-    top: s(295),
+    top: s(255),
     alignSelf: 'center',
     width: s(380),
     height: s(275),
@@ -630,22 +613,22 @@ const styles = StyleSheet.create({
   },
   createButton: {
     position: 'absolute',
-    top: s(755),
+    top: s(715),
     left: s(40),
-    width: s(210),
-    height: s(40),
+    width: s(220),
+    height: s(50),
     zIndex: 10,
   },
   inputRow: {
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    top: s(805),
-    left: s(40),
+    top: s(775),
+    left: s(43),
     zIndex: 10,
   },
   codeBoxBackground: {
-    width: s(125),
+    width: s(130),
     height: s(40),
     justifyContent: 'center',
     marginRight: s(10),
@@ -673,10 +656,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(730),
+    top: s(600),
     right: s(-5),
-    width: s(220),
-    height: s(220),
+    width: s(250),
+    height: s(250),
     zIndex: 15,
   },
   bigEarth: {
