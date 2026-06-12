@@ -52,7 +52,7 @@ const LeaderboardPage: React.FC = () => {
             activeOpacity={0.8}
             onPress={() => setTabMode('individual')}
           >
-            <Image
+            {/* <Image
               source={
                 tabMode === 'individual'
                   ? require('../assets/LeaderboardAssets/individu1.png')
@@ -60,7 +60,7 @@ const LeaderboardPage: React.FC = () => {
               }
               style={styles.tabButton}
               resizeMode="contain"
-            />
+            /> */}
           </TouchableOpacity>
 
           {/* Team Tab */}
@@ -68,7 +68,7 @@ const LeaderboardPage: React.FC = () => {
             activeOpacity={0.8}
             onPress={() => setTabMode('team')}
           >
-            <Image
+            {/* <Image
               source={
                 tabMode === 'individual'
                   ? require('../assets/LeaderboardAssets/team1.png')
@@ -76,7 +76,7 @@ const LeaderboardPage: React.FC = () => {
               }
               style={styles.tabButton}
               resizeMode="contain"
-            />
+            /> */}
           </TouchableOpacity>
         </View>
 
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   weeklyProgress: {
     position: 'absolute',
-    top: s(80),
+    top: s(100),
     alignSelf: 'center',
     width: s(372),
     height: s(125),
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   leaderboardBox: {
     position: 'absolute',
-    top: s(265),
+    top: s(245),
     alignSelf: 'center',
     width: s(376),
     height: s(520),
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   pointsText: {
     position: 'absolute',
-    top: s(795),
+    top: s(775),
     alignSelf: 'center',
     width: s(353),
     height: s(30),
