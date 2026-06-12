@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Image,
@@ -7,11 +7,15 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Text,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS } from '../utils/theme';
+import { FONTS, COLORS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, limit, orderBy, arrayUnion, updateDocument } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'TeamPageChem'>;
 
@@ -22,15 +26,95 @@ const s = (v: number) => v * SCALE;
 
 const TeamPageChem: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { user } = useAuth();
   const [code, setCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [teamData, setTeamData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchTeam = async () => {
+      if (!user) return;
+      try {
+        const teams = await queryDocuments('teams', [
+          where('memberIds', 'array-contains', user.uid),
+          orderBy('createdAt', 'desc'),
+          limit(1)
+        ]);
+        if (teams.length > 0) {
+          setTeamData(teams[0]);
+        }
+      } catch (error) {
+        console.error('[TeamPage] Error fetching team:', error);
+      }
+    };
+    fetchTeam();
+  }, [user]);
+
+  const getWeekRange = (createdAt: any) => {
+    if (!createdAt) return 'Loading...';
+    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+    
+    // Set to Monday
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    
+    // Set to Sunday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    const startDay = startOfWeek.getDate();
+    const startMonth = months[startOfWeek.getMonth()];
+    const endDay = endOfWeek.getDate();
+    const endMonth = months[endOfWeek.getMonth()];
+    const year = endOfWeek.getFullYear();
+
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
+  };
 
   const handleCreateTeam = () => {
     navigation.navigate('CreateTeam');
   };
 
-  const handleJoinTeam = () => {
-    console.log('Join Team with code:', code);
+  const handleJoinTeam = async () => {
+    if (!code.trim()) {
+      Alert.alert('Empty Code', 'Please enter a team code to join.');
+      return;
+    }
+
+    try {
+      const teams = await queryDocuments('teams', [
+        where('code', '==', code.trim().toUpperCase())
+      ]);
+
+      if (teams.length > 0) {
+        const team = teams[0];
+        if (user) {
+          await updateDocument('teams', team.id, {
+            memberIds: arrayUnion(user.uid)
+          });
+          Alert.alert('Success', `You have joined the team: ${team.name}`);
+          // Refresh the page data
+          const updatedTeams = await queryDocuments('teams', [
+            where('memberIds', 'array-contains', user.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          ]);
+          if (updatedTeams.length > 0) {
+            setTeamData(updatedTeams[0]);
+          }
+          setCode('');
+        }
+      } else {
+        Alert.alert('Invalid Code', 'The code you entered does not match any team.');
+      }
+    } catch (error) {
+      console.error('[JoinTeam] Error:', error);
+      Alert.alert('Error', 'Failed to join team. Please try again.');
+    }
   };
 
   const handleNavigateHome = () => {
@@ -58,13 +142,17 @@ const TeamPageChem: React.FC = () => {
           style={styles.topBox}
           resizeMode="stretch"
         >
-          {/* Grade 8 Chemistry Title and Arrow */}
+          {/* Team Name Title and Arrow */}
           <View style={styles.topHeaderRow}>
-            <Image
-              source={require('../assets/TeamPageChemAssets/littleEinstein.png')}
-              style={styles.gradeTitle}
+            <ImageBackground
+              source={require('../assets/TeamPageChemAssets/title.png')}
+              style={styles.gradeTitleContainer}
               resizeMode="contain"
-            />
+            >
+              <Text style={styles.gradeTitleText}>
+                {teamData?.name || 'Loading...'}
+              </Text>
+            </ImageBackground>
             <TouchableOpacity style={styles.arrowButton} activeOpacity={0.7}>
               <Image
                 source={require('../assets/TeamPageChemAssets/arrowBtn.png')}
@@ -139,11 +227,11 @@ const TeamPageChem: React.FC = () => {
             </TouchableOpacity>
 
             {/* Date range label */}
-            <Image
-              source={require('../assets/TeamPageChemAssets/20 April - 25 April 2026.png')}
-              style={styles.weekText}
-              resizeMode="contain"
-            />
+            <View style={styles.weekTextContainer}>
+              <Text style={styles.weekTextContent}>
+                {getWeekRange(teamData?.createdAt)}
+              </Text>
+            </View>
 
             {/* Right arrow touchable area */}
             <TouchableOpacity style={styles.arrowTouchRight} activeOpacity={0.7}>
@@ -315,16 +403,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  gradeTitle: {
+  gradeTitleContainer: {
     width: s(220),
-    height: s(30),
+    height: s(35),
     top: s(0),
-    left: s(-20)
+    left: s(-15),
+    justifyContent: 'center',
+    paddingLeft: s(15),
+  },
+  gradeTitleText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(13),
+    color: '#08121e',
+    top: s(1)
   },
   arrowButton: {
     width: s(25),
     height: s(25),
-    marginLeft: s(-30),
+    marginLeft: s(-20),
     top: s(0)
   },
   indicatorsRow: {
@@ -413,10 +509,17 @@ const styles = StyleSheet.create({
     height: s(24),
     zIndex: 5,
   },
-  weekText: {
+  weekTextContainer: {
     width: s(170),
     height: s(20),
     top: s(2),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  weekTextContent: {
+    fontFamily: FONTS.ui,
+    fontSize: s(11),
+    color: '#08121e',
   },
   createButton: {
     position: 'absolute',

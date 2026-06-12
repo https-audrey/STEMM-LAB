@@ -198,4 +198,4 @@ export const subscribeToDocument = (
 // ─── CONVENIENCE RE-EXPORTS ─────────────────────────────────────────────────
 // So screens can import query helpers from one place
 
-export { where, orderBy, limit } from 'firebase/firestore';
+export { where, orderBy, limit, arrayUnion, arrayRemove } from 'firebase/firestore';

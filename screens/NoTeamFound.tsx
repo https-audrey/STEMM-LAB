@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, updateDocument, arrayUnion } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'NoTeam'>;
 
@@ -22,6 +25,7 @@ const s = (v: number) => v * SCALE;
 
 const NoTeamFound: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { user } = useAuth();
   const [code, setCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -29,9 +33,33 @@ const NoTeamFound: React.FC = () => {
     navigation.navigate('CreateTeam');
   };
 
-  const handleJoinTeam = () => {
-    // Action when user taps "Enter" to join a team with code
-    console.log('Join Team with code:', code);
+  const handleJoinTeam = async () => {
+    if (!code.trim()) {
+      Alert.alert('Empty Code', 'Please enter a team code.');
+      return;
+    }
+
+    try {
+      const teams = await queryDocuments('teams', [
+        where('code', '==', code.trim().toUpperCase())
+      ]);
+
+      if (teams.length > 0) {
+        const team = teams[0];
+        if (user) {
+          await updateDocument('teams', team.id, {
+            memberIds: arrayUnion(user.uid)
+          });
+          Alert.alert('Success', `You have joined the team: ${team.name}`);
+          navigation.navigate('TeamPageChem');
+        }
+      } else {
+        Alert.alert('Invalid Code', 'No team found with this code.');
+      }
+    } catch (error) {
+      console.error('[JoinTeam] Error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
   };
 
   return (
