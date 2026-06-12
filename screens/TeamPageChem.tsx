@@ -57,19 +57,19 @@ const TeamPageChem: React.FC = () => {
   const getWeekRange = (createdAt: any) => {
     if (!createdAt) return 'Loading...';
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-    
+
     // Set to Monday
     const startOfWeek = new Date(date);
     const day = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
-    
+
     // Set to Sunday
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    
+
     const startDay = startOfWeek.getDate();
     const startMonth = months[startOfWeek.getMonth()];
     const endDay = endOfWeek.getDate();
@@ -419,7 +419,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.ui,
     fontSize: s(13),
     color: '#08121e',
-    top: s(1)
+    top: s(1),
+    left: s(10)
   },
   arrowButton: {
     width: s(25),
