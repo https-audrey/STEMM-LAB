@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
 import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, limit } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -23,15 +24,32 @@ const s = (v: number) => v * SCALE;
 
 const ProfilePage: React.FC = () => {
   const navigation = useNavigation<Nav>();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [isEditPressed, setIsEditPressed] = useState(false);
 
   const handleNavigateHome = () => {
     navigation.navigate('Home');
   };
 
-  const handleNavigateTeam = () => {
-    navigation.navigate('NoTeam');
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      console.error('[Profile] Error checking team status:', error);
+      navigation.navigate('NoTeam');
+    }
   };
 
   const handleNavigateLeaderboard = () => {

@@ -64,8 +64,25 @@ const LeaderboardPage: React.FC = () => {
     navigation.navigate('Home');
   };
 
-  const handleNavigateTeam = () => {
-    navigation.navigate('NoTeam');
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teams = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teams.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      console.error('[Leaderboard] Error checking team status:', error);
+      navigation.navigate('NoTeam');
+    }
   };
 
   return (

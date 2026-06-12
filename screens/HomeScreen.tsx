@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
 import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, limit } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -25,8 +26,29 @@ const s = (v: number) => v * SCALE;
 
 const HomePage: React.FC = () => {
   const navigation = useNavigation<Nav>();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<'physics' | 'biology' | 'chemistry' | 'mathematics' | null>(null);
+
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teams = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teams.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      console.error('[Home] Error checking team status:', error);
+      navigation.navigate('NoTeam');
+    }
+  };
 
   const getPhysicsAsset = () => {
     // When no subject is selected (default state), show the unpressed 'phy.png'.
@@ -259,7 +281,7 @@ const HomePage: React.FC = () => {
         <TouchableOpacity
           style={styles.teamButton}
           activeOpacity={0.7}
-          onPress={() => navigation.navigate('NoTeam')}
+          onPress={handleNavigateTeam}
         >
           <Image
             source={require('../assets/HomescreenAssets/team.png')}

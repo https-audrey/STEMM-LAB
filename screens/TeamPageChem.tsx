@@ -125,6 +125,26 @@ const TeamPageChem: React.FC = () => {
     navigation.navigate('Home');
   };
 
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        // Stay here or refresh
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      navigation.navigate('NoTeam');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Full-screen space background */}
@@ -337,8 +357,8 @@ const TeamPageChem: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Team Button (Current Active Page) */}
-        <TouchableOpacity style={styles.teamButton} activeOpacity={1.0}>
+        {/* Team Button (Current Active Page but check status) */}
+        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7} onPress={handleNavigateTeam}>
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}

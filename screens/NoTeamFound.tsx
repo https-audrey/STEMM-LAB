@@ -14,7 +14,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
 import { useAuth } from '../context/AuthContext';
-import { queryDocuments, where, updateDocument, arrayUnion } from '../services/firestoreService';
+import { queryDocuments, where, updateDocument, arrayUnion, limit } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'NoTeam'>;
 
@@ -31,6 +31,26 @@ const NoTeamFound: React.FC = () => {
 
   const handleCreateTeam = () => {
     navigation.navigate('CreateTeam');
+  };
+
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        // Already on this page
+      }
+    } catch (error) {
+      // Stay or go to same
+    }
   };
 
   const handleJoinTeam = async () => {
@@ -239,8 +259,8 @@ const NoTeamFound: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Team Button (Current Active Page) */}
-        <TouchableOpacity style={styles.teamButton} activeOpacity={1.0}>
+        {/* Team Button (Current Active Page but check status) */}
+        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7} onPress={handleNavigateTeam}>
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}
