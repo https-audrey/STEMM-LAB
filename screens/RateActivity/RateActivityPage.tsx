@@ -71,12 +71,16 @@ const RateActivityPage: React.FC = () => {
             if (user) {
                 try {
                     const teams = await queryDocuments('teams', [
-                        where('memberIds', 'array-contains', user.uid),
-                        orderBy('createdAt', 'desc'),
-                        limit(1)
+                        where('memberIds', 'array-contains', user.uid)
                     ]);
                     if (teams.length > 0) {
-                        await updateDocument('teams', teams[0].id, {
+                        // Sort in memory to find the most recent team
+                        const sorted = teams.sort((a: any, b: any) => {
+                            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                        await updateDocument('teams', sorted[0].id, {
                             points: increment(100)
                         });
                     }
