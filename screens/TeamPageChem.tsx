@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Text,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -30,28 +31,39 @@ const TeamPageChem: React.FC = () => {
   const [code, setCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [teamData, setTeamData] = useState<any>(null);
+  const [memberNames, setMemberNames] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchTeam = async () => {
+    const fetchTeamAndMembers = async () => {
       if (!user) return;
       try {
         const teams = await queryDocuments('teams', [
           where('memberIds', 'array-contains', user.uid)
         ]);
         if (teams.length > 0) {
-          // Sort in memory to avoid needing a Firestore composite index
           const sorted = teams.sort((a, b) => {
             const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
             const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
             return dateB.getTime() - dateA.getTime();
           });
-          setTeamData(sorted[0]);
+          const latestTeam = sorted[0];
+          setTeamData(latestTeam);
+
+          // Fetch member names
+          if (latestTeam.memberIds && latestTeam.memberIds.length > 0) {
+            const profiles = await queryDocuments('profiles', [
+              where('uid', 'in', latestTeam.memberIds)
+            ]);
+            // Map names in order of memberIds or just alphabetically
+            const names = profiles.map((p: any) => p.fullName || 'Unknown Member');
+            setMemberNames(names);
+          }
         }
       } catch (error) {
-        console.error('[TeamPage] Error fetching team:', error);
+        console.error('[TeamPage] Error fetching data:', error);
       }
     };
-    fetchTeam();
+    fetchTeamAndMembers();
   }, [user]);
 
   const getWeekRange = (createdAt: any) => {
@@ -262,6 +274,31 @@ const TeamPageChem: React.FC = () => {
               <View style={styles.fullImage} />
             </TouchableOpacity>
           </View>
+        </ImageBackground>
+
+        {/* Member List Box */}
+        <ImageBackground
+           source={require('../assets/TeamPageChemAssets/memberBoxTeam.png')}
+           style={styles.memberBox}
+           resizeMode="stretch"
+        >
+           <View style={styles.memberListTitleBubble}>
+              <Text style={styles.memberListTitleText}>Member List</Text>
+           </View>
+           <ScrollView 
+              style={styles.memberListScroll}
+              contentContainerStyle={styles.memberListScrollContent}
+              showsVerticalScrollIndicator={false}
+           >
+              {memberNames.map((name, index) => (
+                <Text key={index} style={styles.memberNameText}>
+                  {index + 1}. {name}
+                </Text>
+              ))}
+              {memberNames.length === 0 && (
+                <Text style={styles.memberNameText}>No members found</Text>
+              )}
+           </ScrollView>
         </ImageBackground>
 
 
@@ -492,6 +529,51 @@ const styles = StyleSheet.create({
     width: s(72),
     height: s(72),
   },
+  memberBox: {
+    position: 'absolute',
+    top: s(580),
+    alignSelf: 'center',
+    width: s(380),
+    height: s(155),
+    zIndex: 10,
+    paddingHorizontal: s(25),
+    paddingTop: s(15),
+  },
+  memberListTitleBubble: {
+    backgroundColor: '#ffffff',
+    borderWidth: s(1.5),
+    borderColor: '#08121e',
+    borderRadius: s(15),
+    paddingHorizontal: s(15),
+    paddingVertical: s(3),
+    alignSelf: 'flex-start',
+    marginLeft: s(-5),
+    marginTop: s(-5),
+  },
+  memberListTitleText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(13),
+    color: '#08121e',
+    fontWeight: 'bold',
+  },
+  memberListScroll: {
+    marginTop: s(10),
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: s(15),
+    padding: s(10),
+    borderWidth: s(1),
+    borderColor: '#000000',
+  },
+  memberListScrollContent: {
+    paddingBottom: s(10),
+  },
+  memberNameText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: '#333333',
+    marginBottom: s(5),
+  },
   analysisBox: {
     position: 'absolute',
     top: s(295),
@@ -548,17 +630,17 @@ const styles = StyleSheet.create({
   },
   createButton: {
     position: 'absolute',
-    top: s(605),
+    top: s(755),
     left: s(40),
     width: s(210),
-    height: s(50),
+    height: s(40),
     zIndex: 10,
   },
   inputRow: {
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    top: s(665),
+    top: s(805),
     left: s(40),
     zIndex: 10,
   },
@@ -591,10 +673,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(585),
+    top: s(730),
     right: s(-5),
-    width: s(250),
-    height: s(250),
+    width: s(220),
+    height: s(220),
     zIndex: 15,
   },
   bigEarth: {
