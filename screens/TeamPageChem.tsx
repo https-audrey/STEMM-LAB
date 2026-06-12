@@ -36,12 +36,16 @@ const TeamPageChem: React.FC = () => {
       if (!user) return;
       try {
         const teams = await queryDocuments('teams', [
-          where('memberIds', 'array-contains', user.uid),
-          orderBy('createdAt', 'desc'),
-          limit(1)
+          where('memberIds', 'array-contains', user.uid)
         ]);
         if (teams.length > 0) {
-          setTeamData(teams[0]);
+          // Sort in memory to avoid needing a Firestore composite index
+          const sorted = teams.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
+          });
+          setTeamData(sorted[0]);
         }
       } catch (error) {
         console.error('[TeamPage] Error fetching team:', error);
