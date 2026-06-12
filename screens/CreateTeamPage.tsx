@@ -132,7 +132,11 @@ const CreateTeamPage: React.FC = () => {
           />
 
           {/* Name Box (Row containing name writing and code tag) */}
-          <View style={styles.nameBoxTeamContainer}>
+          <ImageBackground
+            source={require('../assets/CreateTeamAssets/nameBoxTeam.png')}
+            style={styles.nameBoxTeamContainer}
+            resizeMode="stretch"
+          >
             <TextInput
               style={styles.teamNameInput}
               placeholder="enter your team name"
@@ -148,7 +152,7 @@ const CreateTeamPage: React.FC = () => {
             >
               <Text style={styles.teamCodeText}>{teamCode}</Text>
             </ImageBackground>
-          </View>
+          </ImageBackground>
 
           {/* Title: Grade & Subject */}
           <Image
@@ -158,7 +162,11 @@ const CreateTeamPage: React.FC = () => {
           />
 
           {/* Grade Box */}
-          <View style={styles.gradeBoxContainer}>
+          <ImageBackground
+            source={require('../assets/CreateTeamAssets/gradeBox.png')}
+            style={styles.gradeBoxContainer}
+            resizeMode="stretch"
+          >
             <TextInput
               style={styles.gradeInput}
               placeholder="enter your grade here"
@@ -166,7 +174,7 @@ const CreateTeamPage: React.FC = () => {
               value={grade}
               onChangeText={setGrade}
             />
-          </View>
+          </ImageBackground>
         </ImageBackground>
 
         {/* Meteor overlapping the top box on the left */}
@@ -409,6 +417,7 @@ const styles = StyleSheet.create({
     height: s(28),
     alignSelf: 'center',
     justifyContent: 'center',
+    marginRight: s(10),
   },
   gradeTitle: {
     position: 'absolute',
