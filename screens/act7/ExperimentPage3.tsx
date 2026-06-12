@@ -30,12 +30,12 @@ const ExperimentPage3: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const route = useRoute<any>();
     const { profile } = useAuth();
-    
+
     // Accumulate all previous records
     const previousDocIds = route.params?.docIds || [];
 
     const [isRecording, setIsRecording] = useState(false);
-    const [timerValue, setTimerValue] = useState(60); 
+    const [timerValue, setTimerValue] = useState(60);
     const [respirationRate, setRespirationRate] = useState(0);
     const [useSimulation, setUseSimulation] = useState(false);
 
@@ -92,7 +92,7 @@ const ExperimentPage3: React.FC = () => {
                 setTimerValue(prev => {
                     if (prev <= 1) {
                         clearInterval(timerIntervalRef.current);
-                        handleRecord(); 
+                        handleRecord();
                         return 0;
                     }
                     return prev - 1;
@@ -113,7 +113,7 @@ const ExperimentPage3: React.FC = () => {
                         const zs = samples.map(s => s.z);
                         const avg = zs.reduce((a, b) => a + b, 0) / zs.length;
                         let peaks = 0;
-                        let lastState = 0; 
+                        let lastState = 0;
                         const threshold = 0.012;
                         for (let i = 1; i < zs.length; i++) {
                             const diff = zs[i] - avg;
@@ -147,7 +147,7 @@ const ExperimentPage3: React.FC = () => {
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             Vibration.vibrate(500);
             try {
-                const finalRate = respirationRate || 20; 
+                const finalRate = respirationRate || 20;
                 const duration = 60 - timerValue;
                 const resultData = {
                     userId: profile?.uid || 'anonymous',
@@ -155,7 +155,7 @@ const ExperimentPage3: React.FC = () => {
                     respirationRate: finalRate,
                     duration: duration,
                     act: 7,
-                    phase: 3, 
+                    phase: 3,
                     createdAt: new Date(),
                 };
                 const docId = await addDocument('experiments', resultData);
@@ -226,15 +226,15 @@ const styles = StyleSheet.create({
     boxContainer: { position: 'absolute', top: s(320), alignSelf: 'center', width: s(374), height: s(583), zIndex: 2 },
     experimentBox: { width: '100%', height: '100%' },
     respirationContainer: { position: 'absolute', top: s(170), alignSelf: 'center', width: s(220), height: s(50), flexDirection: 'row', alignItems: 'center', paddingHorizontal: s(10), left: s(30) },
-    respirationBox: { position: 'absolute', width: '100%', height: '100%' },
-    respirationText: { fontFamily: FONTS.title, fontSize: s(12), color: '#08121E', marginLeft: s(135), marginTop: s(2) },
-    timerContainer: { position: 'absolute', top: s(215), alignSelf: 'center', width: s(140), height: s(90), justifyContent: 'center', alignItems: 'center' },
+    respirationBox: { position: 'absolute', width: '110%', height: '71%' },
+    respirationText: { fontFamily: FONTS.title, fontSize: s(12), color: '#08121E', marginLeft: s(160), marginTop: s(2) },
+    timerContainer: { position: 'absolute', top: s(235), alignSelf: 'center', width: s(140), height: s(60), justifyContent: 'center', alignItems: 'center' },
     timerBox: { position: 'absolute', width: '100%', height: '100%' },
     timerText: { fontFamily: FONTS.title, fontSize: s(14), color: '#08121E', marginTop: s(27), left: s(18) },
     recordButtonContainer: { position: 'absolute', top: s(300), alignSelf: 'center', width: s(100), height: s(100), justifyContent: 'center', alignItems: 'center' },
     recordButton: { width: s(95), height: s(95) },
-    bottomButtonsRow: { position: 'absolute', bottom: s(30), width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: s(25) },
-    bottomBtn: { width: s(145), height: s(45) },
+    bottomButtonsRow: { position: 'absolute', bottom: s(26), width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: s(25) },
+    bottomBtn: { width: s(135), height: s(38) },
     btnImg: { width: '100%', height: '100%' },
     jupiterPlanet: { position: 'absolute', bottom: s(-30), right: s(-40), width: s(480), height: s(280), zIndex: 1 },
 });

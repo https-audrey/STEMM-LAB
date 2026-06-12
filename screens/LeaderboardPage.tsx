@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     fontSize: s(16),
     color: '#ffffff',
     fontWeight: 'bold',
-    left: s(-205)
+    left: s(-195)
   },
   scrollBar: {
     position: 'absolute',
