@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
-import { addDocument } from '../../services/firestoreService';
+import { addDocument, queryDocuments, where, updateDocument, increment, orderBy, limit } from '../../services/firestoreService';
 import { useAuth } from '../../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'RateActivity'>;
@@ -66,6 +66,24 @@ const RateActivityPage: React.FC = () => {
                 userId: user?.uid || 'anonymous',
                 createdAt: new Date(),
             });
+
+            // Award points to the user's team
+            if (user) {
+                try {
+                    const teams = await queryDocuments('teams', [
+                        where('memberIds', 'array-contains', user.uid),
+                        orderBy('createdAt', 'desc'),
+                        limit(1)
+                    ]);
+                    if (teams.length > 0) {
+                        await updateDocument('teams', teams[0].id, {
+                            points: increment(100)
+                        });
+                    }
+                } catch (err) {
+                    console.error('[RateActivity] Failed to update team points:', err);
+                }
+            }
 
             // Navigate to Home screen
             navigation.reset({
