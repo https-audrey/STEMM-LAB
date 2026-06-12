@@ -74,8 +74,21 @@ const CreateTeamPage: React.FC = () => {
     }
   };
 
-  const handleRemoveMember = (uid: string) => {
-    setTeamMembers(teamMembers.filter(m => m.id !== uid));
+
+
+  const handleRemoveMember = (member: any) => {
+    Alert.alert(
+      'Remove Member',
+      `Are you sure you want to remove ${member.displayUsername || member.username} from the team?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Remove', 
+          style: 'destructive',
+          onPress: () => setTeamMembers(teamMembers.filter(m => m.id !== member.id))
+        },
+      ]
+    );
   };
 
   const handleMakeTeam = async () => {
@@ -253,7 +266,7 @@ const CreateTeamPage: React.FC = () => {
                       <TouchableOpacity
                         style={styles.crossButton}
                         activeOpacity={0.7}
-                        onPress={() => handleRemoveMember(member.id)}
+                        onPress={() => handleRemoveMember(member)}
                       >
                         <Image
                           source={require('../assets/CreateTeamAssets/cross.png')}
