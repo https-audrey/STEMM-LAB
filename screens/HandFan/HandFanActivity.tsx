@@ -16,11 +16,13 @@ import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, getHFTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
 
 export default function HandFanActivity({ navigation, route }: Props) {
     const { currentSessionId } = route.params;
+    const {user} = useAuth();
 
     const [showSetupModal, setShowSetupModal] = useState(false);
     const [design, setDesign] = useState('');
@@ -225,6 +227,7 @@ export default function HandFanActivity({ navigation, route }: Props) {
             await Promise.all([
                 addDocument('handfan_submissions', {
                     sessionId: currentSessionId,
+                    userID: user?.uid || 'anonymous',
                     readings,
                     reflection,
                     submittedAt: new Date().toISOString(),

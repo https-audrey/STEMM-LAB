@@ -14,6 +14,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
 import { useAuth } from '../context/AuthContext';
+import { AdBanner } from '../components/AdBanner';
+import { ScrollView } from 'react-native';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -44,6 +46,9 @@ const HomePage: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.bannerOverlay}>
+        <AdBanner />
+      </View>
       {/* Full-screen space background */}
       <ImageBackground
         source={require('../assets/OnBoardingAssets/bgImg.png')}
@@ -469,6 +474,13 @@ const styles = StyleSheet.create({
     width: s(83),
     height: s(83),
   },
+  bannerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    backgroundColor: 'transparent',
+  }
 });
 
 export default HomePage;

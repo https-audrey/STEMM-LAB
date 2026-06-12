@@ -10,6 +10,7 @@ import {
 import {
   CameraView,
   useCameraPermissions,
+  useMicrophonePermissions,
 } from 'expo-camera';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -39,6 +40,8 @@ export default function ParachutePrototype({
 
   const [permission, requestPermission] =
     useCameraPermissions();
+  
+  const [micPermission, requestMicPermission] = useMicrophonePermissions();
 
   const [recording, setRecording] =
     useState(false);
@@ -52,6 +55,29 @@ export default function ParachutePrototype({
       <View style={styles.center}>
         <Text style={styles.text}>
           Camera permission required
+        </Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={requestPermission}
+        >
+          <Text style={styles.buttonText}>
+            Grant Permission
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!micPermission) {
+    return null;
+  }
+
+  if (!micPermission.granted) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.text}>
+          Microphone permission required
         </Text>
 
         <TouchableOpacity

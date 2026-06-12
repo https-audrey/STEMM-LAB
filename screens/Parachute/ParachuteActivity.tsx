@@ -17,12 +17,14 @@ import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrials
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
 
 export default function ParachuteActivity({ navigation, route }: Props) {
     const { currentSessionId } = route.params;
+    const {user} = useAuth();
 
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isExpired, setIsExpired] = useState(false);
@@ -207,6 +209,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             await Promise.all([
                 addDocument('parachute_submissions', {
                     sessionId: currentSessionId,
+                    userID: user?.uid || 'anonymous',
                     readings,
                     reflection,
                     submittedAt: new Date().toISOString(),
@@ -438,6 +441,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             await Promise.all([
                 addDocument('parachute_submissions', {
                     sessionId: currentSessionId,
+                    userID: user?.uid || 'anonymous',
                     readings,
                     reflection,
                     submittedAt: new Date().toISOString(),

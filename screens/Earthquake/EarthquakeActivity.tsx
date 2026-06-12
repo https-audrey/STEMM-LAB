@@ -16,11 +16,13 @@ import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
 
 export default function EarthquakeActivity({ navigation, route }: Props) {
     const { currentSessionId } = route.params;
+    const {user} = useAuth();
 
     const [showSetupModal, setShowSetupModal] = useState(false);
     const [description, setDescription] = useState('');
@@ -173,6 +175,7 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
             await Promise.all([
                 addDocument('earthquake_submissions', {
                     sessionId: currentSessionId,
+                    userID: user?.uid || 'anonymous',
                     readings,
                     reflection,
                     submittedAt: new Date().toISOString(),

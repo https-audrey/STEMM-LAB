@@ -19,11 +19,13 @@ import { RootStackParamList } from '../../types/navigation';
 import { getSessionReflection, getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 
 export default function SoundActivity({ navigation, route }: Props) {
     const { currentSessionId } = route.params;
+    const {user} = useAuth();
 
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [showSetupModal, setShowSetupModal] = useState(false);
@@ -207,6 +209,7 @@ export default function SoundActivity({ navigation, route }: Props) {
             await Promise.all([
                 addDocument('sound_submissions', {
                     sessionId: currentSessionId,
+                    userID: user?.uid || 'anonymous',
                     readings,
                     reflection,
                     submittedAt: new Date().toISOString(),
