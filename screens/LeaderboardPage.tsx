@@ -127,8 +127,8 @@ const LeaderboardPage: React.FC = () => {
           {loading ? (
             <ActivityIndicator size="large" color="#ffffff" style={{ marginTop: s(100) }} />
           ) : (
-            <ScrollView 
-              style={styles.scrollArea} 
+            <ScrollView
+              style={styles.scrollArea}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
@@ -164,18 +164,18 @@ const LeaderboardPage: React.FC = () => {
         {/* User Summary Bar (at the bottom of the list) */}
         {userTeam && (
           <View style={styles.userSummaryFooter}>
-             <View style={styles.footerRank}>
-                <Text style={styles.footerTextSmall}>RANK</Text>
-                <Text style={styles.footerTextLarge}>#{userTeam.rank}</Text>
-             </View>
-             <View style={styles.footerName}>
-                <Text style={styles.footerTextSmall}>TEAM NAME</Text>
-                <Text style={styles.footerTextLarge} numberOfLines={1}>{userTeam.name}</Text>
-             </View>
-             <View style={styles.footerPoints}>
-                <Text style={styles.footerTextSmall}>POINTS</Text>
-                <Text style={styles.footerTextLarge}>{userTeam.points || 0}</Text>
-             </View>
+            <View style={styles.footerRank}>
+              <Text style={styles.footerTextSmall}>RANK</Text>
+              <Text style={styles.footerTextLarge}>#{userTeam.rank}</Text>
+            </View>
+            <View style={styles.footerPoints}>
+              <Text style={styles.footerTextSmall}>POINTS</Text>
+              <Text style={styles.footerTextLarge}>{userTeam.points || 0}</Text>
+            </View>
+            <View style={styles.footerName}>
+              <Text style={styles.footerTextSmall}>TEAM NAME</Text>
+              <Text style={styles.footerTextLarge} numberOfLines={1}>{userTeam.name}</Text>
+            </View>
           </View>
         )}
 
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   leaderboardBox: {
     position: 'absolute',
-    top: s(245),
+    top: s(255),
     alignSelf: 'center',
     width: s(376),
     height: s(480),
@@ -309,12 +309,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: s(15),
+    top: s(60)
   },
   rankCircle: {
-     width: s(25),
-     height: s(25),
-     justifyContent: 'center',
-     alignItems: 'center',
+    width: s(25),
+    height: s(25),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rankText: {
     fontFamily: FONTS.ui,
@@ -328,12 +329,14 @@ const styles = StyleSheet.create({
     fontSize: s(14),
     color: '#ffffff',
     marginLeft: s(15),
+    left: s(130)
   },
   teamScoreLabel: {
     fontFamily: FONTS.ui,
     fontSize: s(16),
     color: '#ffffff',
     fontWeight: 'bold',
+    left: s(-205)
   },
   scrollBar: {
     position: 'absolute',
@@ -344,32 +347,32 @@ const styles = StyleSheet.create({
   },
   userSummaryFooter: {
     position: 'absolute',
-    top: s(735),
+    top: s(683),
     alignSelf: 'center',
     width: s(360),
     height: s(60),
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: s(20),
+    paddingHorizontal: s(38),
     zIndex: 15,
   },
   footerRank: { alignItems: 'center' },
-  footerName: { alignItems: 'center', flex: 1, marginHorizontal: s(10) },
-  footerPoints: { alignItems: 'center' },
+  footerName: { alignItems: 'center', flex: 1, marginHorizontal: s(20), left: s(50) },
+  footerPoints: { alignItems: 'center', left: s(50) },
   footerTextSmall: {
-     fontFamily: FONTS.ui,
-     fontSize: s(10),
-     color: '#8ab4f8',
+    fontFamily: FONTS.ui,
+    fontSize: s(10),
+    color: '#8ab4f8',
   },
   footerTextLarge: {
-     fontFamily: FONTS.ui,
-     fontSize: s(16),
-     color: '#ffffff',
-     fontWeight: 'bold',
+    fontFamily: FONTS.ui,
+    fontSize: s(16),
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
   pointsText: {
     position: 'absolute',
-    top: s(775),
+    top: s(755),
     alignSelf: 'center',
     width: s(353),
     height: s(30),
