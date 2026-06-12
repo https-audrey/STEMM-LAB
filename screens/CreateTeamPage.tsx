@@ -36,7 +36,7 @@ const generateTeamCode = () => {
 const CreateTeamPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
   const { profile } = useAuth();
-  
+
   const [teamName, setTeamName] = useState('');
   const [grade, setGrade] = useState('');
   const [teamCode] = useState(generateTeamCode());
@@ -56,7 +56,7 @@ const CreateTeamPage: React.FC = () => {
       const results = await queryDocuments('users', [
         where('displayUsername', '==', searchQuery.trim())
       ]);
-      
+
       if (results.length > 0) {
         const userFound = results[0];
         if (teamMembers.find(m => m.id === userFound.id)) {
@@ -87,7 +87,7 @@ const CreateTeamPage: React.FC = () => {
       Alert.alert('Required', 'Please enter your grade.');
       return;
     }
-    
+
     try {
       await addDocument('teams', {
         name: teamName,
@@ -234,7 +234,7 @@ const CreateTeamPage: React.FC = () => {
                     <View style={styles.numberBox}>
                       <Text style={styles.numberText}>{index + 1}</Text>
                     </View>
-                    
+
                     {/* User Name */}
                     <Text style={styles.memberNameText}>
                       {member.displayUsername || member.username} {member.isYou ? '(you)' : ''}
@@ -242,8 +242,8 @@ const CreateTeamPage: React.FC = () => {
 
                     {/* Remove button for others */}
                     {!member.isYou && (
-                      <TouchableOpacity 
-                        style={styles.crossButton} 
+                      <TouchableOpacity
+                        style={styles.crossButton}
                         activeOpacity={0.7}
                         onPress={() => handleRemoveMember(member.id)}
                       >
@@ -399,10 +399,10 @@ const styles = StyleSheet.create({
   },
   teamCodeText: {
     fontFamily: FONTS.ui,
-    fontSize: s(14),
+    fontSize: s(15),
     color: COLORS.darkText,
     textAlign: 'center',
-    marginTop: s(4),
+    marginTop: s(0),
   },
   teamCodeImage: {
     width: s(85),
