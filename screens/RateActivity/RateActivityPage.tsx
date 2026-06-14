@@ -112,6 +112,7 @@ const RateActivityPage: React.FC = () => {
                 >
                     {/* Close (X) button — top left */}
                     <TouchableOpacity
+                        testID="close-button"
                         style={styles.closeButton}
                         onPress={handleClose}
                         activeOpacity={0.7}
@@ -143,11 +144,13 @@ const RateActivityPage: React.FC = () => {
                             {[1, 2, 3, 4, 5].map((index) => (
                                 <TouchableOpacity
                                     key={index}
+                                    testID={`star-button-${index}`}
                                     onPress={() => handleStarPress(index)}
                                     activeOpacity={0.7}
                                     style={styles.starButton}
                                 >
                                     <Image
+                                        testID={`star-image-${index}-${index <= starRating ? 'filled' : 'empty'}`}
                                         source={
                                             index <= starRating
                                                 ? require('../../assets/RateActAssets/star2.png')
@@ -163,6 +166,7 @@ const RateActivityPage: React.FC = () => {
                         {/* Comment / Feedback Input Box */}
                         <View style={styles.commentContainer}>
                             <TextInput
+                                testID="comment-input"
                                 style={styles.commentInput}
                                 placeholder=""
                                 placeholderTextColor="#888"
@@ -185,6 +189,7 @@ const RateActivityPage: React.FC = () => {
 
                         {/* Finish Button */}
                         <TouchableOpacity
+                            testID="finish-button"
                             style={styles.finishButton}
                             onPress={handleFinish}
                             activeOpacity={0.8}
