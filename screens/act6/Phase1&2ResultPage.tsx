@@ -273,10 +273,10 @@ const styles = StyleSheet.create({
         borderRadius: s(12),
         paddingHorizontal: s(6),
         paddingVertical: s(2),
-        marginLeft: s(30),
+        marginLeft: s(35),
         minWidth: s(68),
         alignItems: 'center',
-        left: -10
+        left: -8
     },
     resultText: {
         fontFamily: FONTS.title, // ShortStack

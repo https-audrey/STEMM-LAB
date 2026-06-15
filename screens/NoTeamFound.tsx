@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { FONTS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, updateDocument, arrayUnion, limit } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'NoTeam'>;
 
@@ -22,6 +25,7 @@ const s = (v: number) => v * SCALE;
 
 const NoTeamFound: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { user } = useAuth();
   const [code, setCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -29,9 +33,53 @@ const NoTeamFound: React.FC = () => {
     navigation.navigate('CreateTeam');
   };
 
-  const handleJoinTeam = () => {
-    // Action when user taps "Enter" to join a team with code
-    console.log('Join Team with code:', code);
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        // Already on this page
+      }
+    } catch (error) {
+      // Stay or go to same
+    }
+  };
+
+  const handleJoinTeam = async () => {
+    if (!code.trim()) {
+      Alert.alert('Empty Code', 'Please enter a team code.');
+      return;
+    }
+
+    try {
+      const teams = await queryDocuments('teams', [
+        where('code', '==', code.trim().toUpperCase())
+      ]);
+
+      if (teams.length > 0) {
+        const team = teams[0];
+        if (user) {
+          await updateDocument('teams', team.id, {
+            memberIds: arrayUnion(user.uid)
+          });
+          Alert.alert('Success', `You have joined the team: ${team.name}`);
+          navigation.navigate('TeamPageChem');
+        }
+      } else {
+        Alert.alert('Invalid Code', 'No team found with this code.');
+      }
+    } catch (error) {
+      console.error('[JoinTeam] Error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -211,8 +259,8 @@ const NoTeamFound: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Team Button (Current Active Page) */}
-        <TouchableOpacity style={styles.teamButton} activeOpacity={1.0}>
+        {/* Team Button (Current Active Page but check status) */}
+        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7} onPress={handleNavigateTeam}>
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}

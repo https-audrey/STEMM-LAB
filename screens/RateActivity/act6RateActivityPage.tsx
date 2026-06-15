@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
-import { addDocument } from '../../services/firestoreService';
+import { addDocument, queryDocuments, where, updateDocument, increment, orderBy, limit } from '../../services/firestoreService';
 import { useAuth } from '../../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Act6RateActivity'>;
@@ -63,6 +63,28 @@ const Act6RateActivityPage: React.FC = () => {
                 userId: user?.uid || 'anonymous',
                 createdAt: new Date(),
             });
+
+            // Award points to the user's team
+            if (user) {
+                try {
+                    const teams = await queryDocuments('teams', [
+                        where('memberIds', 'array-contains', user.uid)
+                    ]);
+                    if (teams.length > 0) {
+                        // Sort in memory to find the most recent team
+                        const sorted = teams.sort((a: any, b: any) => {
+                            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                        await updateDocument('teams', sorted[0].id, {
+                            points: increment(100)
+                        });
+                    }
+                } catch (err) {
+                    console.error('[Act6RateActivity] Failed to update team points:', err);
+                }
+            }
 
             navigation.reset({
                 index: 0,

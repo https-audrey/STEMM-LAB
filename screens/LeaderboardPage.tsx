@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Image,
@@ -6,10 +6,16 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Text,
+  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
+import { FONTS, COLORS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { getAllDocuments, queryDocuments, where, limit, orderBy } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Leaderboard'>;
 
@@ -20,14 +26,63 @@ const s = (v: number) => v * SCALE;
 
 const LeaderboardPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
-  const [tabMode, setTabMode] = useState<'individual' | 'team'>('individual');
+  const { user } = useAuth();
+  const [tabMode, setTabMode] = useState<'individual' | 'team'>('team'); // Defaulting to team for this feature
+  const [teams, setTeams] = useState<any[]>([]);
+  const [userTeam, setUserTeam] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all teams
+        const allTeams = await getAllDocuments('teams');
+        // Sort by points desc (handling missing points with 0)
+        const sortedTeams = allTeams.sort((a, b) => (b.points || 0) - (a.points || 0));
+        setTeams(sortedTeams);
+
+        // Find user's team
+        if (user) {
+          const uTeam = sortedTeams.find(t => t.memberIds && t.memberIds.includes(user.uid));
+          if (uTeam) {
+            setUserTeam({
+              ...uTeam,
+              rank: sortedTeams.indexOf(uTeam) + 1
+            });
+          }
+        }
+      } catch (error) {
+        console.error('[Leaderboard] Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   const handleNavigateHome = () => {
     navigation.navigate('Home');
   };
 
-  const handleNavigateTeam = () => {
-    navigation.navigate('NoTeam');
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teams = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teams.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      console.error('[Leaderboard] Error checking team status:', error);
+      navigation.navigate('NoTeam');
+    }
   };
 
   return (
@@ -52,7 +107,7 @@ const LeaderboardPage: React.FC = () => {
             activeOpacity={0.8}
             onPress={() => setTabMode('individual')}
           >
-            <Image
+            {/* <Image
               source={
                 tabMode === 'individual'
                   ? require('../assets/LeaderboardAssets/individu1.png')
@@ -60,7 +115,7 @@ const LeaderboardPage: React.FC = () => {
               }
               style={styles.tabButton}
               resizeMode="contain"
-            />
+            /> */}
           </TouchableOpacity>
 
           {/* Team Tab */}
@@ -68,7 +123,7 @@ const LeaderboardPage: React.FC = () => {
             activeOpacity={0.8}
             onPress={() => setTabMode('team')}
           >
-            <Image
+            {/* <Image
               source={
                 tabMode === 'individual'
                   ? require('../assets/LeaderboardAssets/team1.png')
@@ -76,7 +131,7 @@ const LeaderboardPage: React.FC = () => {
               }
               style={styles.tabButton}
               resizeMode="contain"
-            />
+            /> */}
           </TouchableOpacity>
         </View>
 
@@ -86,6 +141,35 @@ const LeaderboardPage: React.FC = () => {
           style={styles.leaderboardBox}
           resizeMode="stretch"
         >
+          {loading ? (
+            <ActivityIndicator size="large" color="#ffffff" style={{ marginTop: s(100) }} />
+          ) : (
+            <ScrollView
+              style={styles.scrollArea}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {teams.map((item, index) => (
+                <ImageBackground
+                  key={item.id}
+                  source={require('../assets/LeaderboardAssets/teamLeaderboardBox.png')}
+                  style={styles.teamRow}
+                  resizeMode="stretch"
+                >
+                  <View style={styles.rankCircle}>
+                    <Text style={styles.rankText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.teamNameLabel} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.teamScoreLabel}>
+                    {item.points || 0}
+                  </Text>
+                </ImageBackground>
+              ))}
+            </ScrollView>
+          )}
+
           {/* Scrollbar on the right */}
           <Image
             source={require('../assets/LeaderboardAssets/scrollBar.png')}
@@ -93,6 +177,24 @@ const LeaderboardPage: React.FC = () => {
             resizeMode="contain"
           />
         </ImageBackground>
+
+        {/* User Summary Bar (at the bottom of the list) */}
+        {userTeam && (
+          <View style={styles.userSummaryFooter}>
+            <View style={styles.footerRank}>
+              <Text style={styles.footerTextSmall}>RANK</Text>
+              <Text style={styles.footerTextLarge}>#{userTeam.rank}</Text>
+            </View>
+            <View style={styles.footerPoints}>
+              <Text style={styles.footerTextSmall}>POINTS</Text>
+              <Text style={styles.footerTextLarge}>{userTeam.points || 0}</Text>
+            </View>
+            <View style={styles.footerName}>
+              <Text style={styles.footerTextSmall}>TEAM NAME</Text>
+              <Text style={styles.footerTextLarge} numberOfLines={1}>{userTeam.name}</Text>
+            </View>
+          </View>
+        )}
 
         {/* 14 more points text */}
         <Image
@@ -183,7 +285,7 @@ const styles = StyleSheet.create({
   },
   weeklyProgress: {
     position: 'absolute',
-    top: s(80),
+    top: s(100),
     alignSelf: 'center',
     width: s(372),
     height: s(125),
@@ -202,11 +304,56 @@ const styles = StyleSheet.create({
   },
   leaderboardBox: {
     position: 'absolute',
-    top: s(265),
+    top: s(255),
     alignSelf: 'center',
     width: s(376),
-    height: s(520),
+    height: s(480),
     zIndex: 10,
+    paddingTop: s(60),
+    paddingHorizontal: s(20),
+  },
+  scrollArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: s(20),
+  },
+  teamRow: {
+    width: s(325),
+    height: s(50),
+    alignSelf: 'center',
+    marginBottom: s(10),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: s(15),
+    top: s(60)
+  },
+  rankCircle: {
+    width: s(25),
+    height: s(25),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rankText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: COLORS.darkText,
+    fontWeight: 'bold',
+  },
+  teamNameLabel: {
+    flex: 1,
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: '#ffffff',
+    marginLeft: s(15),
+    left: s(130)
+  },
+  teamScoreLabel: {
+    fontFamily: FONTS.ui,
+    fontSize: s(16),
+    color: '#ffffff',
+    fontWeight: 'bold',
+    left: s(-195)
   },
   scrollBar: {
     position: 'absolute',
@@ -215,9 +362,34 @@ const styles = StyleSheet.create({
     width: s(5),
     height: s(59),
   },
+  userSummaryFooter: {
+    position: 'absolute',
+    top: s(683),
+    alignSelf: 'center',
+    width: s(360),
+    height: s(60),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: s(38),
+    zIndex: 15,
+  },
+  footerRank: { alignItems: 'center' },
+  footerName: { alignItems: 'center', flex: 1, marginHorizontal: s(20), left: s(50) },
+  footerPoints: { alignItems: 'center', left: s(50) },
+  footerTextSmall: {
+    fontFamily: FONTS.ui,
+    fontSize: s(10),
+    color: '#8ab4f8',
+  },
+  footerTextLarge: {
+    fontFamily: FONTS.ui,
+    fontSize: s(16),
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
   pointsText: {
     position: 'absolute',
-    top: s(795),
+    top: s(755),
     alignSelf: 'center',
     width: s(353),
     height: s(30),

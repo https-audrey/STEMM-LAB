@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
-import { addDocument } from '../../services/firestoreService';
+import { addDocument, queryDocuments, where, updateDocument, increment, orderBy, limit } from '../../services/firestoreService';
 import { useAuth } from '../../context/AuthContext';
 
 type Nav = StackNavigationProp<RootStackParamList, 'RateActivity'>;
@@ -67,6 +67,28 @@ const RateActivityPage: React.FC = () => {
                 createdAt: new Date(),
             });
 
+            // Award points to the user's team
+            if (user) {
+                try {
+                    const teams = await queryDocuments('teams', [
+                        where('memberIds', 'array-contains', user.uid)
+                    ]);
+                    if (teams.length > 0) {
+                        // Sort in memory to find the most recent team
+                        const sorted = teams.sort((a: any, b: any) => {
+                            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                        await updateDocument('teams', sorted[0].id, {
+                            points: increment(100)
+                        });
+                    }
+                } catch (err) {
+                    console.error('[RateActivity] Failed to update team points:', err);
+                }
+            }
+
             // Navigate to Home screen
             navigation.reset({
                 index: 0,
@@ -90,6 +112,7 @@ const RateActivityPage: React.FC = () => {
                 >
                     {/* Close (X) button — top left */}
                     <TouchableOpacity
+                        testID="close-button"
                         style={styles.closeButton}
                         onPress={handleClose}
                         activeOpacity={0.7}
@@ -121,11 +144,13 @@ const RateActivityPage: React.FC = () => {
                             {[1, 2, 3, 4, 5].map((index) => (
                                 <TouchableOpacity
                                     key={index}
+                                    testID={`star-button-${index}`}
                                     onPress={() => handleStarPress(index)}
                                     activeOpacity={0.7}
                                     style={styles.starButton}
                                 >
                                     <Image
+                                        testID={`star-image-${index}-${index <= starRating ? 'filled' : 'empty'}`}
                                         source={
                                             index <= starRating
                                                 ? require('../../assets/RateActAssets/star2.png')
@@ -141,6 +166,7 @@ const RateActivityPage: React.FC = () => {
                         {/* Comment / Feedback Input Box */}
                         <View style={styles.commentContainer}>
                             <TextInput
+                                testID="comment-input"
                                 style={styles.commentInput}
                                 placeholder=""
                                 placeholderTextColor="#888"
@@ -163,6 +189,7 @@ const RateActivityPage: React.FC = () => {
 
                         {/* Finish Button */}
                         <TouchableOpacity
+                            testID="finish-button"
                             style={styles.finishButton}
                             onPress={handleFinish}
                             activeOpacity={0.8}
