@@ -1,0 +1,47 @@
+appId: host.exp.Exponent
+---
+# 1. Open the application
+- openLink: "exp://192.168.100.160:8081"
+
+# 2. Navigate to the activity screen
+- tapOn: "Earthquake" 
+
+# 3. Explicitly initialize the experiment
+# Maestro will wait for this button to exist before tapping
+- extendedWaitUntil:
+    visible: "Initialize Experiment 🚀"
+    timeout: 10000
+- tapOn: "Initialize Experiment 🚀"
+
+# 4. Confirm the transition to the setup area
+# Added a small wait to ensure the modal or UI state has finished loading
+- extendedWaitUntil:
+    visible: "+ Add New Prototype"
+    timeout: 5000
+- tapOn: "+ Add New Prototype"
+
+# 5. Prototype Setup
+- tapOn: "Describe your prototype structure..."
+- inputText: "Maestro Test Structure"
+- tapOn: "Confirm & Start"
+
+# 6. Run the Test
+- tapOn: "🌍 Start Earthquake Test"
+- extendedWaitUntil:
+    visible: "Earthquake Test Results"
+    timeout: 15000
+
+# 3. Now perform actions on the Result screen
+- tapOn: "💾 Save Result"
+- tapOn: "OK"
+
+# 5. Add Reflection
+- extendedWaitUntil:
+    visible: "Add Reflection"
+    timeout: 10000
+- tapOn: "Add Reflection"
+- inputText: "The structure successfully reduced vibration during the 10-second test."
+- tapOn: "Save Reflection"
+
+# 6. Final Submission
+- tapOn: "Submit Activity"

@@ -78,32 +78,38 @@ export default function ParachuteResult({ route, navigation }: Props) {
   const gForce = (deltaV / contactTime) / g;
 
   // -------------------------
-  // RISK LEVEL
+  // RISK LEVEL & RATING
   // -------------------------
   let riskLevel = '';
   let riskColor = '';
   let riskText = '';
+  let rate = ''; // Combined rating for database
 
   if (gForce <= 5) {
     riskLevel = '1–5 g (Low Risk)';
     riskColor = '#2ed573';
     riskText = 'Safe: No injury expected.';
+    rate = 'Low Risk (1-5 g) - Safe: No injury expected';
   } else if (gForce <= 10) {
     riskLevel = '5–10 g (Minor Impact)';
     riskColor = '#ffa502';
     riskText = 'Minor: possible small structural strain.';
+    rate = 'Minor Impact (5-10 g) - Possible small structural strain';
   } else if (gForce <= 30) {
     riskLevel = '10–30 g (Moderate Risk)';
     riskColor = '#ff6b81';
     riskText = 'Moderate: risk of damage or breakage.';
+    rate = 'Moderate Risk (10-30 g) - Risk of damage or breakage';
   } else if (gForce <= 50) {
     riskLevel = '30–50 g (Severe Risk)';
     riskColor = '#ff4757';
     riskText = 'Severe: high chance of structural failure.';
+    rate = 'Severe Risk (30-50 g) - High chance of structural failure';
   } else {
     riskLevel = '50+ g (Extreme)';
     riskColor = '#ff0000';
     riskText = 'Extreme: catastrophic failure likely.';
+    rate = 'Extreme Risk (50+ g) - Catastrophic failure likely';
   }
 
   // -------------------------
@@ -123,6 +129,7 @@ export default function ParachuteResult({ route, navigation }: Props) {
         stop_time: tStop,
         g_force: gForce,
         v_impact: vFinal,
+        rate: rate, // Add the rating to the database
       });
 
       Alert.alert('Success', 'Trial saved successfully!', [
@@ -209,7 +216,7 @@ export default function ParachuteResult({ route, navigation }: Props) {
         <Text style={styles.header}>💥 G-Force Analysis</Text>
 
         <View style={styles.gBox}>
-          <Text style={styles.gLabel}>Peak Deceleration</Text>
+          <Text style={styles.gLabel}>G-Force</Text>
           <Text style={[styles.gValue, { color: riskColor }]}>
             {gForce.toFixed(1)} g
           </Text>

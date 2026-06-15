@@ -20,9 +20,25 @@ import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, S
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { taskManager } from '../../services/simpleTaskManager';
 
 type SoundActivityRouteProp = RouteProp<RootStackParamList, 'SoundActivity'>;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'SoundActivity'>;
+
+// Helper function to get rating from sound level
+const getRatingFromDB = (db: number): string => {
+    if (db < 30) {
+        return 'Quiet - Safe environment, no hearing risk';
+    } else if (db < 60) {
+        return 'Normal - Acceptable levels, minimal impact';
+    } else if (db < 85) {
+        return 'Loud - Potential distraction, prolonged exposure may cause stress';
+    } else if (db < 100) {
+        return 'Harmful - Risk of hearing damage with prolonged exposure';
+    } else {
+        return 'Dangerous - Immediate hearing damage risk, requires hearing protection';
+    }
+};
 
 export default function SoundActivity() {
     const route = useRoute<SoundActivityRouteProp>();
@@ -43,6 +59,11 @@ export default function SoundActivity() {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
+    useEffect(() => {
+        taskManager.addTask('Initialize Sound Map Activity');
+        taskManager.logStatus();
+    }, []);
+
     // Request location permission on mount
     useEffect(() => {
         requestLocationPermission();
@@ -56,10 +77,12 @@ export default function SoundActivity() {
     }, [hasLocationPermission]);
 
     const requestLocationPermission = async () => {
+        taskManager.addTask('Request location permission');
         try {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status === 'granted') {
                 setHasLocationPermission(true);
+                taskManager.addTask('Location permission granted');
             } else {
                 Alert.alert(
                     'Permission Required',
@@ -77,6 +100,7 @@ export default function SoundActivity() {
             const location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.Balanced,
             });
+            taskManager.addTask('Get current location');
             setCurrentLocation({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
@@ -88,9 +112,12 @@ export default function SoundActivity() {
 
     useFocusEffect(
         React.useCallback(() => {
+            taskManager.addTask('Load session data');
             const sessionTrials = getSoundTrialsBySession(currentSessionId);
             setTrials(sessionTrials);
             setIsNewSession(sessionTrials.length === 0);
+            taskManager.addTask(`Loaded ${sessionTrials.length} existing recordings`);
+            taskManager.logStatus();
         }, [currentSessionId])
     );
 
@@ -112,6 +139,8 @@ export default function SoundActivity() {
     };
 
     const handleSetupConfirm = async () => {
+        taskManager.addTask(`Setup recording: ${locationDescription || 'unknown location'}`);
+        taskManager.logStatus();
         if (!locationDescription.trim()) {
             Alert.alert('Invalid Input', 'Please enter a location description.');
             return;
@@ -136,7 +165,10 @@ export default function SoundActivity() {
                 accuracy: location.coords.accuracy ?? 10,
                 location_description: locationDescription,
                 action: action,
+                rate: 'Pending - Recording in Progress',
             });
+            taskManager.addTask('Navigate to recording screen');
+            taskManager.logStatus();
         } catch (error) {
             console.error('Get location error:', error);
             Alert.alert('Error', 'Failed to get your current location. Please try again.');
@@ -159,6 +191,7 @@ export default function SoundActivity() {
     };
 
     const handleSubmit = async () => {
+        taskManager.addTask('Starting submission process');
         if (!trials.length) {
             Alert.alert('Incomplete Activity', 'Please add at least one sound recording.');
             return;
@@ -170,10 +203,14 @@ export default function SoundActivity() {
         }
 
         try {
+            taskManager.addTask('Save reflection to database');
             saveSessionReflection(currentSessionId, 'sound', reflection);
+
+            taskManager.addTask('Mark session as submitted');
             markSessionSubmitted(currentSessionId);
 
             const readings = getSoundTrialsBySession(currentSessionId);
+            taskManager.addTask(`Upload ${readings.length} recordings to cloud`)
             
             await Promise.all([
                 addDocument('sound_submissions', {
@@ -189,6 +226,9 @@ export default function SoundActivity() {
                 ),
             ]);
 
+            taskManager.addTask('Submission complete - navigate home');
+            taskManager.logStatus();
+
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' }],
@@ -197,6 +237,13 @@ export default function SoundActivity() {
             console.error(error);
             Alert.alert('Error', 'Failed to submit activity. Please try again.');
         }
+    };
+
+    const handleSaveReflection = () => {
+        if (currentSessionId && reflection.trim()) {
+            saveSessionReflection(currentSessionId, 'sound', reflection);
+        }
+        setShowReflectionModal(false);
     };
 
     return (
@@ -265,6 +312,12 @@ export default function SoundActivity() {
                                     </Text>
                                 </View>
                                 <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Rating:</Text>
+                                    <Text style={[styles.detailValue, { color: getDotColor(selectedMarker.sound_level_db), fontWeight: 'bold' }]}>
+                                        {selectedMarker.rate || getRatingFromDB(selectedMarker.sound_level_db)}
+                                    </Text>
+                                </View>
+                                <View style={styles.detailRow}>
                                     <Text style={styles.detailLabel}>Time:</Text>
                                     <Text style={styles.detailValue}>
                                         {selectedMarker.timestamp ? new Date(selectedMarker.timestamp).toLocaleTimeString() : 'Unknown'}
@@ -310,7 +363,7 @@ export default function SoundActivity() {
                             placeholderTextColor="#AAA"
                             style={styles.reflectionInput}
                         />
-                        <Pressable style={styles.confirmButton} onPress={() => setShowReflectionModal(false)}>
+                        <Pressable style={styles.confirmButton} onPress={handleSaveReflection}>
                             <Text style={styles.confirmText}>Save Reflection</Text>
                         </Pressable>
                     </View>
@@ -399,6 +452,9 @@ export default function SoundActivity() {
                     <Text style={styles.infoText}>Recordings: {trials.length}</Text>
                     {!isNewSession && trials.length > 0 && (
                         <Text style={styles.infoText}>✅ {trials.length} recording(s) completed</Text>
+                    )}
+                    {reflection.length > 0 && (
+                        <Text style={[styles.infoText, { color: '#2ed573' }]}>✓ Reflection saved</Text>
                     )}
                 </View>
 

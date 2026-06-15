@@ -25,7 +25,7 @@ export default function Earthquake() {
     const handleStart = () => {
         checkBatteryBeforeActivity('Earthquake Simulation (vibration)', () => {
             handleActivityStart();
-        }, 72)
+        }, 0.20)
     }
 
     const handleActivityStart = () => {

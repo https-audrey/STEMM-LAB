@@ -288,6 +288,7 @@ export default function ParachuteActivity() {
                     mass: latest.mass,
                     height: latest.height,
                     prototypeKey: prototypeKey,
+                    rate: latest.rate,
                     isHistoricalView: true,
                 }
             });

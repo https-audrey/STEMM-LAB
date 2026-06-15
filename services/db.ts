@@ -7,6 +7,10 @@ import {
 // Only initialize on native platforms
 let db: SQLite.SQLiteDatabase | null = null;
 
+export const setTestDatabase = (instance: SQLite.SQLiteDatabase) => {
+  db = instance;
+};
+
 try {
   if (Platform.OS !== 'web') {
     db = SQLite.openDatabaseSync('experiments.db');
@@ -33,6 +37,7 @@ export interface PrototypeRecord {
 
   g_force: number;
   v_impact: number;
+  rate: string;
 }
 
 export interface HandFanPrototypeRecord {
@@ -85,6 +90,7 @@ export interface SoundMapRecord {
   duration: number;
 
   dot_color: string;
+  rate: string;
 }
 
 export interface ActivitySession {
@@ -105,12 +111,6 @@ export const initDatabase = (): void => {
   try {
     db.execSync(`
       PRAGMA journal_mode = WAL;
-
-      DROP TABLE IF EXISTS handFan_trials;
-      DROP TABLE IF EXISTS parachute_trials;
-      DROP TABLE IF EXISTS earthquake_trials;
-      DROP TABLE IF EXISTS sound_trials;
-      DROP TABLE IF EXISTS activity_sessions;
 
       CREATE TABLE IF NOT EXISTS parachute_trials (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,6 +133,7 @@ export const initDatabase = (): void => {
 
         g_force REAL NOT NULL,
         v_impact REAL NOT NULL,
+        rate TEXT,
 
         UNIQUE(session_id, prototype_key)
       );
@@ -201,7 +202,9 @@ export const initDatabase = (): void => {
 
         duration REAL NOT NULL,
 
-        dot_color TEXT NOT NULL
+        dot_color TEXT NOT NULL,
+
+        rate TEXT
       );
 
       CREATE TABLE IF NOT EXISTS activity_sessions (
@@ -264,9 +267,10 @@ export const saveTrialRecord = (record: PrototypeRecord & { session_id: string }
           bounce_time,
           stop_time,
           g_force,
-          v_impact
+          v_impact,
+          rate
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
           record.session_id,
@@ -279,7 +283,8 @@ export const saveTrialRecord = (record: PrototypeRecord & { session_id: string }
           record.bounce_time,
           record.stop_time,
           record.g_force,
-          record.v_impact
+          record.v_impact,
+          record.rate
       ]
       );
   } catch (error) {
@@ -608,9 +613,10 @@ export const saveSoundRecord = (record: SoundMapRecord & { session_id: string })
           sound_level_db,
           avg_db,
           duration,
-          dot_color
+          dot_color,
+          rate
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
           record.session_id,
@@ -622,7 +628,8 @@ export const saveSoundRecord = (record: SoundMapRecord & { session_id: string })
           record.sound_level_db,
           record.avg_db,
           record.duration,
-          record.dot_color
+          record.dot_color,
+          record.rate
       ]
       );
   } catch (error) {
@@ -678,62 +685,11 @@ export const getSoundTrialsBySession = (
   }
 };
 
-//Session
-export const saveSessionReflection = (
-  sessionId: string,
-  activityType: string,
-  reflection: string
-): void => {
-  if (!db) {
-    // localStorage fallback
-    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '[]');
-    const existingIndex = sessions.findIndex((s: any) => s.session_id === sessionId);
-    
-    const sessionData = {
-      session_id: sessionId,
-      activity_type: activityType,
-      reflection: reflection,
-      updated_at: new Date().toISOString()
-    };
-    
-    if (existingIndex >= 0) {
-      sessions[existingIndex] = { ...sessions[existingIndex], ...sessionData };
-    } else {
-      sessions.push({
-        ...sessionData,
-        created_at: new Date().toISOString(),
-        submitted_at: null
-      });
-    }
-    
-    localStorage.setItem('activity_sessions', JSON.stringify(sessions));
-    return;
-  }
-
-  try {
-    db.runSync(
-      `
-      INSERT OR REPLACE INTO activity_sessions (
-        session_id,
-        activity_type,
-        reflection,
-        updated_at
-      )
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-      `,
-      [sessionId, activityType, reflection]
-    );
-  } catch (error) {
-    console.error('Save reflection error:', error);
-  }
-};
-
-// Get session reflection
+//Session & Reflection
 export const getSessionReflection = (sessionId: string): string | null => {
   if (!db) {
-    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '[]');
-    const session = sessions.find((s: any) => s.session_id === sessionId);
-    return session?.reflection || null;
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '{}');
+    return sessions[sessionId]?.reflection || null;
   }
 
   try {
@@ -743,11 +699,90 @@ export const getSessionReflection = (sessionId: string): string | null => {
       WHERE session_id = ?
       `,
       [sessionId]
-    ) as {reflection?: string} | undefined;
-    return result?.reflection || null;
+    );
+    
+    // Check if result exists before accessing reflection property
+    if (!result) {
+      return null;
+    }
+    
+    return (result as { reflection?: string }).reflection ?? null;
   } catch (error) {
     console.error('Get reflection error:', error);
     return null;
+  }
+};
+
+export const ensureSessionExists = (
+  sessionId: string,
+  activityType: string
+): void => {
+  if (!db) return;
+
+  try {
+    // Check if session exists first
+    const existing = db.getFirstSync(
+      `SELECT session_id FROM activity_sessions WHERE session_id = ?`,
+      [sessionId]
+    );
+    
+    if (!existing) {
+      // Only insert if it doesn't exist
+      db.runSync(
+        `
+        INSERT INTO activity_sessions (
+          session_id,
+          activity_type,
+          created_at,
+          updated_at
+        )
+        VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `,
+        [sessionId, activityType]
+      );
+      // Remove the verification step - it's causing false errors
+    }
+  } catch (error) {
+    console.error('Ensure session exists error:', error);
+  }
+};
+
+export const saveSessionReflection = (
+  sessionId: string,
+  activityType: string,
+  reflection: string
+): void => {
+  if (!db) {
+    // localStorage fallback
+    const sessions = JSON.parse(localStorage.getItem('activity_sessions') || '{}');
+    sessions[sessionId] = {
+      ...sessions[sessionId],
+      session_id: sessionId,
+      activity_type: activityType,
+      reflection: reflection,
+      updated_at: new Date().toISOString()
+    };
+    localStorage.setItem('activity_sessions', JSON.stringify(sessions));
+    return;
+  }
+
+  try {
+    // First ensure the session exists
+    ensureSessionExists(sessionId, activityType);
+    
+    // Then update the reflection using UPDATE
+    db.runSync(
+      `
+      UPDATE activity_sessions
+      SET reflection = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE session_id = ?
+      `,
+      [reflection, sessionId]
+    );
+    
+    // Remove the verification console.log
+  } catch (error) {
+    console.error('Save reflection error:', error);
   }
 };
 
@@ -774,34 +809,5 @@ export const markSessionSubmitted = (sessionId: string): void => {
     );
   } catch (error) {
     console.error('Mark submitted error:', error);
-  }
-};
-
-export const ensureSessionExists = (
-  sessionId: string,
-  activityType: string
-): void => {
-  if (!db) return;
-
-  try {
-    db.runSync(
-      `
-      INSERT OR IGNORE INTO activity_sessions (
-        session_id,
-        activity_type,
-        created_at,
-        updated_at
-      )
-      VALUES (
-        ?,
-        ?,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP
-      )
-      `,
-      [sessionId, activityType]
-    );
-  } catch (error) {
-    console.error(error);
   }
 };

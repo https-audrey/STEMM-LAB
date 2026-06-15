@@ -231,6 +231,7 @@ const HomePage: React.FC = () => {
 
           {/* Planet 4 */}
           <TouchableOpacity
+            accessibilityLabel='Earthquake'
             style={[styles.planetNode, { top: s(190), left: s(40), width: s(100), height: s(100), zIndex: 5 }]}
             activeOpacity={0.7}
             onPress={() => {

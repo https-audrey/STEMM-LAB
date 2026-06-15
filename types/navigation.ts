@@ -124,6 +124,7 @@ export type RootStackParamList = {
     accuracy: number | null;
     location_description: string;
     action: string;
+    rate: string;
   };
 
   Parachute: { currentSessionId: string };
@@ -156,6 +157,7 @@ export type RootStackParamList = {
       hitGroundTime: number;
       bounceTime: number | null;
       stopTime: number;
+      rate: string;
       isHistoricalView: boolean;
     };
   };

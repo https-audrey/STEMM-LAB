@@ -238,6 +238,7 @@ export default function ActivityResult() {
                     <div><strong>Height:</strong> ${trial.height} m</div>
                     <div><strong>G-Force:</strong> ${trial.g_force?.toFixed(2)} g</div>
                     <div><strong>Impact Velocity:</strong> ${trial.v_impact?.toFixed(2)} m/s</div>
+                    <div><strong>Risk Level:</strong> ${trial.rate || 'N/A'}</div>
                 `;
             case 'handfan':
                 return `
@@ -261,6 +262,7 @@ export default function ActivityResult() {
                     <div><strong>Peak Sound Level:</strong> ${trial.sound_level_db?.toFixed(1)} dB</div>
                     <div><strong>Average Sound Level:</strong> ${trial.avg_db?.toFixed(1)} dB</div>
                     <div><strong>Duration:</strong> ${trial.duration?.toFixed(1)} s</div>
+                    <div><strong>Rating:</strong> ${trial.rate || 'N/A'}</div>
                 `;
             default:
                 return '';
@@ -287,6 +289,12 @@ export default function ActivityResult() {
                         <View style={styles.detailRow}>
                             <Text style={styles.detailLabel}>Impact Velocity:</Text>
                             <Text style={styles.detailValue}>{trial.v_impact?.toFixed(2)} m/s</Text>
+                        </View>
+                        <View style={styles.detailRowMultiline}>
+                            <Text style={styles.detailLabel}>Risk Level:</Text>
+                            <Text style={[styles.detailValueMultiline, { flex: 1, flexWrap: 'wrap', flexShrink: 1 }]} numberOfLines={0}>
+                                {trial.rate || 'N/A'}
+                            </Text>
                         </View>
                     </>
                 );
@@ -358,6 +366,12 @@ export default function ActivityResult() {
                         <View style={styles.detailRow}>
                             <Text style={styles.detailLabel}>Duration:</Text>
                             <Text style={styles.detailValue}>{trial.duration?.toFixed(1)} s</Text>
+                        </View>
+                        <View style={styles.detailRowMultiline}>
+                            <Text style={styles.detailLabel}>Rating:</Text>
+                            <Text style={[styles.detailValueMultiline, { flex: 1, flexWrap: 'wrap', flexShrink: 1 }]} numberOfLines={0}>
+                                {trial.rate || 'N/A'}
+                            </Text>
                         </View>
                     </>
                 );
@@ -712,11 +726,26 @@ const styles = StyleSheet.create({
     detailLabel: {
         color: '#aaa',
         fontSize: 12,
+        width: 100, 
     },
     detailValue: {
         color: '#fff',
         fontSize: 12,
         fontWeight: '500',
+        flex: 1,
+        textAlign: 'right',
+    },
+    detailRowMultiline: {
+        flexDirection: 'row',
+        marginBottom: 4,
+        alignItems: 'flex-start',
+    },
+    detailValueMultiline: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '500',
+        textAlign: 'left',
+        lineHeight: 16,
     },
     reflectionCard: {
         backgroundColor: 'rgba(108,92,231,0.1)',

@@ -39,6 +39,30 @@ export default function SoundRecord({ route, navigation }: Props) {
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const startTimeRef = useRef<number>(0);
 
+    // Helper function to get rating from sound level
+    const getRatingFromDB = (db: number): string => {
+        if (db < 30) {
+            return 'Quiet - Safe environment, no hearing risk';
+        } else if (db < 60) {
+            return 'Normal - Acceptable levels, minimal impact';
+        } else if (db < 85) {
+            return 'Loud - Potential distraction, prolonged exposure may cause stress';
+        } else if (db < 100) {
+            return 'Harmful - Risk of hearing damage with prolonged exposure';
+        } else {
+            return 'Dangerous - Immediate hearing damage risk, requires hearing protection';
+        }
+    };
+
+    // Helper function to get dot color
+    const getDotColor = (db: number): string => {
+        if (db < 30) return '#2ed573';      // Green - Very Quiet
+        if (db < 60) return '#7bed9f';      // Light Green - Normal
+        if (db < 85) return '#ffa502';      // Orange - Loud
+        if (db < 100) return '#ff4757';     // Red - Harmful
+        else return '#341f97';               // Purple - Dangerous
+    };
+
     // Request microphone permission on mount
     useEffect(() => {
         requestMicrophonePermission();
@@ -155,13 +179,8 @@ export default function SoundRecord({ route, navigation }: Props) {
             ? readings.reduce((a, b) => a + b, 0) / readings.length 
             : currentDB;
         
-        // Calculate dot color
-        const getDotColor = (db: number): string => {
-            if (db < 40) return '#2ed573';
-            if (db < 60) return '#ffa502';
-            if (db < 85) return '#ff6b81';
-            return '#ff4757';
-        };
+        // Calculate rating based on peak dB
+        const rating = getRatingFromDB(peakDB);
         
         // Save to database
         try {
@@ -176,11 +195,12 @@ export default function SoundRecord({ route, navigation }: Props) {
                 avg_db: avgDB,
                 duration: duration,
                 dot_color: getDotColor(peakDB),
+                rate: rating  // Now rate is defined
             });
             
             Alert.alert(
                 'Recording Saved',
-                `Peak: ${peakDB.toFixed(1)} dB\nAverage: ${avgDB.toFixed(1)} dB\nDuration: ${duration.toFixed(1)}s`,
+                `Peak: ${peakDB.toFixed(1)} dB\nAverage: ${avgDB.toFixed(1)} dB\nDuration: ${duration.toFixed(1)}s\n\nRating: ${rating}`,
                 [
                     {
                         text: 'OK',

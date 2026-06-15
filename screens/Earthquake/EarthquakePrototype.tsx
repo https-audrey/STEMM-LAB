@@ -27,8 +27,6 @@ export default function EarthquakePrototype({
     description,
   } = route.params;
 
-  const {checkBatteryBeforeActivity} = useBatteryWarning();
-
   const [isTesting, setIsTesting] = useState(false);
   const [peakAccel, setPeakAccel] = useState(0);
   const [avgAccel, setAvgAccel] = useState(0);
@@ -57,14 +55,8 @@ export default function EarthquakePrototype({
     };
   }, []);
 
-  const startTest = () => {
-    checkBatteryBeforeActivity('Earthquake Simulation (vibration)', () => {
-      startEarthquakeTest();
-    }, 0.20)
-  }
-
   // Key fixes in startEarthquakeTest function
-  const startEarthquakeTest = async () => {
+  const startTest = async () => {
       try {
           // Clear previous data
           setPeakAccel(0);
