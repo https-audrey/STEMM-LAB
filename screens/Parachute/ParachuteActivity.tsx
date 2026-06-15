@@ -10,22 +10,24 @@ import {
     TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect, useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, PrototypeRecord, getTrialsBySession, ensureSessionExists } from '../../services/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
-import { CommonActions } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
+type ParachuteActivityRouteProp = RouteProp<RootStackParamList, 'ParachuteActivity'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
 
-export default function ParachuteActivity({ navigation, route }: Props) {
+export default function ParachuteActivity() {
+    const route = useRoute<ParachuteActivityRouteProp>();
+    const navigation = useNavigation<NavigationProp>();
     const { currentSessionId } = route.params;
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isExpired, setIsExpired] = useState(false);
@@ -39,8 +41,6 @@ export default function ParachuteActivity({ navigation, route }: Props) {
 
     const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [reflection, setReflection] = useState('');
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
     const [history, setHistory] = useState<Record<PrototypeKey, PrototypeRecord[]>>({
         baseline: [],
         prototype1: [],
@@ -52,15 +52,14 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         tenMin: false,
         fiveMin: false,
         oneMin: false,
-    })
+    });
 
     const [isNewSession, setIsNewSession] = useState(true);
-
     const autoSubmittedRef = useRef(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
-        let isMounted = true; // Track if component is still mounted
+        let isMounted = true;
         
         const initTimer = async () => {
             let startTime: number;
@@ -91,7 +90,6 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 setTimeRemaining(remaining);
             }
             
-            // Clear existing interval if any
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
             }
@@ -120,7 +118,6 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         
         initTimer();
         
-        // Cleanup function
         return () => {
             isMounted = false;
             if (intervalRef.current) {
@@ -135,32 +132,25 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             if (!timeRemaining || isExpired) return;
             
             const remainingSeconds = timeRemaining;
-            const remainingMinutes = remainingSeconds / 60;
             
-            // 10 minutes warning (600 seconds = 10 minutes)
-
             if (
                 remainingSeconds <= 600 &&
                 remainingSeconds > 595 &&
                 !warningsSentRef.current.tenMin
             ) {
                 warningsSentRef.current.tenMin = true;
-
                 await sendNotification(
                     '⚠️ 5 Minutes Remaining',
                     'Your parachute session will end in 5 minutes.'
                 );
             }
             
-            // 1 minute warning (60 seconds = 1 minute)
-            // Only trigger ONCE when crossing below 61 seconds
             if (
                 remainingSeconds <= 61 &&
                 remainingSeconds > 55 &&
                 !warningsSentRef.current.oneMin
             ) {
                 warningsSentRef.current.oneMin = true;
-
                 await sendNotification(
                     '⚠️ 1 Minute Remaining',
                     'Your parachute session will end in 1 minute. Wrap up your current test!'
@@ -169,7 +159,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         };
         
         sendWarningNotifications();
-    }, [timeRemaining, isExpired]); 
+    }, [timeRemaining, isExpired]);
 
     const autoSubmit = async () => {
         if (autoSubmittedRef.current) return;
@@ -177,36 +167,18 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         autoSubmittedRef.current = true;
 
         try {
-            ensureSessionExists(
-                currentSessionId,
-                'parachute'
-            );
+            ensureSessionExists(currentSessionId, 'parachute');
 
-            // Save reflection if available
             if (reflection.trim()) {
-                saveSessionReflection(
-                    currentSessionId,
-                    'parachute',
-                    reflection
-                );
+                saveSessionReflection(currentSessionId, 'parachute', reflection);
             }
-
-            console.log('AUTO SUBMIT START');
-            console.log('Session ID:', currentSessionId);
 
             markSessionSubmitted(currentSessionId);
 
-            console.log('SESSION MARKED SUBMITTED');
-
-            console.log('Auto submit session:', currentSessionId);
-
             const readings = getTrialsBySession(currentSessionId);
 
-            console.log('Trials found:', readings.length);
-
-
             await cancelAllNotifications();
-            // Upload to Firestore
+            
             await Promise.all([
                 addDocument('parachute_submissions', {
                     sessionId: currentSessionId,
@@ -215,18 +187,18 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                     reflection,
                     submittedAt: new Date().toISOString(),
                 }),
-
                 sendNotification(
                     'Activity Auto-Submitted',
                     `Time expired. ${readings.length} prototype records have been saved automatically.`
                 ),
             ]);
 
-            navigation.navigate('Home');
-
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error) {
             console.error('Auto submit failed:', error);
-
             Alert.alert(
                 'Auto Submit Error',
                 'The session ended but automatic submission failed.'
@@ -261,7 +233,6 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 setHeight('');
                 setReflection('');
                 setIsSessionActive(false);
-                setHasUnsavedChanges(false);
                 setIsNewSession(true);
                 setShowSetupModal(true);
                 navigation.setParams({ didSubmitSuccessfully: undefined as any });
@@ -286,47 +257,9 @@ export default function ParachuteActivity({ navigation, route }: Props) {
         }, [route.params, isSessionActive, currentSessionId])
     );
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (!hasUnsavedChanges && history.baseline.length === 0 && history.prototype1.length === 0) {
-                return;
-            }
-
-            e.preventDefault();
-
-            Alert.alert(
-                'Discard Lab Run?',
-                'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
-                [
-                    { text: 'Keep Workspace', style: 'cancel', onPress: () => {} },
-                    {
-                        text: 'Discard All Data',
-                        style: 'destructive',
-                        onPress: () => {
-                            setMass('');
-                            setHeight('');
-                            setReflection('');
-                            setHistory({
-                                baseline: [],
-                                prototype1: [],
-                                prototype2: [],
-                                prototype3: [],
-                            });
-                            setHasUnsavedChanges(false);
-                            setIsSessionActive(false);
-                            navigation.dispatch(e.data.action);
-                        },
-                    },
-                ]
-            );
-        });
-
-        return unsubscribe;
-    }, [navigation, hasUnsavedChanges, history]);
-
     const handlePrototypePress = (prototypeKey: PrototypeKey) => {
         if (isExpired) {
-            Alert.alert('Session Expired', 'Your 20 minutes have ended. Please start a new session.');
+            Alert.alert('Session Expired', 'Your time has ended. Please start a new session.');
             return;
         }
         
@@ -406,22 +339,15 @@ export default function ParachuteActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: 'Parachute',
-                        params: {currentSessionId},
-                    }
-                ]
-            })
-        )
+        // Direct navigation back without confirmation
+        navigation.replace('Parachute', { 
+            currentSessionId: currentSessionId 
+        });
     };
 
     const handleSubmit = async () => {
         if (isExpired) {
-            Alert.alert('Session Expired', 'Your 20 minutes have ended. Please start a new session.');
+            Alert.alert('Session Expired', 'Your time has ended. Please start a new session.');
             return;
         }
         
@@ -440,12 +366,12 @@ export default function ParachuteActivity({ navigation, route }: Props) {
             return;
         }
 
-        saveSessionReflection(currentSessionId, 'parachute', reflection);
-        markSessionSubmitted(currentSessionId);
-
-        const readings = getTrialsBySession(currentSessionId);
-
         try {
+            saveSessionReflection(currentSessionId, 'parachute', reflection);
+            markSessionSubmitted(currentSessionId);
+
+            const readings = getTrialsBySession(currentSessionId);
+
             await cancelAllNotifications();
             await Promise.all([
                 addDocument('parachute_submissions', {
@@ -455,16 +381,19 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                     reflection,
                     submittedAt: new Date().toISOString(),
                 }),
-
                 sendNotification(
                     'Activity Submitted',
                     'Your Parachute Drop Challenge report has been saved!'
                 ),
             ]);
 
-            navigation.navigate('Home');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error) {
-            Alert.alert('Error', 'Failed to submit activity');
+            console.error(error);
+            Alert.alert('Error', 'Failed to submit activity. Please try again.');
         }
     };
 
@@ -489,7 +418,7 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                         <Text style={styles.label}>Object Mass (g)</Text>
                         <TextInput
                             value={mass}
-                            onChangeText={(text) => { setMass(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setMass}
                             keyboardType="numeric"
                             style={styles.input}
                             placeholder="20.5"
@@ -498,17 +427,24 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                         <Text style={styles.label}>Drop Height (m)</Text>
                         <TextInput
                             value={height}
-                            onChangeText={(text) => { setHeight(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setHeight}
                             keyboardType="numeric"
                             style={styles.input}
                             placeholder="1.5"
                             placeholderTextColor="#bbb"
                         />
-                        <Pressable
-                            style={styles.confirmButton}
-                            onPress={handleSetupConfirm}
-                        >
+                        <Pressable style={styles.confirmButton} onPress={handleSetupConfirm}>
                             <Text style={styles.confirmText}>Confirm</Text>
+                        </Pressable>
+                        <Pressable 
+                            style={[styles.confirmButton, { backgroundColor: '#666', marginTop: 10 }]} 
+                            onPress={() => {
+                                setShowSetupModal(false);
+                                setMass('');
+                                setHeight('');
+                            }}
+                        >
+                            <Text style={styles.confirmText}>Cancel</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -523,7 +459,6 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                     <View style={styles.headerSpacer} />
                 </View>
 
-                {/* Timer Display */}
                 <View style={[styles.timerCard, isExpired && styles.timerCardExpired]}>
                     <Ionicons name="time-outline" size={20} color={isExpired ? '#ff4757' : '#00d2d3'} />
                     <Text style={[styles.timerText, isExpired && styles.timerTextExpired]}>
@@ -532,11 +467,11 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 </View>
 
                 <View style={styles.infoCard}>
-                    <Text style={styles.infoText}>Session Tracking ID: {currentSessionId}</Text>
+                    <Text style={styles.infoText}>Session ID: {currentSessionId}</Text>
                     <Text style={styles.infoText}>Object Mass: {mass || '--'} g</Text>
                     <Text style={styles.infoText}>Drop Height: {height || '--'} m</Text>
                     {!isNewSession && history.baseline.length > 0 && (
-                        <Text style={styles.infoText}>✅ Session in progress - Add more prototypes or review existing ones</Text>
+                        <Text style={styles.infoText}>✅ {history.baseline.length + history.prototype1.length + history.prototype2.length + history.prototype3.length} total prototype(s) completed</Text>
                     )}
                     {isExpired && (
                         <Text style={styles.warningText}>⚠️ Time has expired. Please start a new session.</Text>
@@ -552,11 +487,11 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                     <Text style={styles.cardTitle}>Team Reflection</Text>
                     <Pressable style={styles.actionButton} onPress={() => setShowReflectionModal(true)}>
                         <Text style={styles.actionText}>
-                            {reflection.length > 0 ? 'View / Edit Reflection' : 'Add Reflection'}
+                            {reflection.length > 0 ? 'Edit Reflection' : 'Add Reflection'}
                         </Text>
                     </Pressable>
                     {reflection.length > 0 && (
-                        <Text style={styles.reflectionPreview} numberOfLines={2}>
+                        <Text style={styles.reflectionPreview} numberOfLines={3}>
                             {reflection}
                         </Text>
                     )}
@@ -573,17 +508,15 @@ export default function ParachuteActivity({ navigation, route }: Props) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
                         <Text style={styles.modalTitle}>Team Reflection</Text>
-                        <ScrollView>
-                            <TextInput
-                                multiline
-                                scrollEnabled
-                                value={reflection}
-                                onChangeText={(text) => { setReflection(text); setHasUnsavedChanges(true); }}
-                                placeholder="Describe your design process, what worked, what didn't, and how you improved..."
-                                placeholderTextColor="#AAA"
-                                style={styles.reflectionInput}
-                            />
-                        </ScrollView>
+                        <TextInput
+                            multiline
+                            scrollEnabled
+                            value={reflection}
+                            onChangeText={setReflection}
+                            placeholder="Describe your design process, what worked, what didn't, and how you improved..."
+                            placeholderTextColor="#AAA"
+                            style={styles.reflectionInput}
+                        />
                         <Pressable style={styles.confirmButton} onPress={() => setShowReflectionModal(false)}>
                             <Text style={styles.confirmText}>Save Reflection</Text>
                         </Pressable>

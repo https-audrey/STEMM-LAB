@@ -43,17 +43,9 @@ export default function EarthquakeResult({ route, navigation }: Props) {
         {
           text: 'OK',
           onPress: () =>
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: 'EarthquakeActivity',
-                    params: { currentSessionId: currentSessionId ?? '' }, 
-                  },
-                ],
-              })
-            )
+            navigation.replace('EarthquakeActivity', {
+              currentSessionId: currentSessionId ?? '',
+            }),
         },
       ]);
     } catch (err) {

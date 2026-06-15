@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     View,
@@ -10,183 +10,77 @@ import {
     TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect, useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord, getEarthquakeTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
-import { CommonActions } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
+type EarthquakeActivityRouteProp = RouteProp<RootStackParamList, 'EarthquakeActivity'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'EarthquakeActivity'>;
 
-export default function EarthquakeActivity({ navigation, route }: Props) {
+export default function EarthquakeActivity() {
+    const route = useRoute<EarthquakeActivityRouteProp>();
+    const navigation = useNavigation<NavigationProp>();
     const { currentSessionId } = route.params;
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const [showSetupModal, setShowSetupModal] = useState(false);
     const [description, setDescription] = useState('');
-    const [isSessionActive, setIsSessionActive] = useState(false);
-
     const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [reflection, setReflection] = useState('');
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
-    const isAlertActive = useRef(false);
-    const listenerAttached = useRef(false);
-
-    const [trials, setTrials] =
-    useState<EarthquakePrototypeRecord[]>([]);
-
+    const [trials, setTrials] = useState<EarthquakePrototypeRecord[]>([]);
     const [isNewSession, setIsNewSession] = useState(true);
 
     useFocusEffect(
         React.useCallback(() => {
-            const sessionTrials =
-                getEarthquakeTrialsBySession(
-                    currentSessionId
-                );
-
-            setTrials(sessionTrials);
-
-            setIsNewSession(
-                sessionTrials.length === 0
-            );
-
+            if (currentSessionId) {
+                const sessionTrials = getEarthquakeTrialsBySession(currentSessionId);
+                setTrials(sessionTrials);
+                setIsNewSession(sessionTrials.length === 0);
+            }
         }, [currentSessionId])
     );
 
-    useEffect(() => {
-        if (listenerAttached.current) return;
-        listenerAttached.current = true;
-
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (isAlertActive.current) return;
-
-            if (!hasUnsavedChanges && trials.length === 0) return;
-
-            e.preventDefault();
-            isAlertActive.current = true;
-
-            Alert.alert(
-            'Discard Lab Run?',
-            'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
-            [
-                {
-                text: 'Cancel',
-                style: 'cancel',
-                onPress: () => {
-                    isAlertActive.current = false;
-                },
-                },
-                {
-                text: 'Discard',
-                style: 'destructive',
-                onPress: () => {
-                    isAlertActive.current = false;
-
-                    navigation.dispatch(
-                    CommonActions.reset({
-                        index: 0,
-                        routes: [
-                        {
-                            name: 'Earthquake',
-                            params: { currentSessionId },
-                        },
-                        ],
-                    })
-                    );
-                },
-                },
-            ]
-            );
-        });
-
-        return unsubscribe;
-        }, []);
-
-    const renderTrialCard =
-    (
-        trial: EarthquakePrototypeRecord
-    ) => {
-
+    const renderTrialCard = (trial: EarthquakePrototypeRecord) => {
         return (
-            <View
-                key={trial.prototype_key}
-                style={styles.card}
-            >
-                <Text style={styles.cardTitle}>
-                    {trial.prototype_key}
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Description:
-                    {' '}
-                    {trial.description}
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Peak Acceleration:
-                    {' '}
-                    {trial.peakAccel}
-                </Text>
-
-
+            <View key={trial.prototype_key} style={styles.card}>
+                <Text style={styles.cardTitle}>{trial.prototype_key}</Text>
+                <Text style={styles.infoText}>Description: {trial.description}</Text>
+                <Text style={styles.infoText}>Peak Acceleration: {trial.peakAccel}</Text>
                 <Pressable
                     style={styles.actionButton}
                     onPress={() =>
-                        navigation.navigate(
-                            'EarthquakeResult',
-                            {
-                                data: {
-                                    currentSessionId,
-
-                                    prototypeKey:
-                                        trial.prototype_key,
-
-                                    description:
-                                        trial.description,
-
-                                    peakAccel:
-                                        trial.peakAccel,
-
-                                    avgAccel:
-                                        trial.avgAccel,
-
-                                    isHistoricalView:
-                                        true,
-                                },
-                            }
-                        )
+                        navigation.navigate('EarthquakeResult', {
+                            data: {
+                                currentSessionId,
+                                prototypeKey: trial.prototype_key,
+                                description: trial.description,
+                                peakAccel: trial.peakAccel,
+                                avgAccel: trial.avgAccel,
+                                isHistoricalView: true,
+                            },
+                        })
                     }
                 >
-                    <Text style={styles.actionText}>
-                        View Result
-                    </Text>
+                    <Text style={styles.actionText}>View Result</Text>
                 </Pressable>
             </View>
         );
     };
 
     const handleBack = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: 'Earthquake',
-                        params: {currentSessionId},
-                    }
-                ]
-            })
-        )
+        // Just navigate back directly - no confirmation
+        navigation.replace('Earthquake', { 
+            currentSessionId: currentSessionId 
+        });
     };
 
     const handleSubmit = async () => {
-        
         if (!trials.length) {
-            Alert.alert('Incomplete Activity', 'Please complete the prototype.');
+            Alert.alert('Incomplete Activity', 'Please complete at least one prototype test.');
             return;
         }
 
@@ -195,12 +89,14 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
             return;
         }
 
-        saveSessionReflection(currentSessionId, 'earthquake', reflection);
-        markSessionSubmitted(currentSessionId);
-
-        const readings = getEarthquakeTrialsBySession(currentSessionId);
-                        
         try {
+            if (currentSessionId) {
+                saveSessionReflection(currentSessionId, 'earthquake', reflection);
+                markSessionSubmitted(currentSessionId);
+            }
+
+            const readings = currentSessionId ? getEarthquakeTrialsBySession(currentSessionId) : [];
+
             await Promise.all([
                 addDocument('earthquake_submissions', {
                     sessionId: currentSessionId,
@@ -209,46 +105,36 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
                     reflection,
                     submittedAt: new Date().toISOString(),
                 }),
-
-                sendNotification(
-                    'Activity Submitted',
-                    'Your Earthquake-Resistant Challenge report has been saved!'
-                ),
+                sendNotification('Activity Submitted', 'Your Earthquake-Resistant Challenge report has been saved!'),
             ]);
 
-            navigation.navigate('Home');
+            // Navigate to Home after successful submission
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error) {
-            Alert.alert('Error', 'Failed to submit activity');
+            console.error(error);
+            Alert.alert('Error', 'Failed to submit activity. Please try again.');
         }
     };
 
     const handleSetupConfirm = () => {
-
-        if (
-            !description.trim()
-        ) {
-            Alert.alert(
-                'Invalid Setup',
-                'Please fill the description.'
-            );
+        if (!description.trim()) {
+            Alert.alert('Invalid Setup', 'Please fill in the description.');
             return;
         }
 
-        const prototypeKey =
-            `prototype${trials.length + 1}_${Date.now()}`;
+        const prototypeKey = `prototype${trials.length + 1}_${Date.now()}`;
 
         setShowSetupModal(false);
-
         setDescription('');
 
-        navigation.navigate(
-            'EarthquakePrototype',
-            {
-                currentSessionId,
-                prototype: prototypeKey,
-                description
-            }
-        );
+        navigation.navigate('EarthquakePrototype', {
+            currentSessionId: currentSessionId || '',
+            prototype: prototypeKey,
+            description: description,
+        });
     };
 
     return (
@@ -260,17 +146,24 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
                         <Text style={styles.label}>Prototype Description</Text>
                         <TextInput
                             value={description}
-                            onChangeText={(text) => { setDescription(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setDescription}
                             keyboardType="default"
                             style={styles.input}
-                            placeholder="1"
+                            placeholder="Describe your prototype structure..."
                             placeholderTextColor="#bbb"
+                            multiline
                         />
-                        <Pressable
-                            style={styles.confirmButton}
-                            onPress={handleSetupConfirm}
+                        <Pressable style={styles.confirmButton} onPress={handleSetupConfirm}>
+                            <Text style={styles.confirmText}>Confirm & Start</Text>
+                        </Pressable>
+                        <Pressable 
+                            style={[styles.confirmButton, { backgroundColor: '#666', marginTop: 10 }]} 
+                            onPress={() => {
+                                setShowSetupModal(false);
+                                setDescription('');
+                            }}
                         >
-                            <Text style={styles.confirmText}>Confirm</Text>
+                            <Text style={styles.confirmText}>Cancel</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -286,34 +179,30 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
                 </View>
 
                 <View style={styles.infoCard}>
-                    <Text style={styles.infoText}>Session Tracking ID: {currentSessionId}</Text>
-                    {!isNewSession && (
-                        <Text style={styles.infoText}>✅ Session in progress - Add more prototypes or review existing ones</Text>
+                    <Text style={styles.infoText}>Session ID: {currentSessionId || 'New Session'}</Text>
+                    {!isNewSession && trials.length > 0 && (
+                        <Text style={styles.infoText}>✅ {trials.length} prototype(s) completed</Text>
+                    )}
+                    {isNewSession && (
+                        <Text style={styles.infoText}>🆕 New session - Add your first prototype</Text>
                     )}
                 </View>
 
                 {trials.map(renderTrialCard)}
 
-                <Pressable
-                    style={styles.addButton}
-                    onPress={() =>
-                        setShowSetupModal(true)
-                    }
-                >
-                    <Text style={styles.addButtonText}>
-                        + Add Prototype
-                    </Text>
+                <Pressable style={styles.addButton} onPress={() => setShowSetupModal(true)}>
+                    <Text style={styles.addButtonText}>+ Add New Prototype</Text>
                 </Pressable>
 
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Team Reflection</Text>
                     <Pressable style={styles.actionButton} onPress={() => setShowReflectionModal(true)}>
                         <Text style={styles.actionText}>
-                            {reflection.length > 0 ? 'View / Edit Reflection' : 'Add Reflection'}
+                            {reflection.length > 0 ? 'Edit Reflection' : 'Add Reflection'}
                         </Text>
                     </Pressable>
                     {reflection.length > 0 && (
-                        <Text style={styles.reflectionPreview} numberOfLines={2}>
+                        <Text style={styles.reflectionPreview} numberOfLines={3}>
                             {reflection}
                         </Text>
                     )}
@@ -330,17 +219,15 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
                         <Text style={styles.modalTitle}>Team Reflection</Text>
-                        <ScrollView>
-                            <TextInput
-                                multiline
-                                scrollEnabled
-                                value={reflection}
-                                onChangeText={(text) => { setReflection(text); setHasUnsavedChanges(true); }}
-                                placeholder="Describe your design process, what worked, what didn't, and how you improved..."
-                                placeholderTextColor="#AAA"
-                                style={styles.reflectionInput}
-                            />
-                        </ScrollView>
+                        <TextInput
+                            multiline
+                            scrollEnabled
+                            value={reflection}
+                            onChangeText={setReflection}
+                            placeholder="Describe your design process, what worked, what didn't, and how you improved..."
+                            placeholderTextColor="#AAA"
+                            style={styles.reflectionInput}
+                        />
                         <Pressable style={styles.confirmButton} onPress={() => setShowReflectionModal(false)}>
                             <Text style={styles.confirmText}>Save Reflection</Text>
                         </Pressable>
@@ -362,8 +249,6 @@ const styles = StyleSheet.create({
     card: { backgroundColor: 'rgba(128,128,128,0.5)', borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
     cardTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
     actionButton: { backgroundColor: '#4A90E2', borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
-    completedButton: { backgroundColor: '#2E86C1' },
-    lockedButton: { backgroundColor: '#555', opacity: 0.5 },
     actionText: { color: '#fff', fontSize: 17, fontWeight: 'bold' },
     modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' },
     modalCard: { width: '85%', backgroundColor: '#102654', borderRadius: 24, padding: 25 },
@@ -376,19 +261,7 @@ const styles = StyleSheet.create({
     submitButton: { backgroundColor: '#2ECC71', borderRadius: 20, paddingVertical: 16, alignItems: 'center', marginTop: 10 },
     submitText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
     buttonContainer: { marginTop: 10, marginBottom: 30 },
-    badgeText: { color: '#ffa502', fontSize: 12, alignSelf: 'center', fontWeight: '600' },
-    statsPreview: { color: '#ddd', fontSize: 13, marginBottom: 12, fontStyle: 'italic' },
     reflectionPreview: { color: '#aaa', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
-    addButton: {
-    backgroundColor: '#2ed573',
-    borderRadius: 18,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 20,
-},
-addButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-},
+    addButton: { backgroundColor: '#2ed573', borderRadius: 18, paddingVertical: 16, alignItems: 'center', marginBottom: 20 },
+    addButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
 });

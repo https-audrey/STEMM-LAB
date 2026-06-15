@@ -12,21 +12,23 @@ import {
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect, useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import * as Location from 'expo-location';
 import { RootStackParamList } from '../../types/navigation';
-import { getSessionReflection, getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
+import { getSoundTrialsBySession, markSessionSubmitted, saveSessionReflection, SoundMapRecord } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
-import { CommonActions } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
+type SoundActivityRouteProp = RouteProp<RootStackParamList, 'SoundActivity'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'SoundActivity'>;
 
-export default function SoundActivity({ navigation, route }: Props) {
+export default function SoundActivity() {
+    const route = useRoute<SoundActivityRouteProp>();
+    const navigation = useNavigation<NavigationProp>();
     const { currentSessionId } = route.params;
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [showSetupModal, setShowSetupModal] = useState(false);
@@ -35,7 +37,6 @@ export default function SoundActivity({ navigation, route }: Props) {
     const [isSessionActive, setIsSessionActive] = useState(false);
     const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [reflection, setReflection] = useState('');
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [trials, setTrials] = useState<SoundMapRecord[]>([]);
     const [isNewSession, setIsNewSession] = useState(true);
     const [selectedMarker, setSelectedMarker] = useState<SoundMapRecord | null>(null);
@@ -93,45 +94,12 @@ export default function SoundActivity({ navigation, route }: Props) {
         }, [currentSessionId])
     );
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (!hasUnsavedChanges && trials.length === 0) {
-                return;
-            }
-
-            e.preventDefault();
-
-            Alert.alert(
-                'Discard Lab Run?',
-                'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
-                [
-                    { text: 'Keep Workspace', style: 'cancel', onPress: () => {} },
-                    {
-                        text: 'Discard All Data',
-                        style: 'destructive',
-                        onPress: () => {
-                            setLocationDescription('');
-                            setAction('');
-                            setReflection('');
-                            setTrials([]);
-                            setHasUnsavedChanges(false);
-                            setIsSessionActive(false);
-                            navigation.dispatch(e.data.action);
-                        },
-                    },
-                ]
-            );
-        });
-
-        return unsubscribe;
-    }, [navigation, hasUnsavedChanges, trials]);
-
     const getDotColor = (db: number): string => {
         if (db < 30) return '#2ed573';      // Green - Very Quiet
         if (db < 60) return '#7bed9f';      // Light Green - Normal
         if (db < 85) return '#ffa502';      // Orange - Loud
         if (db < 100) return '#ff4757';     // Red - Harmful
-        else return '#341f97';     // Purple - Dangerous
+        else return '#341f97';               // Purple - Dangerous
     };
 
     const handleRecordSound = async () => {
@@ -154,7 +122,6 @@ export default function SoundActivity({ navigation, route }: Props) {
         }
 
         setShowSetupModal(false);
-        setHasUnsavedChanges(true);
 
         // Get current location before navigating
         try {
@@ -185,17 +152,10 @@ export default function SoundActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: 'Sound',
-                        params: {currentSessionId},
-                    }
-                ]
-            })
-        )
+        // Direct navigation back without confirmation
+        navigation.replace('Sound', { 
+            currentSessionId: currentSessionId 
+        });
     };
 
     const handleSubmit = async () => {
@@ -209,12 +169,12 @@ export default function SoundActivity({ navigation, route }: Props) {
             return;
         }
 
-        saveSessionReflection(currentSessionId, 'sound', reflection);
-        markSessionSubmitted(currentSessionId);
-
-        const readings = getSoundTrialsBySession(currentSessionId);
-        
         try {
+            saveSessionReflection(currentSessionId, 'sound', reflection);
+            markSessionSubmitted(currentSessionId);
+
+            const readings = getSoundTrialsBySession(currentSessionId);
+            
             await Promise.all([
                 addDocument('sound_submissions', {
                     sessionId: currentSessionId,
@@ -223,16 +183,19 @@ export default function SoundActivity({ navigation, route }: Props) {
                     reflection,
                     submittedAt: new Date().toISOString(),
                 }),
-
                 sendNotification(
                     'Activity Submitted',
                     'Your Sound Pollution Hunter report has been saved!'
                 ),
             ]);
 
-            navigation.navigate('Home');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error) {
-            Alert.alert('Error', 'Failed to submit activity');
+            console.error(error);
+            Alert.alert('Error', 'Failed to submit activity. Please try again.');
         }
     };
 
@@ -338,17 +301,15 @@ export default function SoundActivity({ navigation, route }: Props) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
                         <Text style={styles.modalTitle}>Team Reflection</Text>
-                        <ScrollView>
-                            <TextInput
-                                multiline
-                                scrollEnabled
-                                value={reflection}
-                                onChangeText={(text) => { setReflection(text); setHasUnsavedChanges(true); }}
-                                placeholder="Describe your findings: Which actions were loudest? Where are the quiet/loud zones? Were your predictions correct? What surprised you?"
-                                placeholderTextColor="#AAA"
-                                style={styles.reflectionInput}
-                            />
-                        </ScrollView>
+                        <TextInput
+                            multiline
+                            scrollEnabled
+                            value={reflection}
+                            onChangeText={setReflection}
+                            placeholder="Describe your findings: Which actions were loudest? Where are the quiet/loud zones? Were your predictions correct? What surprised you?"
+                            placeholderTextColor="#AAA"
+                            style={styles.reflectionInput}
+                        />
                         <Pressable style={styles.confirmButton} onPress={() => setShowReflectionModal(false)}>
                             <Text style={styles.confirmText}>Save Reflection</Text>
                         </Pressable>
@@ -436,8 +397,8 @@ export default function SoundActivity({ navigation, route }: Props) {
                 <View style={styles.infoCard}>
                     <Text style={styles.infoText}>Session ID: {currentSessionId}</Text>
                     <Text style={styles.infoText}>Recordings: {trials.length}</Text>
-                    {!isNewSession && (
-                        <Text style={styles.infoText}>✅ Session in progress - Add more recordings</Text>
+                    {!isNewSession && trials.length > 0 && (
+                        <Text style={styles.infoText}>✅ {trials.length} recording(s) completed</Text>
                     )}
                 </View>
 
@@ -452,11 +413,11 @@ export default function SoundActivity({ navigation, route }: Props) {
                     <Text style={styles.cardTitle}>Team Reflection</Text>
                     <Pressable style={styles.actionButton} onPress={() => setShowReflectionModal(true)}>
                         <Text style={styles.actionText}>
-                            {reflection.length > 0 ? 'View / Edit Reflection' : 'Add Reflection'}
+                            {reflection.length > 0 ? 'Edit Reflection' : 'Add Reflection'}
                         </Text>
                     </Pressable>
                     {reflection.length > 0 && (
-                        <Text style={styles.reflectionPreview} numberOfLines={2}>
+                        <Text style={styles.reflectionPreview} numberOfLines={3}>
                             {reflection}
                         </Text>
                     )}

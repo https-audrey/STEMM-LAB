@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Alert,
     View,
@@ -10,215 +10,88 @@ import {
     TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect, useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, getHFTrialsBySession } from '../../services/db';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
-import { CommonActions } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
+type HandFanActivityRouteProp = RouteProp<RootStackParamList, 'HandFanActivity'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'HandFanActivity'>;
 
-export default function HandFanActivity({ navigation, route }: Props) {
+export default function HandFanActivity() {
+    const route = useRoute<HandFanActivityRouteProp>();
+    const navigation = useNavigation<NavigationProp>();
     const { currentSessionId } = route.params;
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const [showSetupModal, setShowSetupModal] = useState(false);
     const [design, setDesign] = useState('');
     const [distance, setDistance] = useState('');
     const [material, setMaterial] = useState('');
     const [stiffness, setStiffness] = useState('');
-    const [isSessionActive, setIsSessionActive] = useState(false);
-
     const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [reflection, setReflection] = useState('');
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
-    const [trials, setTrials] =
-    useState<HandFanPrototypeRecord[]>([]);
-
+    const [trials, setTrials] = useState<HandFanPrototypeRecord[]>([]);
     const [isNewSession, setIsNewSession] = useState(true);
 
     useFocusEffect(
         React.useCallback(() => {
-            const sessionTrials =
-                getHFTrialsBySession(
-                    currentSessionId
-                );
-
+            const sessionTrials = getHFTrialsBySession(currentSessionId);
             setTrials(sessionTrials);
-
-            setIsNewSession(
-                sessionTrials.length === 0
-            );
-
+            setIsNewSession(sessionTrials.length === 0);
         }, [currentSessionId])
     );
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (!hasUnsavedChanges && trials.length === 0) {
-                return;
-            }
-
-            e.preventDefault();
-
-            Alert.alert(
-                'Discard Lab Run?',
-                'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
-                [
-                    { text: 'Keep Workspace', style: 'cancel', onPress: () => {} },
-                    {
-                        text: 'Discard All Data',
-                        style: 'destructive',
-                        onPress: () => {
-                            setDesign('');
-                            setDistance('');
-                            setMaterial('');
-                            setStiffness('');
-                            setReflection('');
-                            setTrials([]);
-                            setHasUnsavedChanges(false);
-                            setIsSessionActive(false);
-                            navigation.dispatch(e.data.action);
-                        },
-                    },
-                ]
-            );
-        });
-
-        return unsubscribe;
-    }, [navigation, hasUnsavedChanges, trials]);
-
-    const renderTrialCard =
-    (
-        trial: HandFanPrototypeRecord
-    ) => {
-
+    const renderTrialCard = (trial: HandFanPrototypeRecord) => {
         return (
-            <View
-                key={trial.prototype_key}
-                style={styles.card}
-            >
-                <Text style={styles.cardTitle}>
-                    {trial.prototype_key}
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Design:
-                    {' '}
-                    {trial.design}
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Distance:
-                    {' '}
-                    {trial.distance} cm
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Material:
-                    {' '}
-                    {trial.material}
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Stiffness:
-                    {' '}
-                    {trial.stiffness}
-                </Text>
-
-                {/* <Text style={styles.infoText}>
-                    Bend Angle:
-                    {' '}
-                    {trial.bend_angle}°
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Force:
-                    {' '}
-                    {trial.force.toFixed(3)}
-                    {' '}
-                    N
-                </Text> */}
+            <View key={trial.prototype_key} style={styles.card}>
+                <Text style={styles.cardTitle}>{trial.prototype_key}</Text>
+                <Text style={styles.infoText}>Design: {trial.design}</Text>
+                <Text style={styles.infoText}>Distance: {trial.distance} cm</Text>
+                <Text style={styles.infoText}>Material: {trial.material}</Text>
+                <Text style={styles.infoText}>Stiffness: {trial.stiffness}</Text>
 
                 <Pressable
                     style={styles.actionButton}
                     onPress={() =>
-                        navigation.navigate(
-                            'HandFanResult',
-                            {
-                                data: {
-                                    currentSessionId,
-
-                                    videoUri:
-                                        trial.video_uri,
-
-                                    prototypeKey:
-                                        trial.prototype_key,
-
-                                    design:
-                                        trial.design,
-
-                                    distance:
-                                        trial.distance,
-
-                                    material:
-                                        trial.material,
-
-                                    stiffness:
-                                        trial.stiffness,
-
-                                    top_point_x:
-                                        trial.top_point_x,
-                                    
-                                    top_point_y:
-                                        trial.top_point_y,
-
-                                    bottom_point_x:
-                                        trial.bottom_point_x,
-                                    
-                                    bottom_point_y:
-                                        trial.bottom_point_y,
-
-                                    bend_angle:
-                                        trial.bend_angle,
-
-                                    isHistoricalView:
-                                        true,
-                                },
-                            }
-                        )
+                        navigation.navigate('HandFanResult', {
+                            data: {
+                                currentSessionId,
+                                videoUri: trial.video_uri,
+                                prototypeKey: trial.prototype_key,
+                                design: trial.design,
+                                distance: trial.distance,
+                                material: trial.material,
+                                stiffness: trial.stiffness,
+                                top_point_x: trial.top_point_x,
+                                top_point_y: trial.top_point_y,
+                                bottom_point_x: trial.bottom_point_x,
+                                bottom_point_y: trial.bottom_point_y,
+                                bend_angle: trial.bend_angle,
+                                isHistoricalView: true,
+                            },
+                        })
                     }
                 >
-                    <Text style={styles.actionText}>
-                        View Result
-                    </Text>
+                    <Text style={styles.actionText}>View Result</Text>
                 </Pressable>
             </View>
         );
     };
 
     const handleBack = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: 'HandFan',
-                        params: {currentSessionId},
-                    }
-                ]
-            })
-        )
+        // Direct navigation back without confirmation
+        navigation.replace('HandFan', { 
+            currentSessionId: currentSessionId 
+        });
     };
 
     const handleSubmit = async () => {
-        
         if (!trials.length) {
-            Alert.alert('Incomplete Activity', 'Please complete the prototype.');
+            Alert.alert('Incomplete Activity', 'Please complete at least one prototype test.');
             return;
         }
 
@@ -227,12 +100,12 @@ export default function HandFanActivity({ navigation, route }: Props) {
             return;
         }
 
-        saveSessionReflection(currentSessionId, 'handfan', reflection);
-        markSessionSubmitted(currentSessionId);
-
-        const readings = getHFTrialsBySession(currentSessionId);
-                
         try {
+            saveSessionReflection(currentSessionId, 'handfan', reflection);
+            markSessionSubmitted(currentSessionId);
+
+            const readings = getHFTrialsBySession(currentSessionId);
+            
             await Promise.all([
                 addDocument('handfan_submissions', {
                     sessionId: currentSessionId,
@@ -241,29 +114,27 @@ export default function HandFanActivity({ navigation, route }: Props) {
                     reflection,
                     submittedAt: new Date().toISOString(),
                 }),
-
                 sendNotification(
                     'Activity Submitted',
                     'Your Hand Fan Challenge report has been saved!'
                 ),
             ]);
 
-            navigation.navigate('Home');
+            // Navigate to Home after successful submission
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error) {
-            Alert.alert('Error', 'Failed to submit activity');
+            console.error(error);
+            Alert.alert('Error', 'Failed to submit activity. Please try again.');
         }
     };
 
     const handleSetupConfirm = () => {
-
-        const designNum =
-            parseInt(design);
-
-        const distanceNum =
-            parseFloat(distance);
-
-        const stiffnessNum =
-            parseFloat(stiffness);
+        const designNum = parseInt(design);
+        const distanceNum = parseFloat(distance);
+        const stiffnessNum = parseFloat(stiffness);
 
         if (
             isNaN(designNum) ||
@@ -271,35 +142,28 @@ export default function HandFanActivity({ navigation, route }: Props) {
             !material.trim() ||
             isNaN(stiffnessNum)
         ) {
-            Alert.alert(
-                'Invalid Setup',
-                'Please fill all fields.'
-            );
+            Alert.alert('Invalid Setup', 'Please fill all fields.');
             return;
         }
 
-        const prototypeKey =
-            `prototype${trials.length + 1}_${Date.now()}`;
+        const prototypeKey = `prototype${trials.length + 1}_${Date.now()}`;
 
         setShowSetupModal(false);
-
+        
+        // Clear form fields
         setDesign('');
         setDistance('');
         setMaterial('');
         setStiffness('');
 
-        navigation.navigate(
-            'HandFanPrototype',
-            {
-                currentSessionId,
-                prototype: prototypeKey,
-
-                design: designNum,
-                distance: distanceNum,
-                material,
-                stiffness: stiffnessNum,
-            }
-        );
+        navigation.navigate('HandFanPrototype', {
+            currentSessionId,
+            prototype: prototypeKey,
+            design: designNum,
+            distance: distanceNum,
+            material,
+            stiffness: stiffnessNum,
+        });
     };
 
     return (
@@ -308,47 +172,62 @@ export default function HandFanActivity({ navigation, route }: Props) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
                         <Text style={styles.modalTitle}>Experiment Setup</Text>
+                        
                         <Text style={styles.label}>Design #</Text>
                         <TextInput
                             value={design}
-                            onChangeText={(text) => { setDesign(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setDesign}
                             keyboardType="numeric"
                             style={styles.input}
                             placeholder="1"
                             placeholderTextColor="#bbb"
                         />
+                        
                         <Text style={styles.label}>Distance (cm)</Text>
                         <TextInput
                             value={distance}
-                            onChangeText={(text) => { setDistance(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setDistance}
                             keyboardType="numeric"
                             style={styles.input}
                             placeholder="15"
                             placeholderTextColor="#bbb"
                         />
+                        
                         <Text style={styles.label}>Material</Text>
                         <TextInput
                             value={material}
-                            onChangeText={(text) => { setMaterial(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setMaterial}
                             keyboardType="default"
                             style={styles.input}
                             placeholder="paper"
                             placeholderTextColor="#bbb"
                         />
+                        
                         <Text style={styles.label}>Stiffness (N/rad)</Text>
                         <TextInput
                             value={stiffness}
-                            onChangeText={(text) => { setStiffness(text); setHasUnsavedChanges(true); }}
+                            onChangeText={setStiffness}
                             keyboardType="numeric"
                             style={styles.input}
                             placeholder="0.05"
                             placeholderTextColor="#bbb"
                         />
-                        <Pressable
-                            style={styles.confirmButton}
-                            onPress={handleSetupConfirm}
+                        
+                        <Pressable style={styles.confirmButton} onPress={handleSetupConfirm}>
+                            <Text style={styles.confirmText}>Confirm & Start</Text>
+                        </Pressable>
+                        
+                        <Pressable 
+                            style={[styles.confirmButton, { backgroundColor: '#666', marginTop: 10 }]} 
+                            onPress={() => {
+                                setShowSetupModal(false);
+                                setDesign('');
+                                setDistance('');
+                                setMaterial('');
+                                setStiffness('');
+                            }}
                         >
-                            <Text style={styles.confirmText}>Confirm</Text>
+                            <Text style={styles.confirmText}>Cancel</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -364,34 +243,30 @@ export default function HandFanActivity({ navigation, route }: Props) {
                 </View>
 
                 <View style={styles.infoCard}>
-                    <Text style={styles.infoText}>Session Tracking ID: {currentSessionId}</Text>
-                    {!isNewSession && (
-                        <Text style={styles.infoText}>✅ Session in progress - Add more prototypes or review existing ones</Text>
+                    <Text style={styles.infoText}>Session ID: {currentSessionId}</Text>
+                    {!isNewSession && trials.length > 0 && (
+                        <Text style={styles.infoText}>✅ {trials.length} prototype(s) completed</Text>
+                    )}
+                    {isNewSession && (
+                        <Text style={styles.infoText}>🆕 New session - Add your first prototype</Text>
                     )}
                 </View>
 
                 {trials.map(renderTrialCard)}
 
-                <Pressable
-                    style={styles.addButton}
-                    onPress={() =>
-                        setShowSetupModal(true)
-                    }
-                >
-                    <Text style={styles.addButtonText}>
-                        + Add Prototype
-                    </Text>
+                <Pressable style={styles.addButton} onPress={() => setShowSetupModal(true)}>
+                    <Text style={styles.addButtonText}>+ Add New Prototype</Text>
                 </Pressable>
 
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Team Reflection</Text>
                     <Pressable style={styles.actionButton} onPress={() => setShowReflectionModal(true)}>
                         <Text style={styles.actionText}>
-                            {reflection.length > 0 ? 'View / Edit Reflection' : 'Add Reflection'}
+                            {reflection.length > 0 ? 'Edit Reflection' : 'Add Reflection'}
                         </Text>
                     </Pressable>
                     {reflection.length > 0 && (
-                        <Text style={styles.reflectionPreview} numberOfLines={2}>
+                        <Text style={styles.reflectionPreview} numberOfLines={3}>
                             {reflection}
                         </Text>
                     )}
@@ -408,17 +283,15 @@ export default function HandFanActivity({ navigation, route }: Props) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
                         <Text style={styles.modalTitle}>Team Reflection</Text>
-                        <ScrollView>
-                            <TextInput
-                                multiline
-                                scrollEnabled
-                                value={reflection}
-                                onChangeText={(text) => { setReflection(text); setHasUnsavedChanges(true); }}
-                                placeholder="Describe your design process, what worked, what didn't, and how you improved..."
-                                placeholderTextColor="#AAA"
-                                style={styles.reflectionInput}
-                            />
-                        </ScrollView>
+                        <TextInput
+                            multiline
+                            scrollEnabled
+                            value={reflection}
+                            onChangeText={setReflection}
+                            placeholder="Describe your design process, what worked, what didn't, and how you improved..."
+                            placeholderTextColor="#AAA"
+                            style={styles.reflectionInput}
+                        />
                         <Pressable style={styles.confirmButton} onPress={() => setShowReflectionModal(false)}>
                             <Text style={styles.confirmText}>Save Reflection</Text>
                         </Pressable>
@@ -440,8 +313,6 @@ const styles = StyleSheet.create({
     card: { backgroundColor: 'rgba(128,128,128,0.5)', borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
     cardTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
     actionButton: { backgroundColor: '#4A90E2', borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
-    completedButton: { backgroundColor: '#2E86C1' },
-    lockedButton: { backgroundColor: '#555', opacity: 0.5 },
     actionText: { color: '#fff', fontSize: 17, fontWeight: 'bold' },
     modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' },
     modalCard: { width: '85%', backgroundColor: '#102654', borderRadius: 24, padding: 25 },
@@ -454,19 +325,7 @@ const styles = StyleSheet.create({
     submitButton: { backgroundColor: '#2ECC71', borderRadius: 20, paddingVertical: 16, alignItems: 'center', marginTop: 10 },
     submitText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
     buttonContainer: { marginTop: 10, marginBottom: 30 },
-    badgeText: { color: '#ffa502', fontSize: 12, alignSelf: 'center', fontWeight: '600' },
-    statsPreview: { color: '#ddd', fontSize: 13, marginBottom: 12, fontStyle: 'italic' },
     reflectionPreview: { color: '#aaa', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
-    addButton: {
-    backgroundColor: '#2ed573',
-    borderRadius: 18,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 20,
-},
-addButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-},
+    addButton: { backgroundColor: '#2ed573', borderRadius: 18, paddingVertical: 16, alignItems: 'center', marginBottom: 20 },
+    addButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
 });

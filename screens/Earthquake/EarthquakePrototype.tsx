@@ -63,119 +63,66 @@ export default function EarthquakePrototype({
     }, 0.20)
   }
 
+  // Key fixes in startEarthquakeTest function
   const startEarthquakeTest = async () => {
-    try {
-        setPeakAccel(0);
-        setAvgAccel(0);
-        setReadings([]);
-        setTestDuration(0);
+      try {
+          // Clear previous data
+          setPeakAccel(0);
+          setAvgAccel(0);
+          setReadings([]);
+          setTestDuration(0);
 
-        peakAccelRef.current = 0;
-        readingsRef.current = [];
+          peakAccelRef.current = 0;
+          readingsRef.current = [];
 
-        setIsTesting(true);
-        isTestingRef.current = true;
-        startTime.current = Date.now();
+          setIsTesting(true);
+          isTestingRef.current = true;
+          startTime.current = Date.now();
 
-        Accelerometer.setUpdateInterval(50);
-
-        subscription.current =
-        Accelerometer.addListener(
-            ({ x, y, z }) => {
-
-            // Expo already returns values in g
-            const magnitude =
-                Math.sqrt(
-                x * x +
-                y * y +
-                z * z
-                );
-
-            const vibrationMagnitude =
-                Math.abs(
-                magnitude - 1
-                );
-
-            peakAccelRef.current =
-                Math.max(
-                peakAccelRef.current,
-                vibrationMagnitude
-                );
-
-            readingsRef.current.push(
-                vibrationMagnitude
-            );
-
-            const average =
-                readingsRef.current.reduce(
-                (a, b) => a + b,
-                0
-                ) /
-                readingsRef.current.length;
-
-            setPeakAccel(
-                peakAccelRef.current
-            );
-
-            setAvgAccel(
-                average
-            );
-
-            setReadings([
-                ...readingsRef.current
-            ]);
-
-            setTestDuration(
-                (Date.now() -
-                startTime.current) /
-                1000
-            );
-
-            console.log(
-                'x:',
-                x.toFixed(3),
-                'y:',
-                y.toFixed(3),
-                'z:',
-                z.toFixed(3),
-                'vibration:',
-                vibrationMagnitude.toFixed(3)
-            );
-            }
-        );
-
-        Vibration.vibrate(
-          [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-          ],
-          true
-        );
-
-        timeoutRef.current = setTimeout(() => {
-          if (isTestingRef.current) {
-            stopTest();
+          // Ensure any existing subscription is removed
+          if (subscription.current) {
+              subscription.current.remove();
+              subscription.current = null;
           }
-        }, 10000);
 
-    } catch (error) {
-        console.error(error);
+          await Accelerometer.setUpdateInterval(50); // Add await here
 
-        Alert.alert(
-        'Error',
-        'Failed to start earthquake test.'
-        );
+          subscription.current = Accelerometer.addListener(({ x, y, z }) => {
+              // Ensure we're still testing before processing
+              if (!isTestingRef.current) return;
+              
+              const magnitude = Math.sqrt(x * x + y * y + z * z);
+              const vibrationMagnitude = Math.abs(magnitude - 1);
 
-        setIsTesting(false);
-        isTestingRef.current = false;
-    }
-    };
+              peakAccelRef.current = Math.max(peakAccelRef.current, vibrationMagnitude);
+              readingsRef.current.push(vibrationMagnitude);
+
+              const average = readingsRef.current.reduce((a, b) => a + b, 0) / readingsRef.current.length;
+
+              // Update state with latest values
+              setPeakAccel(peakAccelRef.current);
+              setAvgAccel(average);
+              setReadings([...readingsRef.current]);
+              setTestDuration((Date.now() - startTime.current) / 1000);
+          });
+
+          // Start vibration pattern
+          Vibration.vibrate([100, 100, 100, 100, 100, 100, 100, 100], true);
+
+          // Set timeout to auto-stop after 10 seconds
+          timeoutRef.current = setTimeout(() => {
+              if (isTestingRef.current) {
+                  stopTest();
+              }
+          }, 10000);
+
+      } catch (error) {
+          console.error('Error starting test:', error);
+          Alert.alert('Error', 'Failed to start earthquake test. Please check sensor permissions.');
+          setIsTesting(false);
+          isTestingRef.current = false;
+      }
+  };
 
   const stopTest = () => {
 
