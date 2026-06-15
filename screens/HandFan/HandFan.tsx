@@ -55,7 +55,7 @@ export default function HandFan() {
             <View style={styles.header}>
                 <Pressable
                     style={styles.backButton}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate('Home')}
                 >
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </Pressable>

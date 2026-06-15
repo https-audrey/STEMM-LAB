@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParachuteActivity'>;
 type PrototypeKey = 'baseline' | 'prototype1' | 'prototype2' | 'prototype3';
@@ -405,9 +406,17 @@ export default function ParachuteActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.replace('Parachute', {
-            currentSessionId,
-        });
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'Parachute',
+                        params: {currentSessionId},
+                    }
+                ]
+            })
+        )
     };
 
     const handleSubmit = async () => {

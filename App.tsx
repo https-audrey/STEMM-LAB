@@ -95,20 +95,17 @@ import ProfilePage from './screens/ProfilePage';
 import RateActivityPage from './screens/RateActivity/RateActivityPage';
 import act6RateActivityPage from './screens/RateActivity/act6RateActivityPage';
 import act7RateActivityPage from './screens/RateActivity/act7RateAcitivityPage';
-import mobileAds from "react-native-google-mobile-ads";
+import { isExpoGo } from './utils/env';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   useEffect(() => {
-    // Initialize AdMob SDK
-    mobileAds()
-      .initialize()
-      .then((adapterStatuses) => {
-        // Initialization complete.
-        console.log("AdMob initialized", adapterStatuses);
-      })
-      .catch(err => console.error("AdMob init failed", err));
+    if (isExpoGo) return;
+
+    import("react-native-google-mobile-ads")
+      .then((ads) => ads.default().initialize())
+      .catch(() => {});
   }, []);
 
   const [fontsLoaded] = useFonts({

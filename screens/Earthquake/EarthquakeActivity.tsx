@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Alert,
     View,
@@ -17,6 +17,7 @@ import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord,
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeActivity'>;
 
@@ -31,6 +32,9 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
     const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [reflection, setReflection] = useState('');
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const isAlertActive = useRef(false);
+    const listenerAttached = useRef(false);
 
     const [trials, setTrials] =
     useState<EarthquakePrototypeRecord[]>([]);
@@ -54,36 +58,53 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
     );
 
     useEffect(() => {
+        if (listenerAttached.current) return;
+        listenerAttached.current = true;
+
         const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (!hasUnsavedChanges && trials.length === 0) {
-                return;
-            }
+            if (isAlertActive.current) return;
+
+            if (!hasUnsavedChanges && trials.length === 0) return;
 
             e.preventDefault();
+            isAlertActive.current = true;
 
             Alert.alert(
-                'Discard Lab Run?',
-                'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
-                [
-                    { text: 'Keep Workspace', style: 'cancel', onPress: () => {} },
-                    {
-                        text: 'Discard All Data',
-                        style: 'destructive',
-                        onPress: () => {
-                            setDescription('');
-                            setReflection('');
-                            setTrials([]);
-                            setHasUnsavedChanges(false);
-                            setIsSessionActive(false);
-                            navigation.dispatch(e.data.action);
+            'Discard Lab Run?',
+            'Leaving now will permanently erase all trial configuration entries entered during this unsubmitted sequence.',
+            [
+                {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    isAlertActive.current = false;
+                },
+                },
+                {
+                text: 'Discard',
+                style: 'destructive',
+                onPress: () => {
+                    isAlertActive.current = false;
+
+                    navigation.dispatch(
+                    CommonActions.reset({
+                        index: 0,
+                        routes: [
+                        {
+                            name: 'Earthquake',
+                            params: { currentSessionId },
                         },
-                    },
-                ]
+                        ],
+                    })
+                    );
+                },
+                },
+            ]
             );
         });
 
         return unsubscribe;
-    }, [navigation, hasUnsavedChanges, trials]);
+        }, []);
 
     const renderTrialCard =
     (
@@ -149,9 +170,17 @@ export default function EarthquakeActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.replace('Earthquake', {
-            currentSessionId,
-        });
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'Earthquake',
+                        params: {currentSessionId},
+                    }
+                ]
+            })
+        )
     };
 
     const handleSubmit = async () => {

@@ -1,24 +1,36 @@
-// components/AdBanner.tsx
-import { Platform, View } from "react-native";
+import { View, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import { isExpoGo } from "../utils/env";
 
-let adMob: any = null;
-try {
-  // Try to load the AdMob library. This will fail in Expo Go.
-  adMob = require("react-native-google-mobile-ads");
-} catch {
-  // If it fails (e.g., in Expo Go), we just log a warning and adMob stays null.
-  console.warn("AdMob library not available. Ads will not be shown.");
+let BannerAd: any;
+let BannerAdSize: any;
+let TestIds: any;
+let mobileAds: any;
+
+if (!isExpoGo) {
+  try {
+    const ads = require("react-native-google-mobile-ads");
+    BannerAd = ads.BannerAd;
+    BannerAdSize = ads.BannerAdSize;
+    TestIds = ads.TestIds;
+    mobileAds = ads.default;
+  } catch (e) {}
 }
 
 export const AdBanner = () => {
-  // If the library didn't load, don't render anything.
-  if (!adMob) {
-    return null;
-  }
+  const [ready, setReady] = useState(false);
 
-  const { BannerAd, BannerAdSize, TestIds } = adMob;
+  useEffect(() => {
+    if (!mobileAds) return;
 
-  // Use test ads in development, and your real ad unit ID in production.
+    mobileAds()
+      .initialize()
+      .then(() => setReady(true))
+      .catch(() => {});
+  }, []);
+
+  if (isExpoGo || !BannerAd || !ready) return null;
+
   const adUnitId = __DEV__
     ? TestIds.BANNER
     : Platform.select({
@@ -31,9 +43,6 @@ export const AdBanner = () => {
       <BannerAd
         unitId={adUnitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{
-          requestNonPersonalizedAdsOnly: false,
-        }}
       />
     </View>
   );

@@ -10,6 +10,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { saveEarthquakeTrialRecord } from '../../services/db';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarthquakeResult'>;
 
@@ -42,9 +43,17 @@ export default function EarthquakeResult({ route, navigation }: Props) {
         {
           text: 'OK',
           onPress: () =>
-            navigation.replace('EarthquakeActivity', {
-              currentSessionId: currentSessionId ?? '',
-            }),
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'EarthquakeActivity',
+                    params: { currentSessionId: currentSessionId ?? '' }, 
+                  },
+                ],
+              })
+            )
         },
       ]);
     } catch (err) {

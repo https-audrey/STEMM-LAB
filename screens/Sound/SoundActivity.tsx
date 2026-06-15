@@ -20,6 +20,7 @@ import { getSessionReflection, getSoundTrialsBySession, markSessionSubmitted, sa
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SoundActivity'>;
 
@@ -184,9 +185,17 @@ export default function SoundActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.replace('Sound', {
-            currentSessionId,
-        });
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'Sound',
+                        params: {currentSessionId},
+                    }
+                ]
+            })
+        )
     };
 
     const handleSubmit = async () => {

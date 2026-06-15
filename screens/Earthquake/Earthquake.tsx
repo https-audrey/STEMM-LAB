@@ -11,6 +11,7 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
+import { useBatteryWarning } from '../../hooks/useBatteryWarning';
 
 type NavProp = StackNavigationProp<RootStackParamList, 'Earthquake'>;
 
@@ -19,8 +20,15 @@ export default function Earthquake() {
     const route = useRoute<RouteProp<RootStackParamList, 'Earthquake'>>();
 
     const currentSessionId = route.params?.currentSessionId ?? '';
+    const {checkBatteryBeforeActivity} = useBatteryWarning();
 
     const handleStart = () => {
+        checkBatteryBeforeActivity('Earthquake Simulation (vibration)', () => {
+            handleActivityStart();
+        }, 72)
+    }
+
+    const handleActivityStart = () => {
         const newSessionId =
             `session_${Date.now()}`;
 
@@ -51,7 +59,7 @@ export default function Earthquake() {
             <View style={styles.header}>
                 <Pressable
                     style={styles.backButton}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate('Home')}
                 >
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </Pressable>

@@ -17,6 +17,7 @@ import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, ge
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HandFanActivity'>;
 
@@ -201,9 +202,17 @@ export default function HandFanActivity({ navigation, route }: Props) {
     };
 
     const handleBack = () => {
-        navigation.replace('HandFan', {
-            currentSessionId,
-        });
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'HandFan',
+                        params: {currentSessionId},
+                    }
+                ]
+            })
+        )
     };
 
     const handleSubmit = async () => {

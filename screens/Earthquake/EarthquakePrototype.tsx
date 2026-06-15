@@ -145,7 +145,7 @@ export default function EarthquakePrototype({
         );
 
         Vibration.vibrate(
-        [
+          [
             100,
             100,
             100,
@@ -154,17 +154,14 @@ export default function EarthquakePrototype({
             100,
             100,
             100,
-        ],
-        true
+          ],
+          true
         );
 
-        timeoutRef.current =
-        setTimeout(() => {
-            if (
-            isTestingRef.current
-            ) {
+        timeoutRef.current = setTimeout(() => {
+          if (isTestingRef.current) {
             stopTest();
-            }
+          }
         }, 10000);
 
     } catch (error) {
@@ -221,7 +218,7 @@ export default function EarthquakePrototype({
         finalAverage
     );
 
-    navigation.replace(
+    navigation.navigate(
         'EarthquakeResult',
         {
         data: {

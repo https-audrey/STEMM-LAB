@@ -82,7 +82,7 @@ export default function ParachutePrototype({
 
         <TouchableOpacity
           style={styles.button}
-          onPress={requestPermission}
+          onPress={requestMicPermission}
         >
           <Text style={styles.buttonText}>
             Grant Permission
