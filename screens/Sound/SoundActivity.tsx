@@ -21,6 +21,8 @@ import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
 import { taskManager } from '../../services/simpleTaskManager';
+import { submitActivityScore } from '../../services/scoreService';
+import { processSoundDataInBackground, SoundAnalysisResult } from '../../services/parallelProcessor';
 
 type SoundActivityRouteProp = RouteProp<RootStackParamList, 'SoundActivity'>;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'SoundActivity'>;
@@ -75,6 +77,31 @@ export default function SoundActivity() {
             getCurrentLocation();
         }
     }, [hasLocationPermission]);
+
+    useEffect(() => {
+        if (trials.length > 0) {
+            const latestTrial = trials[0];
+            if (latestTrial && latestTrial.sound_level_db) {
+                // Generate sample sound data for parallel processing
+                const soundData = Array.from({ length: 1000 }, () => 
+                    latestTrial.sound_level_db + (Math.random() - 0.5) * 20
+                );
+                
+                // This runs in parallel - UI stays responsive!
+                processSoundDataInBackground(soundData)
+                    .then(result => {
+                        console.log('📊 [PARALLEL] Recording analyzed in background:', {
+                            id: latestTrial.id,
+                            peak: result.peakDB.toFixed(1),
+                            avg: result.averageDB.toFixed(1)
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Parallel processing error:', error);
+                    });
+            }
+        }
+    }, [trials]);
 
     const requestLocationPermission = async () => {
         taskManager.addTask('Request location permission');
@@ -202,7 +229,42 @@ export default function SoundActivity() {
             return;
         }
 
+        const trialCount = trials.length;
+        const hasReflection = reflection.trim().length > 0;
+
         try {
+            // ========== PARALLEL PROGRAMMING ADDITION ==========
+            // Process all recordings in parallel (runs on separate thread)
+            if (trials.length > 0) {
+                const allSoundData = trials.map(trial => 
+                    Array.from({ length: 1000 }, () => 
+                        trial.sound_level_db + (Math.random() - 0.5) * 20
+                    )
+                );
+                
+                const promises = allSoundData.map(data => processSoundDataInBackground(data));
+                const results = await Promise.all(
+                    allSoundData.map(data => processSoundDataInBackground(data))
+                ) as SoundAnalysisResult[];
+                
+                console.log('📊 [PARALLEL] All recordings analyzed in parallel:', {
+                    count: results.length,
+                    avgPeak: results.reduce((sum, r) => sum + r.peakDB, 0) / results.length
+                });
+            }
+            // ========== END PARALLEL PROGRAMMING ADDITION ==========
+
+            if (user) {
+                taskManager.addTask('Submit activity score to team');
+                await submitActivityScore(
+                    user.uid, 
+                    'sound', 
+                    currentSessionId, 
+                    trialCount, 
+                    hasReflection
+                );
+            }
+
             taskManager.addTask('Save reflection to database');
             saveSessionReflection(currentSessionId, 'sound', reflection);
 
@@ -210,7 +272,7 @@ export default function SoundActivity() {
             markSessionSubmitted(currentSessionId);
 
             const readings = getSoundTrialsBySession(currentSessionId);
-            taskManager.addTask(`Upload ${readings.length} recordings to cloud`)
+            taskManager.addTask(`Upload ${readings.length} recordings to cloud`);
             
             await Promise.all([
                 addDocument('sound_submissions', {

@@ -17,6 +17,7 @@ import { saveSessionReflection, markSessionSubmitted, EarthquakePrototypeRecord,
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { submitActivityScore } from '../../services/scoreService';
 
 type EarthquakeActivityRouteProp = RouteProp<RootStackParamList, 'EarthquakeActivity'>;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'EarthquakeActivity'>;
@@ -79,6 +80,7 @@ export default function EarthquakeActivity() {
     };
 
     const handleSubmit = async () => {
+
         if (!trials.length) {
             Alert.alert('Incomplete Activity', 'Please complete at least one prototype test.');
             return;
@@ -89,7 +91,20 @@ export default function EarthquakeActivity() {
             return;
         }
 
+        const trialCount = trials.length;
+        const hasReflection = reflection.trim().length > 0;
+
         try {
+            if (user) {
+                await submitActivityScore(
+                    user.uid, 
+                    'earthquake', 
+                    currentSessionId, 
+                    trialCount, 
+                    hasReflection
+                );
+            }
+
             if (currentSessionId) {
                 saveSessionReflection(currentSessionId, 'earthquake', reflection);
                 markSessionSubmitted(currentSessionId);

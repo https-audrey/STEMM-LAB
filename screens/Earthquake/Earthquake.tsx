@@ -12,6 +12,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { useBatteryWarning } from '../../hooks/useBatteryWarning';
+import {runOnUI} from 'react-native-worklets';
 
 type NavProp = StackNavigationProp<RootStackParamList, 'Earthquake'>;
 

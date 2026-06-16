@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification, cancelAllNotifications } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { submitActivityScore } from '../../services/scoreService';
 
 type ParachuteActivityRouteProp = RouteProp<RootStackParamList, 'ParachuteActivity'>;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ParachuteActivity'>;
@@ -168,6 +169,25 @@ export default function ParachuteActivity() {
 
         try {
             ensureSessionExists(currentSessionId, 'parachute');
+
+            const prototypeKeys = ['baseline', 'prototype1', 'prototype2', 'prototype3'];
+            let trialCount = 0;
+            for (const key of prototypeKeys) {
+                if (history[key as PrototypeKey].length > 0) {
+                    trialCount++;
+                }
+            }
+            const hasReflection = reflection.trim().length > 0;
+
+            if (user) {
+                await submitActivityScore(
+                    user.uid, 
+                    'parachute', 
+                    currentSessionId, 
+                    trialCount, 
+                    hasReflection
+                );
+            }
 
             if (reflection.trim()) {
                 saveSessionReflection(currentSessionId, 'parachute', reflection);
@@ -367,7 +387,26 @@ export default function ParachuteActivity() {
             return;
         }
 
+        const prototypeKeys = ['baseline', 'prototype1', 'prototype2', 'prototype3'];
+        let trialCount = 0;
+        for (const key of prototypeKeys) {
+            if (history[key as PrototypeKey].length > 0) {
+                trialCount++;
+            }
+        }
+        const hasReflection = reflection.trim().length > 0;
+
         try {
+            if (user) {
+                await submitActivityScore(
+                    user.uid, 
+                    'parachute', 
+                    currentSessionId, 
+                    trialCount, 
+                    hasReflection
+                );
+            }
+
             saveSessionReflection(currentSessionId, 'parachute', reflection);
             markSessionSubmitted(currentSessionId);
 

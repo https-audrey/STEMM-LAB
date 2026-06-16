@@ -17,6 +17,7 @@ import { saveSessionReflection, markSessionSubmitted, HandFanPrototypeRecord, ge
 import { addDocument } from '../../services/firestoreService';
 import { sendNotification } from '../../services/notificationService';
 import { useAuth } from '../../context/AuthContext';
+import { submitActivityScore } from '../../services/scoreService';
 
 type HandFanActivityRouteProp = RouteProp<RootStackParamList, 'HandFanActivity'>;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'HandFanActivity'>;
@@ -100,7 +101,20 @@ export default function HandFanActivity() {
             return;
         }
 
+        const trialCount = trials.length;
+        const hasReflection = reflection.trim().length > 0;
+
         try {
+            if (user) {
+                await submitActivityScore(
+                    user.uid, 
+                    'handfan', 
+                    currentSessionId, 
+                    trialCount, 
+                    hasReflection
+                );
+            }
+
             saveSessionReflection(currentSessionId, 'handfan', reflection);
             markSessionSubmitted(currentSessionId);
 
