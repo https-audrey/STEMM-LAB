@@ -32,11 +32,11 @@ const mockUpdateDocument = jest.fn();
 const mockWhere = jest.fn((field, op, val) => ({ field, op, val }));
 const mockIncrement = jest.fn((val) => ({ type: 'increment', value: val }));
 jest.mock('../../../services/firestoreService', () => ({
-    addDocument: (...args: any[]) => mockAddDocument(...args),
-    queryDocuments: (...args: any[]) => mockQueryDocuments(...args),
-    updateDocument: (...args: any[]) => mockUpdateDocument(...args),
-    where: (...args: any[]) => mockWhere(...args),
-    increment: (...args: any[]) => mockIncrement(...args),
+    addDocument: (...args: any[]) => mockAddDocument.apply(null, args),
+    queryDocuments: (...args: any[]) => mockQueryDocuments.apply(null, args),
+    updateDocument: (...args: any[]) => mockUpdateDocument.apply(null, args),
+    where: (...args: any[]) => mockWhere.apply(null, args),
+    increment: (...args: any[]) => mockIncrement.apply(null, args),
     orderBy: jest.fn(),
     limit: jest.fn(),
 }));
