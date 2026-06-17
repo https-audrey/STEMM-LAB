@@ -26,8 +26,7 @@ const InstructionPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        // Navigate back to Home or the next activity screen
-        navigation.navigate('Home');
+        navigation.navigate('Act5Experiment');
     };
 
     return (

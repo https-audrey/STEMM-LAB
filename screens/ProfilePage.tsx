@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Image,
+  Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -10,6 +11,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
+import { FONTS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, limit } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -20,14 +24,32 @@ const s = (v: number) => v * SCALE;
 
 const ProfilePage: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { user, profile } = useAuth();
   const [isEditPressed, setIsEditPressed] = useState(false);
 
   const handleNavigateHome = () => {
     navigation.navigate('Home');
   };
 
-  const handleNavigateTeam = () => {
-    navigation.navigate('NoTeam');
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        navigation.navigate('TeamPageChem');
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      console.error('[Profile] Error checking team status:', error);
+      navigation.navigate('NoTeam');
+    }
   };
 
   const handleNavigateLeaderboard = () => {
@@ -38,7 +60,7 @@ const ProfilePage: React.FC = () => {
     setIsEditPressed(true);
     setTimeout(() => {
       setIsEditPressed(false);
-    }, 500); // 0.5 seconds
+    }, 500);
   };
 
   return (
@@ -49,26 +71,26 @@ const ProfilePage: React.FC = () => {
         style={styles.background}
         resizeMode="cover"
       >
-        {/* Header Section: Profile Picture and Info */}
-        <View style={styles.headerRow}>
+        {/* Profile Box with profile pic, name, and username */}
+        <ImageBackground
+          source={require('../assets/ProfileAssets/profileBox.png')}
+          style={styles.profileBox}
+          resizeMode="stretch"
+        >
           <Image
             source={require('../assets/ProfileAssets/pp.png')}
             style={styles.profilePic}
             resizeMode="contain"
           />
           <View style={styles.namesColumn}>
-            <Image
-              source={require('../assets/ProfileAssets/nameBig.png')}
-              style={styles.nameBig}
-              resizeMode="contain"
-            />
-            <Image
-              source={require('../assets/ProfileAssets/usn.png')}
-              style={styles.usnText}
-              resizeMode="contain"
-            />
+            <Text style={styles.nameBigText} numberOfLines={1}>
+              {profile?.fullName || 'Explorer'}
+            </Text>
+            <Text style={styles.usnTextDynamic} numberOfLines={1}>
+              {profile?.displayUsername || 'user'}
+            </Text>
           </View>
-        </View>
+        </ImageBackground>
 
         {/* Profile Info Card Box */}
         <ImageBackground
@@ -80,7 +102,7 @@ const ProfilePage: React.FC = () => {
           <TouchableOpacity
             style={styles.editButton}
             onPress={handleEditPress}
-            activeOpacity={0.8}
+            activeOpacity={0.1}
           >
             <Image
               source={
@@ -92,6 +114,32 @@ const ProfilePage: React.FC = () => {
               resizeMode="contain"
             />
           </TouchableOpacity>
+
+          {/* Dynamic text overlays on top of hardcoded image values */}
+          {/* Full Name value */}
+          <Text style={[styles.infoFieldValue, { top: s(144) }]} numberOfLines={1}>
+            {profile?.fullName || 'N/A'}
+          </Text>
+
+          {/* Date of Birth value */}
+          <Text style={[styles.infoFieldValue, { top: s(227) }]} numberOfLines={1}>
+            {profile?.dateOfBirth || 'N/A'}
+          </Text>
+
+          {/* Email value */}
+          <Text style={[styles.infoFieldValue, { top: s(308) }]} numberOfLines={1}>
+            {profile?.username || 'N/A'}
+          </Text>
+
+          {/* Username value */}
+          <Text style={[styles.infoFieldValue, { top: s(390) }]} numberOfLines={1}>
+            {profile?.displayUsername || 'N/A'}
+          </Text>
+
+          {/* Password value (masked) */}
+          <Text style={[styles.infoFieldValue, { top: s(476) }]} numberOfLines={1}>
+            {'* * * * * * * *'}
+          </Text>
         </ImageBackground>
 
         {/* Big Earth Planet at bottom base */}
@@ -134,19 +182,6 @@ const ProfilePage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
@@ -183,41 +218,65 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  headerRow: {
+  profileBox: {
     position: 'absolute',
-    top: s(70),
-    left: s(30),
-    right: s(30),
+    top: s(55),
+    alignSelf: 'center',
+    width: s(390),
+    height: s(150),
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: s(26),
+    paddingVertical: s(15),
+    left: s(35),
   },
   profilePic: {
-    width: s(117),
-    height: s(112),
+    width: s(110),
+    height: s(105),
+    marginLeft: s(5),
+    top: s(9),
+    left: s(-5),
   },
   namesColumn: {
     flex: 1,
     marginLeft: s(15),
     justifyContent: 'center',
   },
-  nameBig: {
-    width: s(262),
-    height: s(44),
-    alignSelf: 'flex-start',
+  nameBigText: {
+    fontFamily: FONTS.title,
+    fontSize: s(20),
+    color: '#FFFFFF',
+    textShadowColor: '#08121E',
+    textShadowOffset: { width: s(1.5), height: s(1.5) },
+    textShadowRadius: s(1),
+    top: s(5),
   },
-  usnText: {
-    width: s(195),
-    height: s(32),
-    alignSelf: 'flex-start',
-    marginTop: s(5),
+  usnTextDynamic: {
+    fontFamily: FONTS.title,
+    fontSize: s(14),
+    color: '#FFFFFF',
+    textShadowColor: '#08121E',
+    textShadowOffset: { width: s(1), height: s(1) },
+    textShadowRadius: s(1),
+    top: s(9),
   },
   infoBox: {
     position: 'absolute',
-    top: s(200),
+    top: s(230),
     alignSelf: 'center',
     width: s(376),
     height: s(580),
     zIndex: 10,
+  },
+  infoFieldValue: {
+    position: 'absolute',
+    left: s(30),
+    right: s(30),
+    height: s(35),
+    fontFamily: FONTS.title,
+    fontSize: s(12),
+    color: '#333333',
+    paddingHorizontal: s(12),
   },
   editButton: {
     position: 'absolute',
@@ -247,7 +306,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -259,31 +318,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -295,7 +342,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {

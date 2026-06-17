@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Image,
@@ -7,11 +7,16 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Text,
+  Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS } from '../utils/theme';
+import { FONTS, COLORS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, limit, orderBy, arrayUnion, updateDocument } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'TeamPageChem'>;
 
@@ -22,19 +27,134 @@ const s = (v: number) => v * SCALE;
 
 const TeamPageChem: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { user } = useAuth();
   const [code, setCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [teamData, setTeamData] = useState<any>(null);
+  const [memberNames, setMemberNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTeamAndMembers = async () => {
+      if (!user) return;
+      try {
+        const teams = await queryDocuments('teams', [
+          where('memberIds', 'array-contains', user.uid)
+        ]);
+        if (teams.length > 0) {
+          const sorted = teams.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
+          });
+          const latestTeam = sorted[0];
+          setTeamData(latestTeam);
+
+          // Fetch member names
+          if (latestTeam.memberIds && latestTeam.memberIds.length > 0) {
+            const profiles = await queryDocuments('users', [
+              where('uid', 'in', latestTeam.memberIds)
+            ]);
+            // Map names in order of memberIds or just alphabetically
+            const names = profiles.map((p: any) => p.fullName || 'Unknown Member');
+            setMemberNames(names);
+          }
+        }
+      } catch (error) {
+        console.error('[TeamPage] Error fetching data:', error);
+      }
+    };
+    fetchTeamAndMembers();
+  }, [user]);
+
+  const getWeekRange = (createdAt: any) => {
+    if (!createdAt) return 'Loading...';
+    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+
+    // Set to Monday
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+
+    // Set to Sunday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    const startDay = startOfWeek.getDate();
+    const startMonth = months[startOfWeek.getMonth()];
+    const endDay = endOfWeek.getDate();
+    const endMonth = months[endOfWeek.getMonth()];
+    const year = endOfWeek.getFullYear();
+
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
+  };
 
   const handleCreateTeam = () => {
     navigation.navigate('CreateTeam');
   };
 
-  const handleJoinTeam = () => {
-    console.log('Join Team with code:', code);
+  const handleJoinTeam = async () => {
+    if (!code.trim()) {
+      Alert.alert('Empty Code', 'Please enter a team code to join.');
+      return;
+    }
+
+    try {
+      const teams = await queryDocuments('teams', [
+        where('code', '==', code.trim().toUpperCase())
+      ]);
+
+      if (teams.length > 0) {
+        const team = teams[0];
+        if (user) {
+          await updateDocument('teams', team.id, {
+            memberIds: arrayUnion(user.uid)
+          });
+          Alert.alert('Success', `You have joined the team: ${team.name}`);
+          // Refresh the page data
+          const updatedTeams = await queryDocuments('teams', [
+            where('memberIds', 'array-contains', user.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          ]);
+          if (updatedTeams.length > 0) {
+            setTeamData(updatedTeams[0]);
+          }
+          setCode('');
+        }
+      } else {
+        Alert.alert('Invalid Code', 'The code you entered does not match any team.');
+      }
+    } catch (error) {
+      console.error('[JoinTeam] Error:', error);
+      Alert.alert('Error', 'Failed to join team. Please try again.');
+    }
   };
 
   const handleNavigateHome = () => {
     navigation.navigate('Home');
+  };
+
+  const handleNavigateTeam = async () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const teamsArr = await queryDocuments('teams', [
+        where('memberIds', 'array-contains', user.uid),
+        limit(1)
+      ]);
+      if (teamsArr.length > 0) {
+        // Stay here or refresh
+      } else {
+        navigation.navigate('NoTeam');
+      }
+    } catch (error) {
+      navigation.navigate('NoTeam');
+    }
   };
 
   return (
@@ -58,13 +178,17 @@ const TeamPageChem: React.FC = () => {
           style={styles.topBox}
           resizeMode="stretch"
         >
-          {/* Grade 8 Chemistry Title and Arrow */}
+          {/* Team Name Title and Arrow */}
           <View style={styles.topHeaderRow}>
-            <Image
-              source={require('../assets/TeamPageChemAssets/littleEinstein.png')}
-              style={styles.gradeTitle}
+            <ImageBackground
+              source={require('../assets/TeamPageChemAssets/title.png')}
+              style={styles.gradeTitleContainer}
               resizeMode="contain"
-            />
+            >
+              <Text style={styles.gradeTitleText}>
+                {teamData?.name || 'Loading...'}
+              </Text>
+            </ImageBackground>
             <TouchableOpacity style={styles.arrowButton} activeOpacity={0.7}>
               <Image
                 source={require('../assets/TeamPageChemAssets/arrowBtn.png')}
@@ -139,11 +263,11 @@ const TeamPageChem: React.FC = () => {
             </TouchableOpacity>
 
             {/* Date range label */}
-            <Image
-              source={require('../assets/TeamPageChemAssets/20 April - 25 April 2026.png')}
-              style={styles.weekText}
-              resizeMode="contain"
-            />
+            <View style={styles.weekTextContainer}>
+              <Text style={styles.weekTextContent}>
+                {getWeekRange(teamData?.createdAt)}
+              </Text>
+            </View>
 
             {/* Right arrow touchable area */}
             <TouchableOpacity style={styles.arrowTouchRight} activeOpacity={0.7}>
@@ -152,12 +276,30 @@ const TeamPageChem: React.FC = () => {
           </View>
         </ImageBackground>
 
-        {/* To-Do List Box */}
-        <Image
-          source={require('../assets/TeamPageChemAssets/todoList.png')}
-          style={styles.todoBox}
+        {/* Member List Box */}
+        <ImageBackground
+          source={require('../assets/TeamPageChemAssets/memberBoxTeam.png')}
+          style={styles.memberBox}
           resizeMode="stretch"
-        />
+        >
+
+          <ScrollView
+            style={styles.memberListScroll}
+            contentContainerStyle={styles.memberListScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {memberNames.map((name, index) => (
+              <Text key={index} style={styles.memberNameText}>
+                {index + 1}. {name}
+              </Text>
+            ))}
+            {memberNames.length === 0 && (
+              <Text style={styles.memberNameText}>No members found</Text>
+            )}
+          </ScrollView>
+        </ImageBackground>
+
+
 
         {/* Create New Team Button */}
         <TouchableOpacity
@@ -250,24 +392,11 @@ const TeamPageChem: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Team Button (Current Active Page) */}
-        <TouchableOpacity style={styles.teamButton} activeOpacity={1.0}>
+        {/* Team Button (Current Active Page but check status) */}
+        <TouchableOpacity style={styles.teamButton} activeOpacity={0.7} onPress={handleNavigateTeam}>
           <Image
             source={require('../assets/HomescreenAssets/team.png')}
             style={styles.teamImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
             resizeMode="contain"
           />
         </TouchableOpacity>
@@ -333,14 +462,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  gradeTitle: {
+  gradeTitleContainer: {
     width: s(220),
-    height: s(30),
+    height: s(35),
+    top: s(0),
+    left: s(-15),
+    justifyContent: 'center',
+    paddingLeft: s(15),
+  },
+  gradeTitleText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(13),
+    color: '#08121e',
+    top: s(1),
+    left: s(10)
   },
   arrowButton: {
     width: s(25),
     height: s(25),
-    marginLeft: s(5),
+    marginLeft: s(-20),
+    top: s(0)
   },
   indicatorsRow: {
     flexDirection: 'row',
@@ -351,10 +492,12 @@ const styles = StyleSheet.create({
     width: s(75),
     height: s(25),
     marginRight: s(5),
+    top: s(8)
   },
   percentIndicator: {
     width: s(50),
     height: s(25),
+    top: s(8)
   },
   planetsContainer: {
     position: 'absolute',
@@ -366,23 +509,53 @@ const styles = StyleSheet.create({
   smallEarthPlanet: {
     position: 'absolute',
     left: s(0),
-    bottom: s(0),
+    bottom: s(-7),
     width: s(90),
     height: s(60),
   },
   act2Planet: {
     position: 'absolute',
     left: s(170),
-    bottom: s(10),
-    width: s(42),
-    height: s(42),
+    bottom: s(3),
+    width: s(72),
+    height: s(72),
   },
   act3Planet: {
     position: 'absolute',
-    left: s(290),
-    bottom: s(10),
-    width: s(42),
-    height: s(42),
+    left: s(280),
+    bottom: s(3),
+    width: s(72),
+    height: s(72),
+  },
+  memberBox: {
+    position: 'absolute',
+    top: s(545),
+    alignSelf: 'center',
+    width: s(380),
+    height: s(155),
+    zIndex: 10,
+    paddingHorizontal: s(25),
+    paddingTop: s(15),
+  },
+
+  memberListScroll: {
+    marginTop: s(35),
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderRadius: s(15),
+    padding: s(10),
+    borderWidth: s(1),
+    borderColor: 'transparent',
+    left: s(6)
+  },
+  memberListScrollContent: {
+    paddingBottom: s(10),
+  },
+  memberNameText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: '#333333',
+    marginBottom: s(5),
   },
   analysisBox: {
     position: 'absolute',
@@ -402,7 +575,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: s(12),
+    marginTop: s(23),
     width: s(229),
     height: s(24),
     alignSelf: 'center',
@@ -426,23 +599,23 @@ const styles = StyleSheet.create({
     height: s(24),
     zIndex: 5,
   },
-  weekText: {
+  weekTextContainer: {
     width: s(170),
     height: s(20),
+    top: s(2),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  todoBox: {
-    position: 'absolute',
-    top: s(545),
-    alignSelf: 'center',
-    width: s(380),
-    height: s(150),
-    zIndex: 10,
+  weekTextContent: {
+    fontFamily: FONTS.ui,
+    fontSize: s(11),
+    color: '#08121e',
   },
   createButton: {
     position: 'absolute',
-    top: s(705),
-    left: s(30),
-    width: s(230),
+    top: s(715),
+    left: s(40),
+    width: s(220),
     height: s(50),
     zIndex: 10,
   },
@@ -450,12 +623,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    top: s(765),
-    left: s(30),
+    top: s(775),
+    left: s(43),
     zIndex: 10,
   },
   codeBoxBackground: {
-    width: s(125),
+    width: s(130),
     height: s(40),
     justifyContent: 'center',
     marginRight: s(10),
@@ -483,10 +656,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(645),
-    right: s(5),
-    width: s(160),
-    height: s(160),
+    top: s(600),
+    right: s(-5),
+    width: s(250),
+    height: s(250),
     zIndex: 15,
   },
   bigEarth: {
@@ -510,7 +683,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -522,31 +695,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -558,7 +719,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {

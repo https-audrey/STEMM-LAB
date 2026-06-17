@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Image,
@@ -7,11 +7,15 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { FONTS } from '../utils/theme';
+import { FONTS, COLORS } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
+import { queryDocuments, where, addDocument } from '../services/firestoreService';
 
 type Nav = StackNavigationProp<RootStackParamList, 'CreateTeam'>;
 
@@ -20,11 +24,97 @@ const DESIGN_W = 440;
 const SCALE = SCREEN_W / DESIGN_W;
 const s = (v: number) => v * SCALE;
 
+const generateTeamCode = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '#';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const CreateTeamPage: React.FC = () => {
   const navigation = useNavigation<Nav>();
+  const { profile } = useAuth();
 
-  const handleMakeTeam = () => {
-    navigation.navigate('TeamPageChem');
+  const [teamName, setTeamName] = useState('');
+  const [grade, setGrade] = useState('');
+  const [teamCode] = useState(generateTeamCode());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (profile) {
+      setTeamMembers([{ ...profile, id: profile.uid, isYou: true }]);
+    }
+  }, [profile]);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    try {
+      // Find user by username or fullname
+      const results = await queryDocuments('users', [
+        where('displayUsername', '==', searchQuery.trim())
+      ]);
+
+      if (results.length > 0) {
+        const userFound = results[0];
+        if (teamMembers.find(m => m.id === userFound.id)) {
+          Alert.alert('Information', 'User is already in the team.');
+          return;
+        }
+        setTeamMembers([...teamMembers, { ...userFound }]);
+        setSearchQuery('');
+      } else {
+        Alert.alert('Not Found', 'Could not find a user with that name.');
+      }
+    } catch (error) {
+      console.error('[Search] Error:', error);
+      Alert.alert('Error', 'An error occurred during search.');
+    }
+  };
+
+
+
+  const handleRemoveMember = (member: any) => {
+    Alert.alert(
+      'Remove Member',
+      `Are you sure you want to remove ${member.displayUsername || member.username} from the team?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Remove', 
+          style: 'destructive',
+          onPress: () => setTeamMembers(teamMembers.filter(m => m.id !== member.id))
+        },
+      ]
+    );
+  };
+
+  const handleMakeTeam = async () => {
+    if (!teamName.trim()) {
+      Alert.alert('Required', 'Please enter a team name.');
+      return;
+    }
+    if (!grade.trim()) {
+      Alert.alert('Required', 'Please enter your grade.');
+      return;
+    }
+
+    try {
+      await addDocument('teams', {
+        name: teamName,
+        grade: grade,
+        code: teamCode,
+        memberIds: teamMembers.map(m => m.id),
+        creatorId: profile?.uid,
+        createdAt: new Date(),
+      });
+      navigation.navigate('TeamPageChem');
+    } catch (error) {
+      console.error('[CreateTeam] Error:', error);
+      Alert.alert('Error', 'Failed to create team. Please try again.');
+    }
   };
 
   return (
@@ -57,20 +147,24 @@ const CreateTeamPage: React.FC = () => {
           {/* Name Box (Row containing name writing and code tag) */}
           <ImageBackground
             source={require('../assets/CreateTeamAssets/nameBoxTeam.png')}
-            style={styles.nameBoxTeam}
+            style={styles.nameBoxTeamContainer}
             resizeMode="stretch"
           >
-            <Image
-              source={require('../assets/CreateTeamAssets/Little Einstein.png')}
-              style={styles.littleEinsteinText}
-              resizeMode="contain"
+            <TextInput
+              style={styles.teamNameInput}
+              placeholder="enter your team name"
+              placeholderTextColor={COLORS.placeholderText}
+              value={teamName}
+              onChangeText={setTeamName}
             />
 
-            <Image
+            <ImageBackground
               source={require('../assets/CreateTeamAssets/teamCode.png')}
               style={styles.teamCodeImage}
               resizeMode="contain"
-            />
+            >
+              <Text style={styles.teamCodeText}>{teamCode}</Text>
+            </ImageBackground>
           </ImageBackground>
 
           {/* Title: Grade & Subject */}
@@ -83,13 +177,15 @@ const CreateTeamPage: React.FC = () => {
           {/* Grade Box */}
           <ImageBackground
             source={require('../assets/CreateTeamAssets/gradeBox.png')}
-            style={styles.gradeBox}
+            style={styles.gradeBoxContainer}
             resizeMode="stretch"
           >
-            <Image
-              source={require('../assets/CreateTeamAssets/Grade 8 - Chemistry.png')}
-              style={styles.gradeChemistryText}
-              resizeMode="contain"
+            <TextInput
+              style={styles.gradeInput}
+              placeholder="enter your grade here"
+              placeholderTextColor={COLORS.placeholderText}
+              value={grade}
+              onChangeText={setGrade}
             />
           </ImageBackground>
         </ImageBackground>
@@ -122,74 +218,67 @@ const CreateTeamPage: React.FC = () => {
           />
 
           {/* Search bar */}
-          <Image
-            source={require('../assets/CreateTeamAssets/searchBar.png')}
-            style={styles.searchBar}
-            resizeMode="contain"
-          />
-
-          {/* Writing: 4 Members Selected */}
-          <Image
-            source={require('../assets/CreateTeamAssets/4 Members Selected.png')}
-            style={styles.membersSelectedText}
-            resizeMode="contain"
-          />
-
-          {/* Selected Member 1: Alexander */}
-          <View style={[styles.memberRow, { top: s(130) }]}>
+          <View style={styles.searchBarContainer}>
             <Image
-              source={require('../assets/CreateTeamAssets/alex.png')}
-              style={styles.memberCard}
-              resizeMode="contain"
+              source={require('../assets/CreateTeamAssets/searchBar.png')}
+              style={styles.searchBarBg}
+              resizeMode="stretch"
             />
-          </View>
-
-          {/* Selected Member 2: Aoi */}
-          <View style={[styles.memberRow, { top: s(176) }]}>
-            <Image
-              source={require('../assets/CreateTeamAssets/aoi.png')}
-              style={styles.memberCard}
-              resizeMode="contain"
+            <TextInput
+              style={styles.searchTextInput}
+              placeholder="Search user name..."
+              placeholderTextColor={COLORS.placeholderText}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
-            <TouchableOpacity style={styles.crossButton} activeOpacity={0.7}>
-              <Image
-                source={require('../assets/CreateTeamAssets/cross.png')}
-                style={styles.crossIcon}
-                resizeMode="contain"
-              />
+            <TouchableOpacity onPress={handleSearch} style={styles.searchIconContainer}>
+              <View style={styles.searchIconPlaceholder} />
             </TouchableOpacity>
           </View>
 
-          {/* Selected Member 3: Angel */}
-          <View style={[styles.memberRow, { top: s(222) }]}>
-            <Image
-              source={require('../assets/CreateTeamAssets/angel.png')}
-              style={styles.memberCard}
-              resizeMode="contain"
-            />
-            <TouchableOpacity style={styles.crossButton} activeOpacity={0.7}>
-              <Image
-                source={require('../assets/CreateTeamAssets/cross.png')}
-                style={styles.crossIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </View>
+          {/* Writing: X Members Selected */}
+          <Text style={styles.membersSelectedText}>
+            {teamMembers.length} Members Selected
+          </Text>
 
-          {/* Selected Member 4: Vina */}
-          <View style={[styles.memberRow, { top: s(268) }]}>
-            <Image
-              source={require('../assets/CreateTeamAssets/vina.png')}
-              style={styles.memberCard}
-              resizeMode="contain"
-            />
-            <TouchableOpacity style={styles.crossButton} activeOpacity={0.7}>
-              <Image
-                source={require('../assets/CreateTeamAssets/cross.png')}
-                style={styles.crossIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+          {/* Render Members List */}
+          <View style={styles.membersContainer}>
+            {teamMembers.map((member, index) => (
+              <View key={member.id} style={[styles.memberRow, { top: s(index * 46 + 130) }]}>
+                <ImageBackground
+                  source={require('../assets/CreateTeamAssets/nameBoxTeamMem.png')}
+                  style={styles.memberCard}
+                  resizeMode="stretch"
+                >
+                  <View style={styles.memberContent}>
+                    {/* Number box on the left */}
+                    <View style={styles.numberBox}>
+                      <Text style={styles.numberText}>{index + 1}</Text>
+                    </View>
+
+                    {/* User Name */}
+                    <Text style={styles.memberNameText}>
+                      {member.displayUsername || member.username} {member.isYou ? '(you)' : ''}
+                    </Text>
+
+                    {/* Remove button for others */}
+                    {!member.isYou && (
+                      <TouchableOpacity
+                        style={styles.crossButton}
+                        activeOpacity={0.7}
+                        onPress={() => handleRemoveMember(member)}
+                      >
+                        <Image
+                          source={require('../assets/CreateTeamAssets/cross.png')}
+                          style={styles.crossIcon}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ImageBackground>
+              </View>
+            ))}
           </View>
         </ImageBackground>
 
@@ -246,19 +335,6 @@ const CreateTeamPage: React.FC = () => {
           />
         </TouchableOpacity>
 
-        {/* Levels Button */}
-        <TouchableOpacity
-          style={styles.levelsButton}
-          onPress={() => navigation.navigate('Activity')}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require('../assets/HomescreenAssets/activity.png')}
-            style={styles.levelsImage}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-
         {/* Leaderboard Button */}
         <TouchableOpacity
           style={styles.leaderboardButton}
@@ -301,10 +377,10 @@ const styles = StyleSheet.create({
   },
   astronaut: {
     position: 'absolute',
-    top: s(-35),
-    left: s(260),
-    width: s(100),
-    height: s(105),
+    top: s(-30),
+    left: s(210),
+    width: s(170),
+    height: s(175),
     zIndex: 1,
   },
   boxTop: {
@@ -317,60 +393,167 @@ const styles = StyleSheet.create({
   },
   teamNameTitle: {
     position: 'absolute',
-    top: s(22),
+    top: s(38),
     left: s(20),
-    width: s(210),
-    height: s(32),
+    width: s(230),
+    height: s(37),
     zIndex: 2,
   },
-  nameBoxTeam: {
+  nameBoxTeamContainer: {
     position: 'absolute',
-    top: s(62),
-    left: s(20),
+    top: s(82),
+    left: s(40),
     width: s(315),
     height: s(42),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingLeft: s(15),
-    paddingRight: s(10),
     zIndex: 2,
   },
-  littleEinsteinText: {
-    width: s(120),
-    height: s(20),
+  teamNameInput: {
+    flex: 1,
+    height: s(48),
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: COLORS.darkText,
+    paddingHorizontal: s(10),
+  },
+  teamCodeText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(12),
+    color: COLORS.darkText,
+    textAlign: 'center',
+    marginTop: s(0),
   },
   teamCodeImage: {
     width: s(85),
     height: s(28),
     alignSelf: 'center',
+    justifyContent: 'center',
+    marginRight: s(10),
   },
   gradeTitle: {
     position: 'absolute',
-    top: s(120),
+    top: s(145),
     left: s(122),
     width: s(190),
-    height: s(32),
+    height: s(37),
   },
-  gradeBox: {
+  gradeBoxContainer: {
     position: 'absolute',
-    top: s(158),
+    top: s(188),
     left: s(120),
     width: s(240),
     height: s(42),
     justifyContent: 'center',
+    paddingHorizontal: s(10),
+  },
+  gradeInput: {
+    fontFamily: FONTS.ui,
+    fontSize: s(15),
+    color: COLORS.darkText,
+    textAlign: 'center',
+  },
+  searchBarContainer: {
+    position: 'absolute',
+    top: s(84),
+    alignSelf: 'center',
+    width: s(320),
+    height: s(40),
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  gradeChemistryText: {
-    width: s(165),
+  searchBarBg: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  searchTextInput: {
+    flex: 1,
+    height: '100%',
+    paddingLeft: s(15),
+    fontFamily: FONTS.ui,
+    fontSize: s(14),
+    color: COLORS.darkText,
+    top: s(3)
+  },
+  searchIconContainer: {
+    width: s(40),
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchIconPlaceholder: {
+    width: s(20),
     height: s(20),
+  },
+  membersSelectedText: {
+    position: 'absolute',
+    top: s(130),
+    left: s(40),
+    fontFamily: FONTS.ui,
+    fontSize: s(16),
+    color: COLORS.darkText,
+  },
+  membersContainer: {
+    marginTop: s(160),
+    width: '100%',
+    alignItems: 'center',
+    top: s(-130)
+  },
+  memberRow: {
+    position: 'absolute',
+    alignSelf: 'center',
+    width: s(330),
+    height: s(40),
+    flexDirection: 'row',
+    alignItems: 'center',
+    left: s(25),
+  },
+  memberCard: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+  },
+  memberContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: s(10),
+  },
+  numberBox: {
+    width: s(28),
+    height: s(28),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: s(10),
+  },
+  numberText: {
+    fontFamily: FONTS.ui,
+    fontSize: s(12),
+    color: COLORS.darkText,
+    fontWeight: 'bold',
+    left: s(8)
+  },
+  memberNameText: {
+    flex: 1,
+    fontFamily: FONTS.ui,
+    fontSize: s(16),
+    color: COLORS.darkText,
+    left: s(8)
+  },
+  crossButton: {
+    padding: s(5),
+  },
+  crossIcon: {
+    width: s(22),
+    height: s(22),
   },
   meteor: {
     position: 'absolute',
     top: s(195),
-    left: s(-5),
-    width: s(165),
-    height: s(115),
+    left: s(0),
+    width: s(175),
+    height: s(125),
     zIndex: 10,
   },
   memberBox: {
@@ -383,52 +566,17 @@ const styles = StyleSheet.create({
   },
   teamMemTitle: {
     position: 'absolute',
-    top: s(12),
+    top: s(18),
     alignSelf: 'center',
-    width: s(190),
-    height: s(26),
+    width: s(200),
+    height: s(36),
   },
   lineDivider: {
     position: 'absolute',
-    top: s(48),
+    top: s(68),
     alignSelf: 'center',
     width: s(340),
-    height: s(4),
-  },
-  searchBar: {
-    position: 'absolute',
-    top: s(64),
-    alignSelf: 'center',
-    width: s(320),
-    height: s(34),
-  },
-  membersSelectedText: {
-    position: 'absolute',
-    top: s(106),
-    left: s(25),
-    width: s(200),
-    height: s(18),
-  },
-  memberRow: {
-    position: 'absolute',
-    alignSelf: 'center',
-    width: s(315),
-    height: s(36),
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberCard: {
-    width: '100%',
-    height: '100%',
-  },
-  crossButton: {
-    position: 'absolute',
-    right: s(12),
-    top: s(7),
-  },
-  crossIcon: {
-    width: s(22),
-    height: s(22),
+    height: s(2),
   },
   bigEarth: {
     position: 'absolute',
@@ -463,7 +611,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(870),
-    left: s(12),
+    left: s(30),
     zIndex: 21,
   },
   homeImage: {
@@ -475,31 +623,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(884),
-    left: s(95),
+    left: s(130),
     zIndex: 21,
   },
   teamImage: {
     width: s(90),
     height: s(70),
   },
-  levelsButton: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: s(880),
-    left: s(188),
-    zIndex: 21,
-  },
-  levelsImage: {
-    width: s(80),
-    height: s(80),
-  },
   leaderboardButton: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     top: s(880),
-    left: s(275),
+    left: s(230),
     zIndex: 21,
   },
   leaderboardImage: {
@@ -511,7 +647,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     top: s(873),
-    left: s(353),
+    left: s(325),
     zIndex: 21,
   },
   profileImage: {
